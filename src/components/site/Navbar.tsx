@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Menu, Search, ShoppingBag, User, X } from "lucide-react";
 import { useState } from "react";
 import { ButtonLink } from "@/components/ui-kit";
+import { media } from "@/data/content";
 
 export const primaryNav = [
   { label: "Garage", to: "/garage" },
@@ -17,8 +18,19 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-md">
       <div className="container-page flex h-16 items-center justify-between gap-6 lg:h-20">
-        <Link to="/" className="font-display text-lg tracking-[0.22em] lg:text-xl" aria-label="36 Spokes home">
-          36<span className="text-primary">·</span>SPOKES
+        <Link
+          to="/"
+          className="group flex items-center gap-2.5 font-display text-lg tracking-[0.22em] lg:text-xl"
+          aria-label="36 Spokes home"
+        >
+          <img
+            src={media.brandLogo}
+            alt="36 Spokes Logo"
+            className="size-8.5 rounded-full object-cover ring-1 ring-border/80 transition-all duration-300 group-hover:scale-105 group-hover:ring-primary/80 lg:size-10"
+          />
+          <span className="flex items-center">
+            36<span className="text-primary">·</span>SPOKES
+          </span>
         </Link>
 
         <nav aria-label="Primary" className="hidden lg:block">

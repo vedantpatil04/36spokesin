@@ -28,8 +28,19 @@ function JoinPage() {
       />
       <div className="flex items-center justify-center px-5 py-14 lg:px-16">
         <div className="w-full max-w-sm">
+          <div className="mb-6 flex items-center gap-3">
+            <img
+              src={media.brandLogo}
+              alt="36 Spokes Crest"
+              className="size-12 rounded-full object-cover ring-2 ring-primary/40 shadow-md"
+            />
+            <div>
+              <p className="font-display text-sm tracking-[0.2em] text-foreground">36·SPOKES</p>
+              <p className="text-xs text-muted-foreground">Rider Membership</p>
+            </div>
+          </div>
           <p className="eyebrow">Join 36 Spokes</p>
-          <h1 className="mt-4 text-4xl">Create your rider profile</h1>
+          <h1 className="mt-2 text-4xl">Create your rider profile</h1>
           <p className="mt-3 text-sm text-muted-foreground">
             Sign-up is not connected to an account system yet.
           </p>

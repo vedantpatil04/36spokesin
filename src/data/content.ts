@@ -14,8 +14,10 @@ import productLuggage from "@/assets/product-luggage.jpg";
 import productProtect from "@/assets/product-protect.jpg";
 import garageWorkshop from "@/assets/garage-workshop.jpg";
 import communityRiders from "@/assets/community-riders.jpg";
+import brandLogo from "@/assets/brand-logo.jpg";
 
 export const media = {
+  brandLogo,
   heroRide,
   destLadakh,
   destSpiti,

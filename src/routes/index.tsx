@@ -64,6 +64,16 @@ function Home() {
         <div className="absolute inset-0 flex items-end">
           <div className="container-page pb-14 md:pb-20">
             <div className="max-w-3xl rise">
+              <div className="mb-5 inline-flex items-center gap-2.5 rounded-full border border-border/60 bg-background/70 px-3.5 py-1.5 backdrop-blur-md shadow-sm">
+                <img
+                  src={media.brandLogo}
+                  alt="36 Spokes Official Crest"
+                  className="size-5 rounded-full object-cover ring-1 ring-primary/40"
+                />
+                <span className="font-display text-xs uppercase tracking-[0.2em] text-foreground/90">
+                  Official 36 Spokes Rider Network
+                </span>
+              </div>
               <p className="eyebrow">Motorcycle travel · Gear · Community</p>
               <h1 className="mt-4 text-4xl leading-[0.98] sm:text-6xl lg:text-7xl">
                 The road starts where the map runs out

@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { media } from "@/data/content";
 
 const columns = [
   {
@@ -32,9 +33,16 @@ export function Footer() {
     <footer className="border-t border-border bg-surface/60">
       <div className="container-page grid gap-10 py-14 md:grid-cols-[1.4fr_repeat(3,1fr)] md:py-20">
         <div>
-          <p className="font-display text-lg tracking-[0.22em]">
-            36<span className="text-primary">·</span>SPOKES
-          </p>
+          <div className="flex items-center gap-3">
+            <img
+              src={media.brandLogo}
+              alt="36 Spokes Crest"
+              className="size-11 rounded-full object-cover ring-1 ring-border/80 shadow-md"
+            />
+            <p className="font-display text-lg tracking-[0.22em]">
+              36<span className="text-primary">·</span>SPOKES
+            </p>
+          </div>
           <p className="mt-4 max-w-xs text-sm leading-relaxed text-muted-foreground">
             Motorcycle travel, gear and rider community. Built around the bike you actually ride.
           </p>
