@@ -35,6 +35,9 @@ export type Bike = {
   variant: string;
   segment: string;
   image: string;
+  /** Approximate real-world figures. Used by the journey planner for fuel range. */
+  fuelEfficiencyKmpl: number;
+  tankLitres: number;
 };
 
 export const bikes: Bike[] = [
@@ -45,6 +48,8 @@ export const bikes: Bike[] = [
     variant: "Kaza Brown",
     segment: "Adventure",
     image: productLuggage,
+    fuelEfficiencyKmpl: 30,
+    tankLitres: 17,
   },
   {
     id: "ktm-390-adv",
@@ -53,6 +58,8 @@ export const bikes: Bike[] = [
     variant: "X",
     segment: "Adventure",
     image: productLuggage,
+    fuelEfficiencyKmpl: 30,
+    tankLitres: 14.5,
   },
   {
     id: "bmw-g310gs",
@@ -61,6 +68,8 @@ export const bikes: Bike[] = [
     variant: "Rallye",
     segment: "Adventure",
     image: productLuggage,
+    fuelEfficiencyKmpl: 30,
+    tankLitres: 11,
   },
   {
     id: "triumph-scrambler-400x",
@@ -69,6 +78,8 @@ export const bikes: Bike[] = [
     variant: "Standard",
     segment: "Scrambler",
     image: productLuggage,
+    fuelEfficiencyKmpl: 28,
+    tankLitres: 13,
   },
   {
     id: "honda-nx500",
@@ -77,6 +88,8 @@ export const bikes: Bike[] = [
     variant: "Standard",
     segment: "Touring",
     image: productLuggage,
+    fuelEfficiencyKmpl: 27,
+    tankLitres: 17.5,
   },
   {
     id: "yamaha-mt15",
@@ -85,6 +98,8 @@ export const bikes: Bike[] = [
     variant: "Standard",
     segment: "Street",
     image: productLuggage,
+    fuelEfficiencyKmpl: 45,
+    tankLitres: 10,
   },
 ];
 
@@ -414,10 +429,10 @@ export type Rider = {
 };
 
 export const riders: Rider[] = [
-  { id: "u-ankit", name: "Ankit Rawat", bike: "Himalayan 450", location: "Dehradun", kmThisYear: 9400, ridesLed: 6 },
-  { id: "u-meera", name: "Meera Iyer", bike: "KTM 390 Adventure", location: "Bengaluru", kmThisYear: 7200, ridesLed: 4 },
-  { id: "u-sahil", name: "Sahil Khan", bike: "BMW G 310 GS", location: "Pune", kmThisYear: 11300, ridesLed: 9 },
-  { id: "u-tenzin", name: "Tenzin Dolma", bike: "Scrambler 400 X", location: "Leh", kmThisYear: 6100, ridesLed: 3 },
+  { id: "u-ankit", name: "Abhishek Sharma", bike: "Himalayan 450", location: "Dehradun", kmThisYear: 9400, ridesLed: 6 },
+  { id: "u-meera", name: "Simran Kathuria", bike: "KTM 390 Adventure", location: "Bengaluru", kmThisYear: 7200, ridesLed: 4 },
+  { id: "u-sahil", name: "sammets", bike: "BMW G 310 GS", location: "Pune", kmThisYear: 11300, ridesLed: 9 },
+  { id: "u-tenzin", name: "Maitrayi S.", bike: "Scrambler 400 X", location: "Leh", kmThisYear: 6100, ridesLed: 3 },
 ];
 
 export type Story = {
@@ -434,7 +449,7 @@ export const stories: Story[] = [
   {
     slug: "eleven-days-above-4000",
     title: "Eleven Days Above 4,000 Metres",
-    rider: "Ankit Rawat",
+    rider: "Abhishek Sharma",
     destination: "Ladakh",
     readMinutes: 8,
     excerpt: "What the altitude does to a rider, a bike and a very carefully packed pannier.",
@@ -443,7 +458,7 @@ export const stories: Story[] = [
   {
     slug: "spiti-in-shoulder-season",
     title: "Spiti in Shoulder Season",
-    rider: "Meera Iyer",
+    rider: "Simran Kathuria",
     destination: "Spiti",
     readMinutes: 6,
     excerpt: "Fewer riders, colder mornings, and river crossings that change by the hour.",
@@ -452,7 +467,7 @@ export const stories: Story[] = [
   {
     slug: "packing-for-rain",
     title: "Packing for Rain That Never Stops",
-    rider: "Sahil Khan",
+    rider: "sammets",
     destination: "Meghalaya",
     readMinutes: 5,
     excerpt: "A practical kit list built over three monsoon runs through the North East.",
@@ -474,6 +489,261 @@ export const garageServices = [
   { name: "Installation", note: "Fitment of luggage, guards, lighting and electronics." },
   { name: "Customization", note: "Ergonomics, seats, suspension and touring setups." },
   { name: "Services", note: "Workshop partners along popular touring routes." },
+];
+
+/* -------------------------------------------------------------------------- */
+/*  Pillars: the five entry points presented on the homepage                  */
+/* -------------------------------------------------------------------------- */
+
+export type PillarRoute = "/garage" | "/shop" | "/travel" | "/rides" | "/community";
+
+export type Pillar = {
+  id: "garage" | "shop" | "travel" | "rides" | "community";
+  name: string;
+  tagline: string;
+  cta: string;
+  to: PillarRoute;
+  image: string;
+  imageAlt: string;
+};
+
+export const pillars: Pillar[] = [
+  {
+    id: "garage",
+    name: "Garage",
+    tagline: "Your bike. Your setup. Your machine.",
+    cta: "Open the garage",
+    to: "/garage",
+    image: garageWorkshop,
+    imageAlt: "Mechanic working on an adventure motorcycle in a workshop",
+  },
+  {
+    id: "shop",
+    name: "Shop",
+    tagline: "Gear and parts matched to the bike you ride.",
+    cta: "Browse gear",
+    to: "/shop",
+    image: productProtect,
+    imageAlt: "Adventure helmet and armoured riding jacket",
+  },
+  {
+    id: "travel",
+    name: "Travel",
+    tagline: "Destinations, tours and long motorcycle journeys.",
+    cta: "Explore trips",
+    to: "/travel",
+    image: destLadakh,
+    imageAlt: "Loaded motorcycle on a snow-lined mountain road in Ladakh",
+  },
+  {
+    id: "rides",
+    name: "Rides",
+    tagline: "Routes, weekend runs and group rides near you.",
+    cta: "Find a ride",
+    to: "/rides",
+    image: destSpiti,
+    imageAlt: "Motorcycle on a winding gravel road through a mountain valley",
+  },
+  {
+    id: "community",
+    name: "Community",
+    tagline: "Riders, groups, stories and meets.",
+    cta: "Meet the riders",
+    to: "/community",
+    image: communityRiders,
+    imageAlt: "Group of riders and their motorcycles at a mountain viewpoint",
+  },
+];
+
+/* -------------------------------------------------------------------------- */
+/*  Events hosted by 36 Spokes (sample listings)                              */
+/* -------------------------------------------------------------------------- */
+
+export type CommunityEventType =
+  "Weekend Ride" | "Community Meetup" | "Workshop" | "Ride & Camp" | "Adventure Departure";
+
+/** Named CommunityEvent rather than Event to avoid shadowing the DOM `Event` type. */
+export type CommunityEvent = {
+  id: string;
+  title: string;
+  type: CommunityEventType;
+  /** ISO date, YYYY-MM-DD */
+  startDate: string;
+  /** ISO date for multi-day events */
+  endDate?: string;
+  location: string;
+  meetingPoint: string;
+  level: "Open to all riders" | "Beginner friendly" | "Experienced riders";
+  host: string;
+  description: string;
+  image: string;
+  imageAlt: string;
+};
+
+export const events: CommunityEvent[] = [
+  {
+    id: "ev-sahyadri-sunrise",
+    title: "Tamhini Ghat Sunrise Run",
+    type: "Weekend Ride",
+    startDate: "2026-10-17",
+    location: "Pune, Maharashtra",
+    meetingPoint: "Chandni Chowk, Pune, 5:30 am",
+    level: "Open to all riders",
+    host: "36 Spokes Pune",
+    description:
+      "An early run through the ghat while the road is empty, breakfast at Mulshi, back in the city before the traffic.",
+    image: heroRide,
+    imageAlt: "Rider on a mountain road at sunrise",
+  },
+  {
+    id: "ev-garage-night-blr",
+    title: "Garage Night: Bengaluru",
+    type: "Community Meetup",
+    startDate: "2026-10-23",
+    location: "Bengaluru, Karnataka",
+    meetingPoint: "Partner workshop, Indiranagar, 7:00 pm",
+    level: "Open to all riders",
+    host: "36 Spokes Bengaluru",
+    description:
+      "Bring your bike, meet the riders from the group chat, and swap notes on the routes everyone keeps talking about.",
+    image: communityRiders,
+    imageAlt: "Riders gathered around their motorcycles",
+  },
+  {
+    id: "ev-roadside-repair",
+    title: "Roadside Repair Basics",
+    type: "Workshop",
+    startDate: "2026-11-08",
+    location: "Pune, Maharashtra",
+    meetingPoint: "36 Spokes partner garage, Baner, 10:00 am",
+    level: "Beginner friendly",
+    host: "36 Spokes Garage",
+    description:
+      "Tubeless puncture repair, chain slack and lubing, and swapping a clutch cable on the side of the road.",
+    image: garageWorkshop,
+    imageAlt: "Mechanic fitting parts to an adventure motorcycle",
+  },
+  {
+    id: "ev-dandeli-camp",
+    title: "Dandeli Ride & Riverside Camp",
+    type: "Ride & Camp",
+    startDate: "2026-11-21",
+    endDate: "2026-11-22",
+    location: "Dandeli, Karnataka",
+    meetingPoint: "Belagavi bypass, 6:30 am",
+    level: "Open to all riders",
+    host: "36 Spokes Belagavi",
+    description:
+      "Forest roads to a camp on the Kali river. Tents, dinner and a slow ride home through the backroads on Sunday.",
+    image: destMeghalaya,
+    imageAlt: "Motorcycle on a forest road surrounded by dense trees",
+  },
+  {
+    id: "ev-desert-flag-off",
+    title: "Desert Highways Flag-off",
+    type: "Adventure Departure",
+    startDate: "2026-12-06",
+    location: "Jaipur, Rajasthan",
+    meetingPoint: "Group hotel, Jaipur, 7:00 am",
+    level: "Experienced riders",
+    host: "36 Spokes Travel",
+    description:
+      "Send-off for the eight-day Desert Highways expedition. Riders on the trip meet the crew; anyone can ride the first 50 km.",
+    image: destLadakh,
+    imageAlt: "Loaded motorcycles ready for a long-distance departure",
+  },
+  {
+    id: "ev-packing-talk",
+    title: "Packing a Loaded Bike",
+    type: "Workshop",
+    startDate: "2026-12-13",
+    location: "Mumbai, Maharashtra",
+    meetingPoint: "36 Spokes partner store, Andheri, 4:00 pm",
+    level: "Beginner friendly",
+    host: "36 Spokes Garage",
+    description:
+      "Weight distribution, pannier vs soft luggage, and what riders who have done Ladakh twice would leave at home.",
+    image: productLuggage,
+    imageAlt: "Adventure motorcycle fitted with aluminium panniers",
+  },
+];
+
+/* -------------------------------------------------------------------------- */
+/*  Memory Lane: moments from the community's past (sample content)           */
+/* -------------------------------------------------------------------------- */
+
+export type Memory = {
+  id: string;
+  /** ISO year-month, YYYY-MM */
+  date: string;
+  /** Short place name shown on the milestone marker */
+  marker: string;
+  title: string;
+  location: string;
+  caption: string;
+  kind: "Expedition" | "Ride" | "Workshop" | "Meetup";
+  image: string;
+  imageAlt: string;
+};
+
+/** Newest first. The first entry is presented as the featured memory. */
+export const memories: Memory[] = [
+  {
+    id: "mem-khardung-la-2025",
+    date: "2025-09",
+    marker: "Leh",
+    title: "Over Khardung La before the snow",
+    location: "Khardung La, Ladakh",
+    caption:
+      "The last departure of the season. Numb fingers, a pass closing behind us, and the quietest cup of chai any of us have had.",
+    kind: "Expedition",
+    image: destLadakh,
+    imageAlt: "Motorcycle on a snow-lined high mountain pass in Ladakh",
+  },
+  {
+    id: "mem-chorla-2024",
+    date: "2024-06",
+    marker: "Chorla",
+    title: "Chorla Ghat in the first rain",
+    location: "Chorla Ghat, Karnataka–Goa border",
+    caption: "A short Sunday ride that became a monsoon habit.",
+    kind: "Ride",
+    image: heroRide,
+    imageAlt: "Rider climbing a mountain road under heavy cloud",
+  },
+  {
+    id: "mem-losar-2023",
+    date: "2023-07",
+    marker: "Losar",
+    title: "The river crossing at Losar",
+    location: "Spiti Valley, Himachal Pradesh",
+    caption: "Snowmelt up to the footpegs. Everyone made it across, some of us twice.",
+    kind: "Expedition",
+    image: destSpiti,
+    imageAlt: "Gravel road winding through the Spiti valley",
+  },
+  {
+    id: "mem-garage-night-2022",
+    date: "2022-11",
+    marker: "Pune",
+    title: "The first garage night",
+    location: "Pune, Maharashtra",
+    caption: "A borrowed workshop and a lesson on chain slack that ran well past midnight.",
+    kind: "Workshop",
+    image: garageWorkshop,
+    imageAlt: "Mechanic working on a motorcycle in a workshop",
+  },
+  {
+    id: "mem-cherrapunji-2019",
+    date: "2019-10",
+    marker: "Sohra",
+    title: "Riding inside the clouds",
+    location: "Cherrapunji, Meghalaya",
+    caption: "Wet tarmac, root bridges and cloud sitting right on the road.",
+    kind: "Expedition",
+    image: destMeghalaya,
+    imageAlt: "Motorcycle on a misty forest road in Meghalaya",
+  },
 ];
 
 export const formatINR = (value: number) =>

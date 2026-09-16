@@ -28,6 +28,7 @@ function ShopPage() {
   const bike = bikes.find((b) => b.id === bikeId)!;
 
   const filtered = category === "All" ? products : products.filter((p) => p.category === category);
+  const activeCategory = shopCategories.find((c) => c.name === category);
 
   return (
     <>
@@ -76,6 +77,11 @@ function ShopPage() {
             </button>
           ))}
         </div>
+        <p className="mt-3 text-sm text-muted-foreground">
+          {activeCategory
+            ? `${activeCategory.name}: ${activeCategory.purpose}.`
+            : "Categories built around what the gear does on a ride, not around brand names."}
+        </p>
 
         <div className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
           {filtered.map((product) => (

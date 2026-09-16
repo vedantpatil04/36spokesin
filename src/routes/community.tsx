@@ -1,8 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useLocation } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { ButtonLink, Media, Rail, RailItem, Section, SectionHeader } from "@/components/ui-kit";
-import { RiderCard, StoryCard } from "@/components/cards";
+import { RiderCard, StoryCard, UpcomingEventCard } from "@/components/cards";
 import { PageHeader } from "@/components/site/PageShell";
-import { media, riders, rides, stories } from "@/data/content";
+import { events, media, riders, rides, stories } from "@/data/content";
 
 export const Route = createFileRoute("/community")({
   head: () => ({
@@ -20,6 +21,14 @@ export const Route = createFileRoute("/community")({
 });
 
 function CommunityPage() {
+  // Highlight the event linked from the homepage (/community#event-id). `:target` does not
+  // update on client-side navigation, and the hash is unknown during SSR, so apply it after mount.
+  const hash = useLocation({ select: (location) => location.hash });
+  const [linkedEventId, setLinkedEventId] = useState<string | null>(null);
+  useEffect(() => {
+    setLinkedEventId(hash || null);
+  }, [hash]);
+
   return (
     <>
       <PageHeader
@@ -29,6 +38,32 @@ function CommunityPage() {
         image={media.communityRiders}
         imageAlt="Riders gathered with their motorcycles at a mountain viewpoint"
       />
+
+      <Section id="events" tone="surface" className="scroll-mt-16 lg:scroll-mt-20">
+        <SectionHeader
+          eyebrow="Upcoming events"
+          title="Ride, meet and learn with 36 Spokes"
+          description="Weekend rides, garage nights, workshops and departures hosted by 36 Spokes crews. These are sample listings; registration opens in a later phase."
+        />
+        <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {[...events]
+            .sort((a, b) => a.startDate.localeCompare(b.startDate))
+            .map((event) => (
+              <li key={event.id}>
+                <UpcomingEventCard
+                  id={event.id}
+                  event={event}
+                  detailed
+                  className={
+                    event.id === linkedEventId
+                      ? "scroll-mt-24 border-primary ring-1 ring-primary/40 hover:border-primary"
+                      : "scroll-mt-24"
+                  }
+                />
+              </li>
+            ))}
+        </ul>
+      </Section>
 
       <Section>
         <SectionHeader eyebrow="Riders" title="People on the road" />

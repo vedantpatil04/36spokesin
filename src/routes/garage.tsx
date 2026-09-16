@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
+import { Check, TriangleAlert } from "lucide-react";
 import { ButtonLink, Media, Rail, RailItem, Section, SectionHeader } from "@/components/ui-kit";
 import { BikeCard, ProductCard } from "@/components/cards";
 import { PageHeader } from "@/components/site/PageShell";
-import { bikes, garageServices, media, products } from "@/data/content";
+import { bikes, garageServices, media, products, setupChecklist } from "@/data/content";
 
 export const Route = createFileRoute("/garage")({
   head: () => ({
@@ -84,6 +85,61 @@ function GaragePage() {
             ratio="3/2"
             className="rounded-sm border border-border"
           />
+        </div>
+      </Section>
+
+      <Section id="trip-ready" tone="surface">
+        <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+          <div>
+            <SectionHeader
+              eyebrow="Trip-ready check"
+              title="Prepare for your next adventure"
+              description="Tell us the destination and the motorcycle. We show what your setup is missing before you leave."
+            />
+            <dl className="mt-8 grid gap-4 sm:grid-cols-2">
+              <div className="rounded-sm border border-border bg-card p-4">
+                <dt className="text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground">
+                  Where are you going?
+                </dt>
+                <dd className="mt-2 font-display text-xl uppercase">Spiti</dd>
+              </div>
+              <div className="rounded-sm border border-border bg-card p-4">
+                <dt className="text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground">
+                  What are you riding?
+                </dt>
+                <dd className="mt-2 font-display text-xl uppercase">{selected.model}</dd>
+              </div>
+            </dl>
+          </div>
+
+          <div className="rounded-sm border border-border bg-card p-6 md:p-8">
+            <h3 className="text-xl">Your ride setup</h3>
+            <ul className="mt-6 divide-y divide-border">
+              {setupChecklist.map((item) => (
+                <li key={item.label} className="flex items-center justify-between gap-4 py-3.5">
+                  <div>
+                    <p className="font-display text-sm uppercase tracking-[0.14em]">{item.label}</p>
+                    <p className="text-xs text-muted-foreground">{item.note}</p>
+                  </div>
+                  {item.status === "ready" ? (
+                    <span className="flex shrink-0 items-center gap-1.5 text-xs text-success">
+                      <Check className="size-4" aria-hidden /> Ready
+                    </span>
+                  ) : (
+                    <span className="flex shrink-0 items-center gap-1.5 text-xs text-warning">
+                      <TriangleAlert className="size-4" aria-hidden /> Missing
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
+            <ButtonLink to="/shop" className="mt-7 w-full" size="lg">
+              Shop missing gear
+            </ButtonLink>
+            <p className="mt-3 text-center text-xs text-muted-foreground">
+              Placeholder preview. Recommendations will be generated from your garage.
+            </p>
+          </div>
         </div>
       </Section>
     </>

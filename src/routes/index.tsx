@@ -1,56 +1,49 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
-import { ArrowRight, Check, TriangleAlert } from "lucide-react";
-import {
-  Badge,
-  Button,
-  ButtonLink,
-  Media,
-  Rail,
-  RailItem,
-  Section,
-  SectionHeader,
-} from "@/components/ui-kit";
-import { BikeCard, DestinationCard, ProductCard, RideCard, RiderCard, StoryCard, TripCard } from "@/components/cards";
-import {
-  bikes,
-  destinations,
-  garageServices,
-  media,
-  products,
-  rides,
-  riders,
-  setupChecklist,
-  shopCategories,
-  stories,
-  trips,
-} from "@/data/content";
+import { ArrowRight } from "lucide-react";
+import { ButtonLink, Media, Rail, RailItem, Section, SectionHeader } from "@/components/ui-kit";
+import { PathCard, UpcomingEventCard } from "@/components/cards";
+import { JourneyPlanner } from "@/components/journey-planner/JourneyPlanner";
+import { MemoryLane } from "@/components/memory-lane/MemoryLane";
+import { events, media, memories, pillars } from "@/data/content";
+import { cn } from "@/lib/utils";
+
+const TITLE = "36 Spokes | Motorcycle Rides, Travel, Gear & Rider Community";
+const DESCRIPTION =
+  "36 Spokes brings your motorcycle, the gear that fits it, the journeys you plan and the riders you meet into one place. Find a ride, plan a trip and join upcoming events.";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "36 Spokes | Motorcycle Travel, Gear & Rider Community" },
-      {
-        name: "description",
-        content:
-          "Plan Himalayan expeditions, find gear that fits your motorcycle, discover weekend rides and ride with a real rider community.",
-      },
-      { property: "og:title", content: "36 Spokes | Motorcycle Travel, Gear & Rider Community" },
+      { title: TITLE },
+      { name: "description", content: DESCRIPTION },
+      { property: "og:title", content: TITLE },
       {
         property: "og:description",
-        content: "Expeditions, gear matched to your bike, rides and rider community.",
+        content: "Your bike, your gear, your next journey and the riders you share it with.",
       },
     ],
   }),
   component: Home,
 });
 
-function Home() {
-  const [selectedBike, setSelectedBike] = useState(bikes[0]!);
+/** Tablet layout: two wide cards, then three. Desktop: five across. */
+const pathLayout = [
+  "md:col-span-3",
+  "md:col-span-3",
+  "md:col-span-2",
+  "md:col-span-2",
+  "md:col-span-2",
+];
 
+const connection = ["Bike", "Gear", "Trip", "Route", "Riders"];
+
+/** Upcoming events are sorted by date; the homepage shows the next three. */
+const nextEvents = [...events].sort((a, b) => a.startDate.localeCompare(b.startDate)).slice(0, 3);
+
+function Home() {
   return (
     <>
-      {/* 1. HERO */}
+      {/* A. HERO */}
       <section className="relative">
         <Media
           src={media.heroRide}
@@ -74,23 +67,19 @@ function Home() {
                   Official 36 Spokes Rider Network
                 </span>
               </div>
-              <p className="eyebrow">Motorcycle travel · Gear · Community</p>
-              <h1 className="mt-4 text-4xl leading-[0.98] sm:text-6xl lg:text-7xl">
+              <h1 className="text-4xl leading-[0.98] sm:text-6xl lg:text-7xl">
                 The road starts where the map runs out
               </h1>
               <p className="mt-5 max-w-xl text-base leading-relaxed text-muted-foreground md:text-lg">
-                Expeditions across the Himalaya, gear matched to the motorcycle in your garage, and riders who turn up
-                when you post a route.
+                Expeditions across the Himalaya, gear matched to the motorcycle in your garage, and
+                riders who turn up when you post a route.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <ButtonLink to="/travel" size="lg">
-                  Explore travel <ArrowRight className="size-4" aria-hidden />
+                <ButtonLink to="/" hash="choose-your-path" size="lg">
+                  Choose your path <ArrowRight className="size-4" aria-hidden />
                 </ButtonLink>
-                <ButtonLink to="/shop" variant="outline" size="lg">
-                  Shop your bike
-                </ButtonLink>
-                <ButtonLink to="/rides" variant="ghost" size="lg">
-                  Plan a ride
+                <ButtonLink to="/" hash="plan-your-journey" variant="outline" size="lg">
+                  Plan a journey
                 </ButtonLink>
               </div>
             </div>
@@ -98,291 +87,125 @@ function Home() {
         </div>
       </section>
 
-      {/* 2. CHOOSE YOUR BIKE */}
-      <Section id="choose-your-bike">
-        <SectionHeader
-          eyebrow="Start with your bike"
-          title="Everything here begins with what you ride"
-          description="Pick your motorcycle once. Gear, fitment, services and trip preparation adjust around it."
-          action={
-            <ButtonLink to="/garage" variant="outline">
-              Open garage
-            </ButtonLink>
-          }
-        />
-        <Rail className="mt-10 md:grid-cols-3 lg:grid-cols-6">
-          {bikes.map((bike) => (
-            <RailItem key={bike.id}>
-              <BikeCard bike={bike} selected={bike.id === selectedBike.id} onSelect={setSelectedBike} />
-            </RailItem>
-          ))}
-        </Rail>
-        <div className="mt-8 flex flex-col gap-4 rounded-sm border border-border bg-surface p-6 md:flex-row md:items-center md:justify-between">
+      {/* B. WHAT IS 36 SPOKES? */}
+      <Section id="what-is-36-spokes">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)] lg:gap-16">
+          <h2 className="text-3xl leading-[1.05] sm:text-4xl lg:text-5xl">What is 36 Spokes?</h2>
           <div>
-            <p className="eyebrow">Selected motorcycle</p>
-            <p className="mt-2 font-display text-xl uppercase">
-              {selectedBike.brand} {selectedBike.model}
+            <p className="max-w-2xl text-xl leading-snug text-foreground md:text-2xl">
+              A home for Indian motorcyclists, built around the bike you ride. The gear that fits
+              it, the trips you take it on and the riders you meet along the way all start from
+              there.
             </p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Compatible products, recommended gear and workshop services are filtered to this model.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Badge tone="success">✓ Compatible products</Badge>
-            <Badge tone="primary">Recommended gear</Badge>
-            <Badge>Services</Badge>
+            <ol
+              aria-label="How 36 Spokes connects"
+              className="mt-8 flex flex-wrap items-center gap-x-2 gap-y-3 font-display text-[0.8rem] uppercase tracking-[0.12em] sm:gap-x-3 sm:text-sm sm:tracking-[0.18em] md:text-base"
+            >
+              {connection.map((step, index) => (
+                <li key={step} className="flex items-center gap-2 sm:gap-3">
+                  {index > 0 ? (
+                    <span aria-hidden className="h-px w-3 bg-primary/70 sm:w-6 md:w-10" />
+                  ) : null}
+                  <span className={index === 0 ? "text-primary" : "text-foreground/85"}>
+                    {step}
+                  </span>
+                </li>
+              ))}
+            </ol>
           </div>
         </div>
       </Section>
 
-      {/* 3. TRAVEL */}
-      <Section tone="surface">
+      {/* C. CHOOSE YOUR PATH */}
+      <Section id="choose-your-path" tone="surface" className="scroll-mt-16 lg:scroll-mt-20">
         <SectionHeader
-          eyebrow="Travel"
-          title="Where will you ride next?"
-          description="Routes chosen for the riding, not the sightseeing. Small groups, support vehicle, and days built around daylight."
+          title="Choose your path"
+          description="What do you want to do today? Each path opens its own section with the full detail."
+        />
+        <ul className="mt-10 grid gap-3 md:grid-cols-6 md:gap-4 lg:grid-cols-5">
+          {pillars.map((pillar, index) => (
+            <li key={pillar.id} className={cn(pathLayout[index], "lg:col-span-1")}>
+              <PathCard pillar={pillar} className="h-44 sm:h-52 md:h-72 lg:h-[30rem]" />
+            </li>
+          ))}
+        </ul>
+      </Section>
+
+      {/* D. 36 SPOKES UPCOMING EVENTS */}
+      <Section id="upcoming-events">
+        <SectionHeader
+          title="36 Spokes Upcoming Events"
+          description="Rides, meetups and workshops run by 36 Spokes crews. The listings below are sample events for this preview."
           action={
-            <ButtonLink to="/travel" variant="outline">
-              Explore all travel
+            <ButtonLink to="/community" hash="events" variant="outline">
+              All events
             </ButtonLink>
           }
         />
         <Rail className="mt-10 md:grid-cols-3">
-          {destinations.slice(0, 6).map((destination) => (
-            <RailItem key={destination.slug}>
-              <DestinationCard destination={destination} />
+          {nextEvents.map((event) => (
+            <RailItem key={event.id}>
+              <UpcomingEventCard
+                event={event}
+                action={
+                  <Link
+                    to="/community"
+                    hash={event.id}
+                    aria-label={`View event: ${event.title}`}
+                    className="shrink-0 font-display text-xs uppercase tracking-[0.18em] text-primary hover:underline"
+                  >
+                    View event
+                  </Link>
+                }
+              />
             </RailItem>
           ))}
         </Rail>
       </Section>
 
-      {/* 4. UPCOMING EXPEDITIONS */}
-      <Section>
+      {/* E. PLAN YOUR JOURNEY */}
+      <Section id="plan-your-journey" tone="surface" className="scroll-mt-16 lg:scroll-mt-20">
         <SectionHeader
-          eyebrow="Upcoming departures"
-          title="Ride with us"
-          description="Fixed departures with confirmed dates, distances and seat counts."
+          title="Plan your journey"
+          description="An early look at the 36 Spokes journey planner. Pick your route, dates, bike and riding style, and get a day-by-day plan with distance, stays, places to visit, weather, fuel and cost."
+        />
+        <div className="mt-10">
+          <JourneyPlanner />
+        </div>
+      </Section>
+
+      {/* F. 36 SPOKES MEMORY LANE */}
+      <Section id="memory-lane">
+        <SectionHeader
+          title="36 Spokes Memory Lane"
+          description="Where the community has been: the expeditions, Sunday rides and garage nights that made 36 Spokes. Sample memories for this preview."
           action={
-            <ButtonLink to="/travel" variant="outline">
-              All departures
+            <ButtonLink to="/stories" variant="outline">
+              Read ride stories
             </ButtonLink>
           }
         />
-        <Rail className="mt-10 md:grid-cols-2 lg:grid-cols-4">
-          {trips.map((trip) => (
-            <RailItem key={trip.id}>
-              <TripCard trip={trip} />
-            </RailItem>
-          ))}
-        </Rail>
-      </Section>
-
-      {/* 5. GEAR UP */}
-      <Section tone="surface">
-        <SectionHeader
-          eyebrow="Shop"
-          title="Gear up for the road"
-          description="Categories built around what the gear does on a ride, not around brand names."
-          action={
-            <ButtonLink to="/shop" variant="outline">
-              Browse the shop
-            </ButtonLink>
-          }
-        />
-        <ul className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-          {shopCategories.map((category) => (
-            <li key={category.slug}>
-              <Link
-                to="/shop"
-                className="group flex h-full flex-col justify-between rounded-sm border border-border bg-card p-4 transition-colors hover:border-primary"
-              >
-                <span className="font-display text-base uppercase tracking-[0.12em]">{category.name}</span>
-                <span className="mt-6 text-xs text-muted-foreground">{category.purpose}</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-
-        <div className="mt-10 grid gap-4 lg:grid-cols-[1.15fr_1fr]">
-          <article className="relative overflow-hidden rounded-sm border border-border">
-            <Media
-              src={media.productLuggage}
-              alt="Adventure motorcycle fitted with aluminium panniers and crash protection"
-              ratio="16/10"
-              className="h-full"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-background/90 to-transparent" />
-              <div className="absolute inset-y-0 left-0 flex max-w-sm flex-col justify-center p-6 md:p-10">
-                <p className="eyebrow">Installed, not just shipped</p>
-                <h3 className="mt-3 text-2xl md:text-3xl">Built for a loaded bike</h3>
-                <p className="mt-3 text-sm text-muted-foreground">
-                  Luggage, guards and lighting shown fitted to real motorcycles, with fitment listed per variant.
-                </p>
-                <ButtonLink to="/shop" variant="outline" className="mt-6 self-start">
-                  See carry systems
-                </ButtonLink>
-              </div>
-            </Media>
-          </article>
-          <div className="grid grid-cols-2 gap-4">
-            {products.slice(0, 2).map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-        </div>
-
-        <Rail className="mt-4 md:grid-cols-4">
-          {products.slice(2, 6).map((product) => (
-            <RailItem key={product.id}>
-              <ProductCard product={product} />
-            </RailItem>
-          ))}
-        </Rail>
-      </Section>
-
-      {/* 6. SIGNATURE: PREPARE */}
-      <Section>
-        <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
-          <div>
-            <SectionHeader
-              eyebrow="Signature"
-              title="Prepare for your next adventure"
-              description="Tell us the destination and the motorcycle. We show what your setup is missing before you leave."
-            />
-            <dl className="mt-8 grid gap-4 sm:grid-cols-2">
-              <div className="rounded-sm border border-border bg-card p-4">
-                <dt className="text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground">Where are you going?</dt>
-                <dd className="mt-2 font-display text-xl uppercase">Spiti</dd>
-              </div>
-              <div className="rounded-sm border border-border bg-card p-4">
-                <dt className="text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground">What are you riding?</dt>
-                <dd className="mt-2 font-display text-xl uppercase">
-                  {selectedBike.model}
-                </dd>
-              </div>
-            </dl>
-          </div>
-
-          <div className="rounded-sm border border-border bg-surface p-6 md:p-8">
-            <h3 className="text-xl">Your ride setup</h3>
-            <ul className="mt-6 divide-y divide-border">
-              {setupChecklist.map((item) => (
-                <li key={item.label} className="flex items-center justify-between gap-4 py-3.5">
-                  <div>
-                    <p className="font-display text-sm uppercase tracking-[0.14em]">{item.label}</p>
-                    <p className="text-xs text-muted-foreground">{item.note}</p>
-                  </div>
-                  {item.status === "ready" ? (
-                    <span className="flex items-center gap-1.5 text-xs text-success">
-                      <Check className="size-4" aria-hidden /> Ready
-                    </span>
-                  ) : (
-                    <span className="flex items-center gap-1.5 text-xs text-warning">
-                      <TriangleAlert className="size-4" aria-hidden /> Missing
-                    </span>
-                  )}
-                </li>
-              ))}
-            </ul>
-            <Button className="mt-7 w-full" size="lg">
-              Build my setup
-            </Button>
-            <p className="mt-3 text-center text-xs text-muted-foreground">
-              Placeholder preview — recommendations will be generated from your garage.
-            </p>
-          </div>
+        <div className="mt-10">
+          <MemoryLane memories={memories} />
         </div>
       </Section>
 
-      {/* 7. RIDES */}
-      <Section tone="surface">
-        <SectionHeader
-          eyebrow="Rides"
-          title="Find your next ride"
-          description="Weekend runs, day loops, group rides and meets posted by riders near you."
-          action={
-            <ButtonLink to="/rides" variant="outline">
-              Plan a ride
-            </ButtonLink>
-          }
-        />
-        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {rides.map((ride) => (
-            <RideCard key={ride.id} ride={ride} />
-          ))}
-        </div>
-      </Section>
-
-      {/* 8. COMMUNITY */}
-      <Section>
-        <SectionHeader
-          eyebrow="Community"
-          title="The 36 Spokes rider community"
-          description="Riders, groups and stories from people who actually put the kilometres in."
-          action={
-            <ButtonLink to="/community" variant="outline">
-              Meet the riders
-            </ButtonLink>
-          }
-        />
-        <div className="mt-10 grid gap-4 lg:grid-cols-[1.2fr_1fr]">
-          <Media
-            src={media.communityRiders}
-            alt="Group of riders and their motorcycles at a mountain viewpoint"
-            ratio="16/10"
-            className="rounded-sm border border-border"
-          />
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-            {riders.map((rider) => (
-              <RiderCard key={rider.id} rider={rider} />
-            ))}
-          </div>
-        </div>
-        <Rail className="mt-4 md:grid-cols-3">
-          {stories.map((story) => (
-            <RailItem key={story.slug}>
-              <StoryCard story={story} />
-            </RailItem>
-          ))}
-        </Rail>
-      </Section>
-
-      {/* 9. GARAGE */}
-      <Section tone="surface">
-        <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
-          <Media
-            src={media.garageWorkshop}
-            alt="Mechanic fitting accessories to an adventure motorcycle in a workshop"
-            ratio="3/2"
-            className="rounded-sm border border-border"
-          />
-          <div>
-            <SectionHeader eyebrow="Garage" title="Your bike. Your setup. Your garage." />
-            <ul className="mt-8 divide-y divide-border border-y border-border">
-              {garageServices.map((service) => (
-                <li key={service.name} className="py-4">
-                  <p className="font-display text-sm uppercase tracking-[0.16em]">{service.name}</p>
-                  <p className="mt-1 text-sm text-muted-foreground">{service.note}</p>
-                </li>
-              ))}
-            </ul>
-            <ButtonLink to="/garage" className="mt-8">
-              Enter the garage
-            </ButtonLink>
-          </div>
-        </div>
-      </Section>
-
-      {/* 10. FINAL CTA */}
-      <Section>
+      {/* G. JOIN / DISCOVER */}
+      <Section className="pt-0 md:pt-0">
         <div className="rounded-sm border border-border bg-card px-6 py-14 text-center md:px-16 md:py-20">
-          <p className="eyebrow">Join 36 Spokes</p>
-          <h2 className="mx-auto mt-4 max-w-3xl text-3xl leading-tight sm:text-4xl lg:text-5xl">
+          <img
+            src={media.brandLogo}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            className="mx-auto size-16 rounded-full object-cover ring-2 ring-primary/40 shadow-card"
+          />
+          <h2 className="mx-auto mt-6 max-w-3xl text-3xl leading-tight sm:text-4xl lg:text-5xl">
             Keep your bike, your gear and your next ride in one place
           </h2>
           <p className="mx-auto mt-5 max-w-xl text-base text-muted-foreground">
-            Create a rider profile, add your motorcycle, and everything on 36 Spokes starts speaking your bike's
-            language.
+            Create a rider profile, add your motorcycle, and everything on 36 Spokes starts speaking
+            your bike's language.
           </p>
           <div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
             <ButtonLink to="/join" size="lg">
