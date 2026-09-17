@@ -1,102 +1,72 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { Button, Media } from "@/components/ui-kit";
-import { bikes, media } from "@/data/content";
+import { Link, createFileRoute } from "@tanstack/react-router";
+import { AuthLayout } from "@/components/layout/AuthLayout";
+import { Button, FormField, SelectInput, TextInput } from "@/components/ui-kit";
+import { media } from "@/data/media";
+import { seo } from "@/lib/seo";
+import { listBikes } from "@/services/catalog";
 
 export const Route = createFileRoute("/join")({
-  head: () => ({
-    meta: [
-      { title: "Join 36 Spokes | Create Your Rider Profile" },
-      {
-        name: "description",
-        content: "Create a 36 Spokes rider profile, add your motorcycle and get gear, rides and trips matched to it.",
-      },
-      { property: "og:title", content: "Join 36 Spokes | Create Your Rider Profile" },
-      { property: "og:description", content: "Add your motorcycle and make the whole platform fit your bike." },
-    ],
-  }),
+  loader: async () => ({ bikes: await listBikes() }),
+  head: () =>
+    seo({
+      title: "Join 36 Spokes | Create Your Rider Profile",
+      description:
+        "Create a 36 Spokes rider profile, add your motorcycle and get gear, rides and trips matched to it.",
+      socialDescription: "Add your motorcycle and make the whole platform fit your bike.",
+      path: "/join",
+    }),
   component: JoinPage,
 });
 
 function JoinPage() {
+  const { bikes } = Route.useLoaderData();
+
   return (
-    <div className="grid lg:min-h-[calc(100svh-5rem)] lg:grid-cols-2">
-      <Media
-        src={media.heroRide}
-        alt="Rider on a mountain road at sunrise"
-        ratio="auto"
-        className="h-56 lg:h-auto"
-      />
-      <div className="flex items-center justify-center px-5 py-14 lg:px-16">
-        <div className="w-full max-w-sm">
-          <div className="mb-6 flex items-center gap-3">
-            <img
-              src={media.brandLogo}
-              alt="36 Spokes Crest"
-              className="size-12 rounded-full object-cover ring-2 ring-primary/40 shadow-md"
-            />
-            <div>
-              <p className="font-display text-sm tracking-[0.2em] text-foreground">36·SPOKES</p>
-              <p className="text-xs text-muted-foreground">Rider Membership</p>
-            </div>
-          </div>
-          <p className="eyebrow">Join 36 Spokes</p>
-          <h1 className="mt-2 text-4xl">Create your rider profile</h1>
-          <p className="mt-3 text-sm text-muted-foreground">
-            Sign-up is not connected to an account system yet.
-          </p>
-
-          <form className="mt-8 space-y-4" onSubmit={(e) => e.preventDefault()}>
-            <div>
-              <label htmlFor="name" className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                Name
-              </label>
-              <input
-                id="name"
-                autoComplete="name"
-                placeholder="Your name"
-                className="mt-2 h-12 w-full rounded-sm border border-input bg-surface px-3 text-sm text-foreground placeholder:text-muted-foreground"
-              />
-            </div>
-            <div>
-              <label htmlFor="join-email" className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                Email
-              </label>
-              <input
-                id="join-email"
-                type="email"
-                autoComplete="email"
-                placeholder="you@example.com"
-                className="mt-2 h-12 w-full rounded-sm border border-input bg-surface px-3 text-sm text-foreground placeholder:text-muted-foreground"
-              />
-            </div>
-            <div>
-              <label htmlFor="bike" className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                Your motorcycle
-              </label>
-              <select
-                id="bike"
-                className="mt-2 h-12 w-full rounded-sm border border-input bg-surface px-3 text-sm text-foreground"
-              >
-                {bikes.map((bike) => (
-                  <option key={bike.id} value={bike.id}>
-                    {bike.brand} {bike.model}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <Button type="submit" size="lg" className="w-full">
-              Create profile
-            </Button>
-          </form>
-
-          <p className="mt-6 text-sm text-muted-foreground">
-            Already a member?{" "}
-            <Link to="/login" className="text-primary hover:underline">
-              Log in
-            </Link>
-          </p>
-        </div>
-      </div>
-    </div>
+    <AuthLayout
+      image={media.site.heroRide}
+      imageAlt="Rider on a mountain road at sunrise"
+      imageSide="left"
+      portalLabel="Rider Membership"
+      eyebrow="Join 36 Spokes"
+      title="Create your rider profile"
+      note="Sign-up is not connected to an account system yet."
+      footer={
+        <>
+          Already a member?{" "}
+          <Link to="/login" className="text-primary hover:underline">
+            Log in
+          </Link>
+        </>
+      }
+    >
+      {/* Phase 3 wires this form to Supabase Auth and the rider garage. */}
+      <form className="mt-8 space-y-4" onSubmit={(event) => event.preventDefault()}>
+        <FormField id="name" label="Name">
+          <TextInput id="name" name="name" autoComplete="name" placeholder="Your name" required />
+        </FormField>
+        <FormField id="join-email" label="Email">
+          <TextInput
+            id="join-email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            placeholder="you@example.com"
+            required
+          />
+        </FormField>
+        <FormField id="bike" label="Your motorcycle">
+          <SelectInput id="bike" name="bikeId">
+            {bikes.map((bike) => (
+              <option key={bike.id} value={bike.id}>
+                {bike.brand} {bike.model}
+              </option>
+            ))}
+          </SelectInput>
+        </FormField>
+        <Button type="submit" size="lg" className="w-full">
+          Create profile
+        </Button>
+      </form>
+    </AuthLayout>
   );
 }

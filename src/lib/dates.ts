@@ -97,3 +97,21 @@ export function formatYearMonth(value: string): string {
 export function yearOf(value: string): string {
   return value.slice(0, 4);
 }
+
+const pad2 = (value: number) => String(value).padStart(2, "0");
+
+/**
+ * Compact departure dates without the year, as shown on trip cards:
+ * "12 – 22 Sep", or "28 Sep – 04 Oct" across months.
+ */
+export function formatCompactDateRange(startISO: string, endISO: string): string {
+  const start = parseISODate(startISO);
+  const end = parseISODate(endISO);
+  if (!start || !end) return startISO;
+  const startMonth = MONTHS[start.getUTCMonth()];
+  const endMonth = MONTHS[end.getUTCMonth()];
+  if (startMonth === endMonth) {
+    return `${pad2(start.getUTCDate())} – ${pad2(end.getUTCDate())} ${endMonth}`;
+  }
+  return `${pad2(start.getUTCDate())} ${startMonth} – ${pad2(end.getUTCDate())} ${endMonth}`;
+}

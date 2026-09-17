@@ -19,8 +19,8 @@ import {
   MapPin,
 } from "lucide-react";
 import { Badge } from "@/components/ui-kit";
-import { formatINR } from "@/data/content";
-import type { TravelPlan, TravelPlanDay } from "@/data/journey-planner";
+import { formatINR } from "@/lib/format";
+import type { TravelPlan, TravelPlanDay } from "@/types";
 import { formatDuration } from "@/lib/journey-planner";
 import { formatShortDate, parseISODate } from "@/lib/dates";
 import { cn } from "@/lib/utils";

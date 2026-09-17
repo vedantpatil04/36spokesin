@@ -1,28 +1,41 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { Link, createFileRoute } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
-import { ButtonLink, Media, Rail, RailItem, Section, SectionHeader } from "@/components/ui-kit";
 import { PathCard, UpcomingEventCard } from "@/components/cards";
 import { JourneyPlanner } from "@/components/journey-planner/JourneyPlanner";
 import { MemoryLane } from "@/components/memory-lane/MemoryLane";
-import { events, media, memories, pillars } from "@/data/content";
+import {
+  BrandCrest,
+  ButtonLink,
+  Media,
+  Rail,
+  RailItem,
+  Section,
+  SectionHeader,
+} from "@/components/ui-kit";
+import { media } from "@/data/media";
+import { seo } from "@/lib/seo";
 import { cn } from "@/lib/utils";
-
-const TITLE = "36 Spokes | Motorcycle Rides, Travel, Gear & Rider Community";
-const DESCRIPTION =
-  "36 Spokes brings your motorcycle, the gear that fits it, the journeys you plan and the riders you meet into one place. Find a ride, plan a trip and join upcoming events.";
+import { listEvents, listMemories } from "@/services/community";
+import { listPillars } from "@/services/site";
 
 export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: TITLE },
-      { name: "description", content: DESCRIPTION },
-      { property: "og:title", content: TITLE },
-      {
-        property: "og:description",
-        content: "Your bike, your gear, your next journey and the riders you share it with.",
-      },
-    ],
-  }),
+  loader: async () => {
+    const [pillars, events, memories] = await Promise.all([
+      listPillars(),
+      listEvents({ limit: 3 }),
+      listMemories(),
+    ]);
+    return { pillars, events, memories };
+  },
+  head: () =>
+    seo({
+      title: "36 Spokes | Motorcycle Rides, Travel, Gear & Rider Community",
+      description:
+        "36 Spokes brings your motorcycle, the gear that fits it, the journeys you plan and the riders you meet into one place. Find a ride, plan a trip and join upcoming events.",
+      socialDescription:
+        "Your bike, your gear, your next journey and the riders you share it with.",
+      path: "/",
+    }),
   component: Home,
 });
 
@@ -37,19 +50,18 @@ const pathLayout = [
 
 const connection = ["Bike", "Gear", "Trip", "Route", "Riders"];
 
-/** Upcoming events are sorted by date; the homepage shows the next three. */
-const nextEvents = [...events].sort((a, b) => a.startDate.localeCompare(b.startDate)).slice(0, 3);
-
 function Home() {
+  const { pillars, events, memories } = Route.useLoaderData();
+
   return (
     <>
       {/* A. HERO */}
       <section className="relative">
         <Media
-          src={media.heroRide}
-          alt="Rider on a loaded adventure motorcycle climbing a Himalayan mountain road at sunrise"
+          asset={media.site.heroRide}
           ratio="auto"
           className="h-[78svh] min-h-125 w-full lg:h-[88svh]"
+          sizes="100vw"
           priority
         >
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/55 to-background/25" />
@@ -58,11 +70,7 @@ function Home() {
           <div className="container-page pb-14 md:pb-20">
             <div className="max-w-3xl rise">
               <div className="mb-5 inline-flex items-center gap-2.5 rounded-full border border-border/60 bg-background/70 px-3.5 py-1.5 backdrop-blur-md shadow-sm">
-                <img
-                  src={media.brandLogo}
-                  alt="36 Spokes Official Crest"
-                  className="size-5 rounded-full object-cover ring-1 ring-primary/40"
-                />
+                <BrandCrest className="size-5 ring-1 ring-primary/40" />
                 <span className="font-display text-xs uppercase tracking-[0.2em] text-foreground/90">
                   Official 36 Spokes Rider Network
                 </span>
@@ -143,7 +151,7 @@ function Home() {
           }
         />
         <Rail className="mt-10 md:grid-cols-3">
-          {nextEvents.map((event) => (
+          {events.map((event) => (
             <RailItem key={event.id}>
               <UpcomingEventCard
                 event={event}
@@ -193,12 +201,9 @@ function Home() {
       {/* G. JOIN / DISCOVER */}
       <Section className="pt-0 md:pt-0">
         <div className="rounded-sm border border-border bg-card px-6 py-14 text-center md:px-16 md:py-20">
-          <img
-            src={media.brandLogo}
-            alt=""
+          <BrandCrest
+            className="mx-auto size-16 ring-2 ring-primary/40 shadow-card"
             loading="lazy"
-            decoding="async"
-            className="mx-auto size-16 rounded-full object-cover ring-2 ring-primary/40 shadow-card"
           />
           <h2 className="mx-auto mt-6 max-w-3xl text-3xl leading-tight sm:text-4xl lg:text-5xl">
             Keep your bike, your gear and your next ride in one place

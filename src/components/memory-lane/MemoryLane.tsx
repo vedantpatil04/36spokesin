@@ -1,5 +1,5 @@
 import { Media } from "@/components/ui-kit";
-import type { Memory } from "@/data/content";
+import type { Memory } from "@/types";
 import { formatYearMonth, yearOf } from "@/lib/dates";
 import { cn } from "@/lib/utils";
 
@@ -56,8 +56,7 @@ export function FeaturedMemory({ memory }: { memory: Memory }) {
   return (
     <article className="overflow-hidden rounded-sm border border-border">
       <Media
-        src={memory.image}
-        alt={memory.imageAlt}
+        asset={memory.image}
         ratio="auto"
         className="h-[28rem] sm:h-[34rem] lg:h-full lg:min-h-[38rem]"
       >
@@ -91,8 +90,7 @@ export function MemoryLaneItem({ memory }: { memory: Memory }) {
       </div>
       <article className="flex min-w-0 gap-4 sm:gap-5">
         <Media
-          src={memory.image}
-          alt={memory.imageAlt}
+          asset={memory.image}
           ratio="4/3"
           className="w-20 shrink-0 self-start rounded-sm border border-border sm:w-36"
         />

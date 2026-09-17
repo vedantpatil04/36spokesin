@@ -1,5 +1,5 @@
 /**
- * Phase 1 mock journey planner.
+ * Sample journey planner.
  *
  * `generateMockTravelPlan` is a pure, deterministic function over the sample
  * routes in src/data/journey-planner.ts. It stands in for a future planning
@@ -10,20 +10,18 @@
  * lazily, so it is not part of the initial homepage bundle.
  */
 
-import { bikes, type Bike } from "@/data/content";
-import {
-  climate,
-  journeyRoutes,
-  planAssumptions,
-  tripStyles,
-  type RouteStop,
-  type Season,
-  type TravelPlan,
-  type TravelPlanDay,
-  type TravelPlanNotice,
-  type TravelPlanRequest,
-  type TripStyle,
-} from "@/data/journey-planner";
+import { bikes } from "@/data/bikes";
+import { climate, journeyRoutes, planAssumptions, tripStyles } from "@/data/journey-planner";
+import type {
+  Bike,
+  RouteStop,
+  Season,
+  TravelPlan,
+  TravelPlanDay,
+  TravelPlanNotice,
+  TravelPlanRequest,
+  TripStyle,
+} from "@/types";
 import { addDays, daysBetween, parseISODate, toISODate } from "@/lib/dates";
 import { formatDuration, validatePlanRequest } from "@/lib/journey-planner";
 

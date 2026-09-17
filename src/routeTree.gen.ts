@@ -10,29 +10,38 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as CommunityRouteImport } from './routes/community'
-import { Route as GarageRouteImport } from './routes/garage'
 import { Route as JoinRouteImport } from './routes/join'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as My36SpokesRouteImport } from './routes/my-36-spokes'
-import { Route as RidesRouteImport } from './routes/rides'
-import { Route as ShopRouteImport } from './routes/shop'
-import { Route as StoriesRouteImport } from './routes/stories'
-import { Route as TravelRouteImport } from './routes/travel'
+import { Route as My36SpokesRouteRouteImport } from './routes/my-36-spokes/route'
+import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as ShopRouteRouteImport } from './routes/shop/route'
+import { Route as CommunityIndexRouteImport } from './routes/community/index'
+import { Route as CommunityGroupsRouteImport } from './routes/community/groups'
+import { Route as CommunityRidersRouteImport } from './routes/community/riders'
+import { Route as GarageIndexRouteImport } from './routes/garage/index'
+import { Route as GarageBikeRouteImport } from './routes/garage/$bike'
+import { Route as My36SpokesIndexRouteImport } from './routes/my-36-spokes/index'
+import { Route as My36SpokesCommunityRouteImport } from './routes/my-36-spokes/community'
+import { Route as My36SpokesGarageRouteImport } from './routes/my-36-spokes/garage'
+import { Route as My36SpokesRidesRouteImport } from './routes/my-36-spokes/rides'
+import { Route as My36SpokesShopRouteImport } from './routes/my-36-spokes/shop'
+import { Route as My36SpokesTravelRouteImport } from './routes/my-36-spokes/travel'
+import { Route as ProductSlugRouteImport } from './routes/product/$slug'
+import { Route as RidesIndexRouteImport } from './routes/rides/index'
+import { Route as RidesSlugRouteImport } from './routes/rides/$slug'
+import { Route as ShopIndexRouteImport } from './routes/shop/index'
+import { Route as ShopCategoryRouteImport } from './routes/shop/$category'
+import { Route as StoriesIndexRouteImport } from './routes/stories/index'
+import { Route as StoriesSlugRouteImport } from './routes/stories/$slug'
+import { Route as TravelIndexRouteImport } from './routes/travel/index'
+import { Route as TravelDestinationRouteImport } from './routes/travel/$destination'
+import { Route as TravelDestinationsRouteImport } from './routes/travel/destinations'
+import { Route as TravelTripsIndexRouteImport } from './routes/travel/trips/index'
+import { Route as TravelTripsSlugRouteImport } from './routes/travel/trips/$slug'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CommunityRoute = CommunityRouteImport.update({
-  id: '/community',
-  path: '/community',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const GarageRoute = GarageRouteImport.update({
-  id: '/garage',
-  path: '/garage',
   getParentRoute: () => rootRouteImport,
 } as any)
 const JoinRoute = JoinRouteImport.update({
@@ -45,119 +54,345 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const My36SpokesRoute = My36SpokesRouteImport.update({
+const My36SpokesRouteRoute = My36SpokesRouteRouteImport.update({
   id: '/my-36-spokes',
   path: '/my-36-spokes',
   getParentRoute: () => rootRouteImport,
 } as any)
-const RidesRoute = RidesRouteImport.update({
-  id: '/rides',
-  path: '/rides',
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ShopRoute = ShopRouteImport.update({
+const ShopRouteRoute = ShopRouteRouteImport.update({
   id: '/shop',
   path: '/shop',
   getParentRoute: () => rootRouteImport,
 } as any)
-const StoriesRoute = StoriesRouteImport.update({
-  id: '/stories',
-  path: '/stories',
+const CommunityIndexRoute = CommunityIndexRouteImport.update({
+  id: '/community/',
+  path: '/community/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TravelRoute = TravelRouteImport.update({
+const CommunityGroupsRoute = CommunityGroupsRouteImport.update({
+  id: '/community/groups',
+  path: '/community/groups',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CommunityRidersRoute = CommunityRidersRouteImport.update({
+  id: '/community/riders',
+  path: '/community/riders',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GarageIndexRoute = GarageIndexRouteImport.update({
+  id: '/garage/',
+  path: '/garage/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GarageBikeRoute = GarageBikeRouteImport.update({
+  id: '/garage/$bike',
+  path: '/garage/$bike',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const My36SpokesIndexRoute = My36SpokesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => My36SpokesRouteRoute,
+} as any)
+const My36SpokesCommunityRoute = My36SpokesCommunityRouteImport.update({
+  id: '/community',
+  path: '/community',
+  getParentRoute: () => My36SpokesRouteRoute,
+} as any)
+const My36SpokesGarageRoute = My36SpokesGarageRouteImport.update({
+  id: '/garage',
+  path: '/garage',
+  getParentRoute: () => My36SpokesRouteRoute,
+} as any)
+const My36SpokesRidesRoute = My36SpokesRidesRouteImport.update({
+  id: '/rides',
+  path: '/rides',
+  getParentRoute: () => My36SpokesRouteRoute,
+} as any)
+const My36SpokesShopRoute = My36SpokesShopRouteImport.update({
+  id: '/shop',
+  path: '/shop',
+  getParentRoute: () => My36SpokesRouteRoute,
+} as any)
+const My36SpokesTravelRoute = My36SpokesTravelRouteImport.update({
   id: '/travel',
   path: '/travel',
+  getParentRoute: () => My36SpokesRouteRoute,
+} as any)
+const ProductSlugRoute = ProductSlugRouteImport.update({
+  id: '/product/$slug',
+  path: '/product/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RidesIndexRoute = RidesIndexRouteImport.update({
+  id: '/rides/',
+  path: '/rides/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RidesSlugRoute = RidesSlugRouteImport.update({
+  id: '/rides/$slug',
+  path: '/rides/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShopIndexRoute = ShopIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ShopRouteRoute,
+} as any)
+const ShopCategoryRoute = ShopCategoryRouteImport.update({
+  id: '/$category',
+  path: '/$category',
+  getParentRoute: () => ShopRouteRoute,
+} as any)
+const StoriesIndexRoute = StoriesIndexRouteImport.update({
+  id: '/stories/',
+  path: '/stories/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StoriesSlugRoute = StoriesSlugRouteImport.update({
+  id: '/stories/$slug',
+  path: '/stories/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TravelIndexRoute = TravelIndexRouteImport.update({
+  id: '/travel/',
+  path: '/travel/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TravelDestinationRoute = TravelDestinationRouteImport.update({
+  id: '/travel/$destination',
+  path: '/travel/$destination',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TravelDestinationsRoute = TravelDestinationsRouteImport.update({
+  id: '/travel/destinations',
+  path: '/travel/destinations',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TravelTripsIndexRoute = TravelTripsIndexRouteImport.update({
+  id: '/travel/trips/',
+  path: '/travel/trips/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TravelTripsSlugRoute = TravelTripsSlugRouteImport.update({
+  id: '/travel/trips/$slug',
+  path: '/travel/trips/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/community': typeof CommunityRoute
-  '/garage': typeof GarageRoute
+  '/my-36-spokes': typeof My36SpokesRouteRouteWithChildren
+  '/shop': typeof ShopRouteRouteWithChildren
   '/join': typeof JoinRoute
   '/login': typeof LoginRoute
-  '/my-36-spokes': typeof My36SpokesRoute
-  '/rides': typeof RidesRoute
-  '/shop': typeof ShopRoute
-  '/stories': typeof StoriesRoute
-  '/travel': typeof TravelRoute
+  '/profile': typeof ProfileRoute
+  '/community/groups': typeof CommunityGroupsRoute
+  '/community/riders': typeof CommunityRidersRoute
+  '/garage/$bike': typeof GarageBikeRoute
+  '/my-36-spokes/community': typeof My36SpokesCommunityRoute
+  '/my-36-spokes/garage': typeof My36SpokesGarageRoute
+  '/my-36-spokes/rides': typeof My36SpokesRidesRoute
+  '/my-36-spokes/shop': typeof My36SpokesShopRoute
+  '/my-36-spokes/travel': typeof My36SpokesTravelRoute
+  '/product/$slug': typeof ProductSlugRoute
+  '/rides/$slug': typeof RidesSlugRoute
+  '/shop/$category': typeof ShopCategoryRoute
+  '/stories/$slug': typeof StoriesSlugRoute
+  '/travel/$destination': typeof TravelDestinationRoute
+  '/travel/destinations': typeof TravelDestinationsRoute
+  '/community/': typeof CommunityIndexRoute
+  '/garage/': typeof GarageIndexRoute
+  '/my-36-spokes/': typeof My36SpokesIndexRoute
+  '/rides/': typeof RidesIndexRoute
+  '/shop/': typeof ShopIndexRoute
+  '/stories/': typeof StoriesIndexRoute
+  '/travel/': typeof TravelIndexRoute
+  '/travel/trips/$slug': typeof TravelTripsSlugRoute
+  '/travel/trips/': typeof TravelTripsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/community': typeof CommunityRoute
-  '/garage': typeof GarageRoute
   '/join': typeof JoinRoute
   '/login': typeof LoginRoute
-  '/my-36-spokes': typeof My36SpokesRoute
-  '/rides': typeof RidesRoute
-  '/shop': typeof ShopRoute
-  '/stories': typeof StoriesRoute
-  '/travel': typeof TravelRoute
+  '/profile': typeof ProfileRoute
+  '/community/groups': typeof CommunityGroupsRoute
+  '/community/riders': typeof CommunityRidersRoute
+  '/garage/$bike': typeof GarageBikeRoute
+  '/my-36-spokes/community': typeof My36SpokesCommunityRoute
+  '/my-36-spokes/garage': typeof My36SpokesGarageRoute
+  '/my-36-spokes/rides': typeof My36SpokesRidesRoute
+  '/my-36-spokes/shop': typeof My36SpokesShopRoute
+  '/my-36-spokes/travel': typeof My36SpokesTravelRoute
+  '/product/$slug': typeof ProductSlugRoute
+  '/rides/$slug': typeof RidesSlugRoute
+  '/shop/$category': typeof ShopCategoryRoute
+  '/stories/$slug': typeof StoriesSlugRoute
+  '/travel/$destination': typeof TravelDestinationRoute
+  '/travel/destinations': typeof TravelDestinationsRoute
+  '/community': typeof CommunityIndexRoute
+  '/garage': typeof GarageIndexRoute
+  '/my-36-spokes': typeof My36SpokesIndexRoute
+  '/rides': typeof RidesIndexRoute
+  '/shop': typeof ShopIndexRoute
+  '/stories': typeof StoriesIndexRoute
+  '/travel': typeof TravelIndexRoute
+  '/travel/trips/$slug': typeof TravelTripsSlugRoute
+  '/travel/trips': typeof TravelTripsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/community': typeof CommunityRoute
-  '/garage': typeof GarageRoute
+  '/my-36-spokes': typeof My36SpokesRouteRouteWithChildren
+  '/shop': typeof ShopRouteRouteWithChildren
   '/join': typeof JoinRoute
   '/login': typeof LoginRoute
-  '/my-36-spokes': typeof My36SpokesRoute
-  '/rides': typeof RidesRoute
-  '/shop': typeof ShopRoute
-  '/stories': typeof StoriesRoute
-  '/travel': typeof TravelRoute
+  '/profile': typeof ProfileRoute
+  '/community/groups': typeof CommunityGroupsRoute
+  '/community/riders': typeof CommunityRidersRoute
+  '/garage/$bike': typeof GarageBikeRoute
+  '/my-36-spokes/community': typeof My36SpokesCommunityRoute
+  '/my-36-spokes/garage': typeof My36SpokesGarageRoute
+  '/my-36-spokes/rides': typeof My36SpokesRidesRoute
+  '/my-36-spokes/shop': typeof My36SpokesShopRoute
+  '/my-36-spokes/travel': typeof My36SpokesTravelRoute
+  '/product/$slug': typeof ProductSlugRoute
+  '/rides/$slug': typeof RidesSlugRoute
+  '/shop/$category': typeof ShopCategoryRoute
+  '/stories/$slug': typeof StoriesSlugRoute
+  '/travel/$destination': typeof TravelDestinationRoute
+  '/travel/destinations': typeof TravelDestinationsRoute
+  '/community/': typeof CommunityIndexRoute
+  '/garage/': typeof GarageIndexRoute
+  '/my-36-spokes/': typeof My36SpokesIndexRoute
+  '/rides/': typeof RidesIndexRoute
+  '/shop/': typeof ShopIndexRoute
+  '/stories/': typeof StoriesIndexRoute
+  '/travel/': typeof TravelIndexRoute
+  '/travel/trips/$slug': typeof TravelTripsSlugRoute
+  '/travel/trips/': typeof TravelTripsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/community'
-    | '/garage'
+    | '/my-36-spokes'
+    | '/shop'
     | '/join'
     | '/login'
-    | '/my-36-spokes'
-    | '/rides'
-    | '/shop'
-    | '/stories'
-    | '/travel'
+    | '/profile'
+    | '/community/groups'
+    | '/community/riders'
+    | '/garage/$bike'
+    | '/my-36-spokes/community'
+    | '/my-36-spokes/garage'
+    | '/my-36-spokes/rides'
+    | '/my-36-spokes/shop'
+    | '/my-36-spokes/travel'
+    | '/product/$slug'
+    | '/rides/$slug'
+    | '/shop/$category'
+    | '/stories/$slug'
+    | '/travel/$destination'
+    | '/travel/destinations'
+    | '/community/'
+    | '/garage/'
+    | '/my-36-spokes/'
+    | '/rides/'
+    | '/shop/'
+    | '/stories/'
+    | '/travel/'
+    | '/travel/trips/$slug'
+    | '/travel/trips/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/community'
-    | '/garage'
     | '/join'
     | '/login'
+    | '/profile'
+    | '/community/groups'
+    | '/community/riders'
+    | '/garage/$bike'
+    | '/my-36-spokes/community'
+    | '/my-36-spokes/garage'
+    | '/my-36-spokes/rides'
+    | '/my-36-spokes/shop'
+    | '/my-36-spokes/travel'
+    | '/product/$slug'
+    | '/rides/$slug'
+    | '/shop/$category'
+    | '/stories/$slug'
+    | '/travel/$destination'
+    | '/travel/destinations'
+    | '/community'
+    | '/garage'
     | '/my-36-spokes'
     | '/rides'
     | '/shop'
     | '/stories'
     | '/travel'
+    | '/travel/trips/$slug'
+    | '/travel/trips'
   id:
     | '__root__'
     | '/'
-    | '/community'
-    | '/garage'
+    | '/my-36-spokes'
+    | '/shop'
     | '/join'
     | '/login'
-    | '/my-36-spokes'
-    | '/rides'
-    | '/shop'
-    | '/stories'
-    | '/travel'
+    | '/profile'
+    | '/community/groups'
+    | '/community/riders'
+    | '/garage/$bike'
+    | '/my-36-spokes/community'
+    | '/my-36-spokes/garage'
+    | '/my-36-spokes/rides'
+    | '/my-36-spokes/shop'
+    | '/my-36-spokes/travel'
+    | '/product/$slug'
+    | '/rides/$slug'
+    | '/shop/$category'
+    | '/stories/$slug'
+    | '/travel/$destination'
+    | '/travel/destinations'
+    | '/community/'
+    | '/garage/'
+    | '/my-36-spokes/'
+    | '/rides/'
+    | '/shop/'
+    | '/stories/'
+    | '/travel/'
+    | '/travel/trips/$slug'
+    | '/travel/trips/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  CommunityRoute: typeof CommunityRoute
-  GarageRoute: typeof GarageRoute
+  My36SpokesRouteRoute: typeof My36SpokesRouteRouteWithChildren
+  ShopRouteRoute: typeof ShopRouteRouteWithChildren
   JoinRoute: typeof JoinRoute
   LoginRoute: typeof LoginRoute
-  My36SpokesRoute: typeof My36SpokesRoute
-  RidesRoute: typeof RidesRoute
-  ShopRoute: typeof ShopRoute
-  StoriesRoute: typeof StoriesRoute
-  TravelRoute: typeof TravelRoute
+  ProfileRoute: typeof ProfileRoute
+  CommunityGroupsRoute: typeof CommunityGroupsRoute
+  CommunityRidersRoute: typeof CommunityRidersRoute
+  GarageBikeRoute: typeof GarageBikeRoute
+  ProductSlugRoute: typeof ProductSlugRoute
+  RidesSlugRoute: typeof RidesSlugRoute
+  StoriesSlugRoute: typeof StoriesSlugRoute
+  TravelDestinationRoute: typeof TravelDestinationRoute
+  TravelDestinationsRoute: typeof TravelDestinationsRoute
+  CommunityIndexRoute: typeof CommunityIndexRoute
+  GarageIndexRoute: typeof GarageIndexRoute
+  RidesIndexRoute: typeof RidesIndexRoute
+  StoriesIndexRoute: typeof StoriesIndexRoute
+  TravelIndexRoute: typeof TravelIndexRoute
+  TravelTripsSlugRoute: typeof TravelTripsSlugRoute
+  TravelTripsIndexRoute: typeof TravelTripsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -167,20 +402,6 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/community': {
-      id: '/community'
-      path: '/community'
-      fullPath: '/community'
-      preLoaderRoute: typeof CommunityRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/garage': {
-      id: '/garage'
-      path: '/garage'
-      fullPath: '/garage'
-      preLoaderRoute: typeof GarageRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/join': {
@@ -201,51 +422,245 @@ declare module '@tanstack/react-router' {
       id: '/my-36-spokes'
       path: '/my-36-spokes'
       fullPath: '/my-36-spokes'
-      preLoaderRoute: typeof My36SpokesRouteImport
+      preLoaderRoute: typeof My36SpokesRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/rides': {
-      id: '/rides'
-      path: '/rides'
-      fullPath: '/rides'
-      preLoaderRoute: typeof RidesRouteImport
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/shop': {
       id: '/shop'
       path: '/shop'
       fullPath: '/shop'
-      preLoaderRoute: typeof ShopRouteImport
+      preLoaderRoute: typeof ShopRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/stories': {
-      id: '/stories'
-      path: '/stories'
-      fullPath: '/stories'
-      preLoaderRoute: typeof StoriesRouteImport
+    '/community/': {
+      id: '/community/'
+      path: '/community'
+      fullPath: '/community/'
+      preLoaderRoute: typeof CommunityIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/travel': {
-      id: '/travel'
+    '/community/groups': {
+      id: '/community/groups'
+      path: '/community/groups'
+      fullPath: '/community/groups'
+      preLoaderRoute: typeof CommunityGroupsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/community/riders': {
+      id: '/community/riders'
+      path: '/community/riders'
+      fullPath: '/community/riders'
+      preLoaderRoute: typeof CommunityRidersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/garage/': {
+      id: '/garage/'
+      path: '/garage'
+      fullPath: '/garage/'
+      preLoaderRoute: typeof GarageIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/garage/$bike': {
+      id: '/garage/$bike'
+      path: '/garage/$bike'
+      fullPath: '/garage/$bike'
+      preLoaderRoute: typeof GarageBikeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/my-36-spokes/': {
+      id: '/my-36-spokes/'
+      path: '/'
+      fullPath: '/my-36-spokes/'
+      preLoaderRoute: typeof My36SpokesIndexRouteImport
+      parentRoute: typeof My36SpokesRouteRoute
+    }
+    '/my-36-spokes/community': {
+      id: '/my-36-spokes/community'
+      path: '/community'
+      fullPath: '/my-36-spokes/community'
+      preLoaderRoute: typeof My36SpokesCommunityRouteImport
+      parentRoute: typeof My36SpokesRouteRoute
+    }
+    '/my-36-spokes/garage': {
+      id: '/my-36-spokes/garage'
+      path: '/garage'
+      fullPath: '/my-36-spokes/garage'
+      preLoaderRoute: typeof My36SpokesGarageRouteImport
+      parentRoute: typeof My36SpokesRouteRoute
+    }
+    '/my-36-spokes/rides': {
+      id: '/my-36-spokes/rides'
+      path: '/rides'
+      fullPath: '/my-36-spokes/rides'
+      preLoaderRoute: typeof My36SpokesRidesRouteImport
+      parentRoute: typeof My36SpokesRouteRoute
+    }
+    '/my-36-spokes/shop': {
+      id: '/my-36-spokes/shop'
+      path: '/shop'
+      fullPath: '/my-36-spokes/shop'
+      preLoaderRoute: typeof My36SpokesShopRouteImport
+      parentRoute: typeof My36SpokesRouteRoute
+    }
+    '/my-36-spokes/travel': {
+      id: '/my-36-spokes/travel'
       path: '/travel'
-      fullPath: '/travel'
-      preLoaderRoute: typeof TravelRouteImport
+      fullPath: '/my-36-spokes/travel'
+      preLoaderRoute: typeof My36SpokesTravelRouteImport
+      parentRoute: typeof My36SpokesRouteRoute
+    }
+    '/product/$slug': {
+      id: '/product/$slug'
+      path: '/product/$slug'
+      fullPath: '/product/$slug'
+      preLoaderRoute: typeof ProductSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rides/': {
+      id: '/rides/'
+      path: '/rides'
+      fullPath: '/rides/'
+      preLoaderRoute: typeof RidesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rides/$slug': {
+      id: '/rides/$slug'
+      path: '/rides/$slug'
+      fullPath: '/rides/$slug'
+      preLoaderRoute: typeof RidesSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shop/': {
+      id: '/shop/'
+      path: '/'
+      fullPath: '/shop/'
+      preLoaderRoute: typeof ShopIndexRouteImport
+      parentRoute: typeof ShopRouteRoute
+    }
+    '/shop/$category': {
+      id: '/shop/$category'
+      path: '/$category'
+      fullPath: '/shop/$category'
+      preLoaderRoute: typeof ShopCategoryRouteImport
+      parentRoute: typeof ShopRouteRoute
+    }
+    '/stories/': {
+      id: '/stories/'
+      path: '/stories'
+      fullPath: '/stories/'
+      preLoaderRoute: typeof StoriesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/stories/$slug': {
+      id: '/stories/$slug'
+      path: '/stories/$slug'
+      fullPath: '/stories/$slug'
+      preLoaderRoute: typeof StoriesSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/travel/': {
+      id: '/travel/'
+      path: '/travel'
+      fullPath: '/travel/'
+      preLoaderRoute: typeof TravelIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/travel/$destination': {
+      id: '/travel/$destination'
+      path: '/travel/$destination'
+      fullPath: '/travel/$destination'
+      preLoaderRoute: typeof TravelDestinationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/travel/destinations': {
+      id: '/travel/destinations'
+      path: '/travel/destinations'
+      fullPath: '/travel/destinations'
+      preLoaderRoute: typeof TravelDestinationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/travel/trips/': {
+      id: '/travel/trips/'
+      path: '/travel/trips'
+      fullPath: '/travel/trips/'
+      preLoaderRoute: typeof TravelTripsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/travel/trips/$slug': {
+      id: '/travel/trips/$slug'
+      path: '/travel/trips/$slug'
+      fullPath: '/travel/trips/$slug'
+      preLoaderRoute: typeof TravelTripsSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
 }
 
+interface My36SpokesRouteRouteChildren {
+  My36SpokesCommunityRoute: typeof My36SpokesCommunityRoute
+  My36SpokesGarageRoute: typeof My36SpokesGarageRoute
+  My36SpokesRidesRoute: typeof My36SpokesRidesRoute
+  My36SpokesShopRoute: typeof My36SpokesShopRoute
+  My36SpokesTravelRoute: typeof My36SpokesTravelRoute
+  My36SpokesIndexRoute: typeof My36SpokesIndexRoute
+}
+
+const My36SpokesRouteRouteChildren: My36SpokesRouteRouteChildren = {
+  My36SpokesCommunityRoute: My36SpokesCommunityRoute,
+  My36SpokesGarageRoute: My36SpokesGarageRoute,
+  My36SpokesRidesRoute: My36SpokesRidesRoute,
+  My36SpokesShopRoute: My36SpokesShopRoute,
+  My36SpokesTravelRoute: My36SpokesTravelRoute,
+  My36SpokesIndexRoute: My36SpokesIndexRoute,
+}
+
+const My36SpokesRouteRouteWithChildren = My36SpokesRouteRoute._addFileChildren(
+  My36SpokesRouteRouteChildren,
+)
+
+interface ShopRouteRouteChildren {
+  ShopCategoryRoute: typeof ShopCategoryRoute
+  ShopIndexRoute: typeof ShopIndexRoute
+}
+
+const ShopRouteRouteChildren: ShopRouteRouteChildren = {
+  ShopCategoryRoute: ShopCategoryRoute,
+  ShopIndexRoute: ShopIndexRoute,
+}
+
+const ShopRouteRouteWithChildren = ShopRouteRoute._addFileChildren(
+  ShopRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  CommunityRoute: CommunityRoute,
-  GarageRoute: GarageRoute,
+  My36SpokesRouteRoute: My36SpokesRouteRouteWithChildren,
+  ShopRouteRoute: ShopRouteRouteWithChildren,
   JoinRoute: JoinRoute,
   LoginRoute: LoginRoute,
-  My36SpokesRoute: My36SpokesRoute,
-  RidesRoute: RidesRoute,
-  ShopRoute: ShopRoute,
-  StoriesRoute: StoriesRoute,
-  TravelRoute: TravelRoute,
+  ProfileRoute: ProfileRoute,
+  CommunityGroupsRoute: CommunityGroupsRoute,
+  CommunityRidersRoute: CommunityRidersRoute,
+  GarageBikeRoute: GarageBikeRoute,
+  ProductSlugRoute: ProductSlugRoute,
+  RidesSlugRoute: RidesSlugRoute,
+  StoriesSlugRoute: StoriesSlugRoute,
+  TravelDestinationRoute: TravelDestinationRoute,
+  TravelDestinationsRoute: TravelDestinationsRoute,
+  CommunityIndexRoute: CommunityIndexRoute,
+  GarageIndexRoute: GarageIndexRoute,
+  RidesIndexRoute: RidesIndexRoute,
+  StoriesIndexRoute: StoriesIndexRoute,
+  TravelIndexRoute: TravelIndexRoute,
+  TravelTripsSlugRoute: TravelTripsSlugRoute,
+  TravelTripsIndexRoute: TravelTripsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

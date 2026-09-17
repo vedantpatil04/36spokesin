@@ -1,114 +1,21 @@
 /**
- * Plan Your Journey: Phase 1 sample data.
+ * Plan Your Journey: sample data.
  *
- * The planner UI is built against the TravelPlan contract below. In Phase 1 a
- * deterministic mock generator (src/lib/journey-planner.ts) produces plans from
- * these hand-authored routes. A future routing / weather / stays backend should
- * return the same TravelPlan shape so the UI does not need to change.
+ * Hand-authored routes, climate and pace assumptions consumed by the mock
+ * generator in src/lib/mock-travel-plan.ts. Types live in src/types/journey-planner.ts.
  *
  * Distances, stays, prices and weather are approximate sample values.
  */
 
-/* ---------------------------------- Types ---------------------------------- */
-
-export type TripStyle = "Adventure" | "Scenic" | "Relaxed" | "Fast-paced" | "Weekend";
-
-export type ClimateZone =
-  "konkan-coast" | "western-ghats" | "deccan-plateau" | "himalaya-mid" | "himalaya-high";
-
-export type Terrain = "plains" | "ghats" | "coast" | "high-altitude";
-
-export type Season = "winter" | "summer" | "monsoon" | "post-monsoon";
-
-export type StayKind = "Homestay" | "Hotel" | "Guesthouse" | "Camp" | "Beach hut";
-
-export type Stay = {
-  name: string;
-  kind: StayKind;
-  pricePerNight: number;
-};
-
-export type RouteStop = {
-  name: string;
-  region: string;
-  kmFromPrevious: number;
-  climate: ClimateZone;
-  elevationM?: number;
-  fuel?: boolean;
-  /** Present when riders can realistically stop overnight here. */
-  stay?: Stay;
-  /** Places worth stopping for on the way into, or around, this stop. */
-  highlights: string[];
-};
-
-export type JourneyRoute = {
-  id: string;
-  from: string;
-  to: string;
-  via: string;
-  terrain: Terrain;
-  /** Shown when the chosen pace is too quick for the route (e.g. altitude). */
-  advisory?: string;
-  stops: RouteStop[];
-};
-
-export type WeatherOutlook = {
-  summary: string;
-  minC: number;
-  maxC: number;
-  note?: string;
-};
-
-export type TravelPlanRequest = {
-  routeId: string;
-  bikeId: string;
-  style: TripStyle;
-  /** YYYY-MM-DD */
-  startDate: string;
-  /** YYYY-MM-DD */
-  endDate: string;
-};
-
-export type TravelPlanNotice = {
-  tone: "info" | "warning";
-  message: string;
-};
-
-export type TravelPlanDay = {
-  day: number;
-  /** YYYY-MM-DD */
-  date: string;
-  from: string;
-  to: string;
-  distanceKm: number;
-  ridingMinutes: number;
-  elevationM?: number;
-  stay: Stay | null;
-  places: string[];
-  weather: WeatherOutlook;
-  fuel: { stop: string; note?: string };
-  cost: { fuel: number; stay: number; food: number; total: number };
-};
-
-export type TravelPlan = {
-  request: TravelPlanRequest;
-  from: string;
-  to: string;
-  via: string;
-  bikeName: string;
-  style: TripStyle;
-  styleTip: string;
-  /** Overnight points in order, starting point first. */
-  overnights: string[];
-  totalKm: number;
-  totalCost: number;
-  /** Approximate distance the chosen bike covers on one tank on this terrain. */
-  tankRangeKm: number;
-  days: TravelPlanDay[];
-  notices: TravelPlanNotice[];
-  /** Phase 1 plans are generated from sample data only. */
-  source: "sample";
-};
+import type {
+  ClimateZone,
+  JourneyRoute,
+  Season,
+  Stay,
+  Terrain,
+  TripStyle,
+  WeatherOutlook,
+} from "@/types/journey-planner";
 
 /* ------------------------------- Trip styles ------------------------------- */
 

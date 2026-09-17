@@ -4,8 +4,9 @@
  * ./mock-travel-plan.ts and is loaded on demand when a plan is requested.
  */
 
-import { bikes } from "@/data/content";
-import { journeyRoutes, type JourneyRoute, type TravelPlanRequest } from "@/data/journey-planner";
+import { bikes } from "@/data/bikes";
+import { journeyRoutes } from "@/data/journey-planner";
+import type { JourneyRoute, TravelPlanRequest } from "@/types";
 import { daysBetween, parseISODate } from "@/lib/dates";
 
 export type PlanRequestError = {

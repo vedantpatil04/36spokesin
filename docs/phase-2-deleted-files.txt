@@ -1,0 +1,15 @@
+src/assets/brand-logo.jpg
+src/components/cards.tsx
+src/components/site/Footer.tsx
+src/components/site/MobileTabBar.tsx
+src/components/site/Navbar.tsx
+src/components/site/PageShell.tsx
+src/components/ui-kit.tsx
+src/data/content.ts
+src/routes/community.tsx
+src/routes/garage.tsx
+src/routes/my-36-spokes.tsx
+src/routes/rides.tsx
+src/routes/shop.tsx
+src/routes/stories.tsx
+src/routes/travel.tsx

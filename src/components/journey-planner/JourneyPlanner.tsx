@@ -1,29 +1,22 @@
 import { lazy, Suspense, useEffect, useId, useRef, useState, type FormEvent } from "react";
 import { LoaderCircle } from "lucide-react";
 import { Button } from "@/components/ui-kit";
-import { bikes } from "@/data/content";
-import {
-  journeyStartingPoints,
-  tripStyles,
-  type TravelPlan,
-  type TravelPlanRequest,
-  type TripStyle,
-} from "@/data/journey-planner";
+import { bikes } from "@/data/bikes";
+import { journeyStartingPoints, tripStyles } from "@/data/journey-planner";
 import { routesFrom, validatePlanRequest, type PlanRequestError } from "@/lib/journey-planner";
+import { requestTravelPlan } from "@/services/journey-planner";
+import type { TravelPlan, TravelPlanRequest, TripStyle } from "@/types";
 import { addDays, toISODate } from "@/lib/dates";
 import { cn } from "@/lib/utils";
 import { JourneyPlannerEmpty } from "./JourneyPlannerEmpty";
 
-// The plan view and generator are only needed after "Generate my plan", so they
-// load on demand instead of shipping with the homepage.
+// The plan view is only needed after "Generate my plan", so it loads on demand
+// instead of shipping with the homepage. The planning service lazy-loads its
+// generator the same way.
 const loadResult = () => import("./JourneyPlannerResult");
-const loadGenerator = () => import("@/lib/mock-travel-plan");
 const JourneyPlannerResult = lazy(() =>
   loadResult().then((module) => ({ default: module.JourneyPlannerResult })),
 );
-
-/** Short pause so the loading state exists in the UI before a real planner service does. */
-const MOCK_LATENCY_MS = 600;
 
 const labelClass = "text-xs uppercase tracking-[0.18em] text-muted-foreground";
 const controlClass =
@@ -130,11 +123,10 @@ export function JourneyPlanner() {
     setIsGenerating(true);
     setLoadError(false);
 
-    const pause = new Promise((resolve) => window.setTimeout(resolve, MOCK_LATENCY_MS));
-    Promise.all([loadGenerator(), loadResult(), pause])
-      .then(([generator]) => {
+    Promise.all([requestTravelPlan(submitted), loadResult()])
+      .then(([nextPlan]) => {
         if (requestNumber !== requestRef.current) return;
-        setPlan(generator.generateMockTravelPlan(submitted));
+        setPlan(nextPlan);
         setGeneration((count) => count + 1);
       })
       .catch(() => {
