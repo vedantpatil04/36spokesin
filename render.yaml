@@ -1,0 +1,114 @@
+# Render Blueprint — 36 Spokes API
+# https://render.com/docs/blueprint-spec
+#
+# Deploy: connect the repository to Render and point it at this file.
+# Render will create the Web Service described below.
+# The PostgreSQL database must be created separately in the Render dashboard;
+# copy its "Internal Database URL" into the DATABASE_URL secret below.
+
+services:
+  - type: web
+    name: 36spokes-api
+    runtime: node
+    region: singapore        # Change to the region closest to your users.
+    plan: free               # Upgrade to a paid plan before going to production.
+    rootDir: backend
+
+    buildCommand: npm ci && npm run build
+    preDeployCommand: npm run db:deploy
+    startCommand: npm run start:prod
+
+    healthCheckPath: /api/v1/health/live
+
+    envVars:
+      # ── Runtime ──────────────────────────────────────────────────────────
+      - key: NODE_ENV
+        value: production
+
+      # PORT is injected automatically by Render — do not set it here.
+
+      # Public origin of this API (no trailing slash). Used in Swagger UI.
+      # Replace with your actual Render URL or custom domain once known.
+      - key: API_URL
+        sync: false          # Set this value in the Render dashboard.
+
+      # Public origin of the Vercel frontend (no trailing slash).
+      - key: WEB_URL
+        sync: false
+
+      # Comma-separated browser origins allowed to call the API.
+      # Must include your Vercel deployment URL (and any preview URLs you use).
+      # Example: https://36spokes.vercel.app,https://www.36spokes.in
+      - key: CORS_ORIGINS
+        sync: false
+
+      # Set to 1: Render places one load balancer in front of the service.
+      - key: TRUST_PROXY
+        value: "1"
+
+      # ── Database ─────────────────────────────────────────────────────────
+      # Paste the "Internal Database URL" from your Render PostgreSQL instance.
+      - key: DATABASE_URL
+        sync: false
+
+      # ── Authentication ────────────────────────────────────────────────────
+      # Generate each with:
+      #   node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"
+      # They must be different values, each at least 32 characters.
+      - key: JWT_SECRET
+        sync: false
+
+      - key: JWT_REFRESH_SECRET
+        sync: false
+
+      - key: JWT_ACCESS_TTL_SECONDS
+        value: "900"
+
+      - key: REFRESH_TOKEN_TTL_DAYS
+        value: "30"
+
+      # Cross-origin cookie settings (Vercel ↔ Render on different domains).
+      # Use none+true until you add a shared custom domain (e.g. api.36spokes.in).
+      # Once on a shared domain, switch to lax and optionally set AUTH_COOKIE_DOMAIN.
+      - key: AUTH_COOKIE_SAMESITE
+        value: none
+
+      - key: AUTH_COOKIE_SECURE
+        value: "true"
+
+      # AUTH_COOKIE_DOMAIN — leave unset for *.vercel.app / *.onrender.com.
+      # Set to .yourdomain.in when both services share a custom parent domain.
+
+      # ── Rate limiting ─────────────────────────────────────────────────────
+      - key: RATE_LIMIT_ENABLED
+        value: "true"
+
+      - key: RATE_LIMIT_TTL_SECONDS
+        value: "60"
+
+      - key: RATE_LIMIT_MAX
+        value: "120"
+
+      - key: RATE_LIMIT_AUTH_MAX
+        value: "10"
+
+      # ── Logging / docs ────────────────────────────────────────────────────
+      - key: LOG_LEVEL
+        value: info
+
+      - key: SWAGGER_ENABLED
+        value: "false"       # Enable temporarily for debugging if needed.
+
+      # ── Cloudflare R2 (optional) ──────────────────────────────────────────
+      # Leave ALL of these unset to run without media storage.
+      # Set ALL of them (except R2_ENDPOINT, which is derived) to enable uploads.
+      # - key: R2_ACCOUNT_ID
+      #   sync: false
+      # - key: R2_ACCESS_KEY_ID
+      #   sync: false
+      # - key: R2_SECRET_ACCESS_KEY
+      #   sync: false
+      # - key: R2_BUCKET_NAME
+      #   sync: false
+      # - key: R2_PUBLIC_BASE_URL
+      #   sync: false
