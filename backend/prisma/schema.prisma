@@ -1,0 +1,148 @@
+// 36 Spokes — database schema (Phase 3 foundation)
+//
+// Workflow: edit this file → `npm run db:migrate -- --name <change>` → commit the
+// generated folder in prisma/migrations. Never edit the database by hand.
+//
+// Conventions
+// - Tables and columns are snake_case (@@map / @map); Prisma models stay PascalCase.
+// - Primary keys are UUIDv7: time-ordered, so B-tree inserts stay local as tables grow.
+// - Timestamps are timestamptz.
+// - Media binaries live in Cloudflare R2. Postgres stores metadata only.
+
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  moduleFormat        = "esm"
+  importFileExtension = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// Access level. Add staff roles (STAFF, CONTENT_MANAGER, OPERATIONS, …) here;
+/// authorization reads roles only through @Roles() and RolesGuard.
+enum UserRole {
+  RIDER
+  ADMIN
+
+  @@map("user_role")
+}
+
+/// What an uploaded asset is for. Drives the storage prefix and who may upload it.
+enum MediaCategory {
+  RIDER
+  BIKE
+  PRODUCT
+  DESTINATION
+  TRIP
+  EVENT
+  STORY
+  GROUP
+  GARAGE_SERVICE
+  SITE
+
+  @@map("media_category")
+}
+
+enum MediaStatus {
+  /// Upload authorised; the object may not exist in storage yet.
+  PENDING
+  /// Object verified in storage; safe to reference.
+  READY
+
+  @@map("media_status")
+}
+
+model User {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  /// Stored lower-cased and trimmed.
+  email         String   @unique
+  passwordHash  String   @map("password_hash")
+  firstName     String   @map("first_name")
+  lastName      String?  @map("last_name")
+  phone         String?
+  role          UserRole @default(RIDER)
+  isActive      Boolean  @default(true) @map("is_active")
+  emailVerified Boolean  @default(false) @map("email_verified")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  riderProfile RiderProfile?
+  sessions     AuthSession[]
+  mediaAssets  MediaAsset[]
+
+  @@map("users")
+}
+
+/// One row per signed-in device. The refresh token rotates on every use; only
+/// HMAC digests are stored, never the token itself.
+model AuthSession {
+  id                String    @id @default(uuid(7)) @db.Uuid
+  userId            String    @map("user_id") @db.Uuid
+  tokenHash         String    @unique @map("token_hash")
+  /// Digest of the token replaced by the last rotation, kept for reuse detection.
+  previousTokenHash String?   @map("previous_token_hash")
+  rotatedAt         DateTime? @map("rotated_at") @db.Timestamptz(3)
+  expiresAt         DateTime  @map("expires_at") @db.Timestamptz(3)
+  revokedAt         DateTime? @map("revoked_at") @db.Timestamptz(3)
+  userAgent         String?   @map("user_agent")
+  ipAddress         String?   @map("ip_address")
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt         DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([previousTokenHash])
+  @@map("auth_sessions")
+}
+
+/// Rider-facing identity. Riding identity, stats and achievements extend this
+/// model in later phases.
+model RiderProfile {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  userId        String   @unique @map("user_id") @db.Uuid
+  displayName   String?  @map("display_name")
+  bio           String?
+  city          String?
+  avatarMediaId String?  @map("avatar_media_id") @db.Uuid
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user   User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  avatar MediaAsset? @relation("RiderAvatar", fields: [avatarMediaId], references: [id], onDelete: SetNull)
+
+  @@index([avatarMediaId])
+  @@map("rider_profiles")
+}
+
+/// Metadata for a file stored in object storage. Domain models reference assets
+/// through their own foreign keys or join tables (e.g. RiderProfile.avatar, and
+/// later ProductImage, TripImage), so this model never needs to know about them.
+model MediaAsset {
+  id               String        @id @default(uuid(7)) @db.Uuid
+  /// Server-generated object key. Never derived from the client's file name.
+  storageKey       String        @unique @map("storage_key")
+  category         MediaCategory
+  status           MediaStatus   @default(PENDING)
+  /// Sanitised display name only; never used as a storage path.
+  originalFileName String        @map("original_file_name")
+  mimeType         String        @map("mime_type")
+  /// Bytes. Declared at upload start, replaced by the stored size on completion.
+  fileSize         Int           @map("file_size")
+  width            Int?
+  height           Int?
+  altText          String?       @map("alt_text")
+  /// Null once the uploading account is deleted; the asset outlives it.
+  ownerId          String?       @map("owner_id") @db.Uuid
+  uploadedAt       DateTime?     @map("uploaded_at") @db.Timestamptz(3)
+  createdAt        DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  owner        User?          @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+  riderAvatars RiderProfile[] @relation("RiderAvatar")
+
+  @@index([ownerId, status, createdAt(sort: Desc), id(sort: Desc)])
+  @@map("media_assets")
+}

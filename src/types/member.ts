@@ -19,11 +19,15 @@ export type GarageBike = OwnedBike & { bike: Bike };
 /** A booking joined with the trip and departure it refers to. */
 export type BookingSummary = Booking & { trip: Trip; departure: Departure };
 
-/** What "My 36 Spokes" needs about the signed-in rider. Assembled by the member service. */
+/**
+ * What "My 36 Spokes" needs about the signed-in rider, aside from identity
+ * (name, email), which comes from the authenticated user, not this overview.
+ * Assembled by the member service.
+ */
 export type MemberOverview = {
   profile: RiderProfile;
-  greeting: string;
-  primaryBike: GarageBike;
+  /** Null until Garage has an API — no bike is actually on the rider's account yet. */
+  primaryBike: GarageBike | null;
   bikes: GarageBike[];
   maintenance: MaintenanceRecord[];
   setupChecklist: SetupCheckItem[];

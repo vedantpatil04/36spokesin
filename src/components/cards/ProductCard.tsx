@@ -1,7 +1,9 @@
 import { Link } from "@tanstack/react-router";
-import { Badge, Media } from "@/components/ui-kit";
+import { ShoppingBag } from "lucide-react";
+import { Badge, Button, Media } from "@/components/ui-kit";
 import { formatINR } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { useCartActions } from "@/state/cart";
 import { useProductFits } from "@/state/garage";
 import type { ID, Product } from "@/types";
 import { cardBase, stretchedCardFocus, stretchedControl } from "./card-styles";
@@ -12,6 +14,7 @@ import { cardBase, stretchedCardFocus, stretchedControl } from "./card-styles";
  */
 export function ProductCard({ product, bikeId }: { product: Product; bikeId?: ID }) {
   const fits = useProductFits(product, bikeId);
+  const cart = useCartActions();
 
   return (
     <article className={cn(cardBase, stretchedCardFocus)}>
@@ -50,6 +53,16 @@ export function ProductCard({ product, bikeId }: { product: Product; bikeId?: ID
             </Badge>
           ) : null}
         </div>
+        <Button
+          size="sm"
+          variant="outline"
+          className="relative z-10 mt-2 w-full"
+          disabled={!product.inStock}
+          onClick={() => cart.add(product.id)}
+        >
+          <ShoppingBag className="size-3.5" aria-hidden />
+          {product.inStock ? "Add to cart" : "Back in 2 weeks"}
+        </Button>
       </div>
     </article>
   );

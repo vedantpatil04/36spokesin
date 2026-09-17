@@ -1,4 +1,5 @@
 import { createFileRoute, getRouteApi } from "@tanstack/react-router";
+import { Wrench } from "lucide-react";
 import { RideCard, TripCard } from "@/components/cards";
 import { SetupChecklist } from "@/components/garage/SetupChecklist";
 import { GarageBikeCard } from "@/components/member/GarageBikeCard";
@@ -35,7 +36,15 @@ function Dashboard() {
   return (
     <div className="space-y-4">
       <div className="grid gap-4 lg:grid-cols-[1.2fr_1fr]">
-        <GarageBikeCard garageBike={primaryBike} />
+        {primaryBike ? (
+          <GarageBikeCard garageBike={primaryBike} />
+        ) : (
+          <EmptyState
+            icon={Wrench}
+            title="No motorcycle added yet"
+            description="Add your bike to see gear matched to it and its service status."
+          />
+        )}
 
         <div className="grid gap-4">
           <article className="rounded-sm border border-border bg-card p-5">
@@ -75,7 +84,13 @@ function Dashboard() {
 
       <div className="grid gap-4 lg:grid-cols-2">
         <MemberPanel title="Setup readiness">
-          <SetupChecklist items={member.setupChecklist} variant="compact" />
+          {member.setupChecklist.length > 0 ? (
+            <SetupChecklist items={member.setupChecklist} variant="compact" />
+          ) : (
+            <p className="mt-4 text-sm text-muted-foreground">
+              Your trip-readiness checklist will appear here once it's connected to your gear.
+            </p>
+          )}
         </MemberPanel>
 
         <MemberPanel title="Recent activity">
@@ -95,7 +110,10 @@ function Dashboard() {
 
       <section>
         <h2 className="mb-4 text-lg">Recommended gear for your bike</h2>
-        <ProductGrid products={recommended} bikeId={primaryBike.bikeId} />
+        <ProductGrid
+          products={recommended}
+          {...(primaryBike ? { bikeId: primaryBike.bikeId } : {})}
+        />
       </section>
 
       <section>

@@ -1,8 +1,9 @@
-import { Link, useLocation } from "@tanstack/react-router";
+import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { Menu, Search, ShoppingBag, User, X } from "lucide-react";
 import { useEffect } from "react";
-import { BrandCrest, BrandWordmark, ButtonLink } from "@/components/ui-kit";
+import { Button, BrandCrest, BrandWordmark, ButtonLink } from "@/components/ui-kit";
 import { useDisclosure } from "@/hooks/use-disclosure";
+import { useAuthActions, useAuthStatus, useAuthUser } from "@/state/auth";
 import { useCartCount } from "@/state/cart";
 import { mobileMenuExtras, primaryNav } from "./nav-config";
 
@@ -12,12 +13,21 @@ export function Navbar() {
   const menu = useDisclosure();
   const cartCount = useCartCount();
   const pathname = useLocation({ select: (location) => location.pathname });
+  const status = useAuthStatus();
+  const user = useAuthUser();
+  const { logout } = useAuthActions();
+  const navigate = useNavigate();
+  const isAuthenticated = status === "authenticated" && user !== null;
 
   // Close the mobile menu whenever the route changes (including back/forward).
   const closeMenu = menu.close;
   useEffect(() => {
     closeMenu();
   }, [pathname, closeMenu]);
+
+  const handleLogout = () => {
+    logout().then(() => navigate({ to: "/", replace: true }));
+  };
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-md">
@@ -77,12 +87,25 @@ export function Navbar() {
           >
             <User className="size-[1.15rem]" aria-hidden />
           </Link>
-          <ButtonLink to="/login" variant="outline" size="sm" className="hidden lg:inline-flex">
-            Login
-          </ButtonLink>
-          <ButtonLink to="/join" size="sm" className="hidden lg:inline-flex">
-            Join
-          </ButtonLink>
+          {isAuthenticated ? (
+            <div className="hidden items-center gap-3 lg:flex">
+              <span className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+                Hi, {user.firstName}
+              </span>
+              <Button variant="outline" size="sm" onClick={handleLogout}>
+                Log out
+              </Button>
+            </div>
+          ) : (
+            <>
+              <ButtonLink to="/login" variant="outline" size="sm" className="hidden lg:inline-flex">
+                Login
+              </ButtonLink>
+              <ButtonLink to="/join" size="sm" className="hidden lg:inline-flex">
+                Join
+              </ButtonLink>
+            </>
+          )}
 
           <button
             type="button"
@@ -120,12 +143,27 @@ export function Navbar() {
               </li>
             ))}
             <li className="flex gap-3 py-3">
-              <ButtonLink to="/login" variant="outline" className="flex-1" onClick={menu.close}>
-                Login
-              </ButtonLink>
-              <ButtonLink to="/join" className="flex-1" onClick={menu.close}>
-                Join
-              </ButtonLink>
+              {isAuthenticated ? (
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => {
+                    menu.close();
+                    handleLogout();
+                  }}
+                >
+                  Log out
+                </Button>
+              ) : (
+                <>
+                  <ButtonLink to="/login" variant="outline" className="flex-1" onClick={menu.close}>
+                    Login
+                  </ButtonLink>
+                  <ButtonLink to="/join" className="flex-1" onClick={menu.close}>
+                    Join
+                  </ButtonLink>
+                </>
+              )}
             </li>
           </ul>
         </nav>

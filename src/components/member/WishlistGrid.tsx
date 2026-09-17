@@ -5,7 +5,7 @@ import { ProductGrid } from "@/components/shop/ProductGrid";
 import { useWishlistItems } from "@/state/wishlist";
 import type { ID, Product } from "@/types";
 
-export function WishlistGrid({ products, bikeId }: { products: Product[]; bikeId: ID }) {
+export function WishlistGrid({ products, bikeId }: { products: Product[]; bikeId?: ID }) {
   const items = useWishlistItems();
   const saved = items.flatMap((item) => {
     const product = products.find((entry) => entry.id === item.productId);
@@ -27,5 +27,11 @@ export function WishlistGrid({ products, bikeId }: { products: Product[]; bikeId
       />
     );
   }
-  return <ProductGrid products={saved} bikeId={bikeId} className="mt-4 lg:grid-cols-3" />;
+  return (
+    <ProductGrid
+      products={saved}
+      {...(bikeId !== undefined ? { bikeId } : {})}
+      className="mt-4 lg:grid-cols-3"
+    />
+  );
 }

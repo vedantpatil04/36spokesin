@@ -1,0 +1,7 @@
+# Generated Prisma Client (run `npm run db:generate`)
+/src/generated/
+
+# Build and test output
+/dist
+/coverage
+*.tsbuildinfo

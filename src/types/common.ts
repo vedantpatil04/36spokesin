@@ -2,7 +2,7 @@
  * Primitive aliases shared by every model.
  *
  * These are plain strings/numbers at runtime. The aliases document intent so the
- * Phase 3 database schema (and any generated Supabase types) can be mapped 1:1.
+ * API's database schema and response types can be mapped 1:1.
  */
 
 /** Stable identifier. Mock data uses readable ids; the backend will use UUIDs. */

@@ -93,7 +93,7 @@ export function CartSummary({ products }: { products: Product[] }) {
         <span className="font-display text-xl">{formatINR(subtotal)}</span>
       </div>
       <p className="mt-2 text-xs text-muted-foreground">
-        Checkout opens when accounts go live. Your cart is kept for this visit only.
+        Checkout isn't connected yet. Your cart is kept for this visit only.
       </p>
     </div>
   );

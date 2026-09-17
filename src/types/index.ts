@@ -1,8 +1,8 @@
 /**
  * Shared frontend models. Import from "@/types" in UI code.
  *
- * These describe what the UI consumes, not database tables. Phase 3 maps
- * Supabase rows onto these shapes inside src/services so components never change.
+ * These describe what the UI consumes, not database tables. Services map API
+ * responses onto these shapes inside src/services so components never change.
  */
 
 export type * from "./bike";

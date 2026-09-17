@@ -33,11 +33,25 @@ function MemberGaragePage() {
       />
       <div className="space-y-4">
         <div className="grid gap-4 lg:grid-cols-2">
-          {bikes.map((garageBike) => (
-            <GarageBikeCard key={garageBike.id} garageBike={garageBike} linkToDetails />
-          ))}
+          {bikes.length > 0 ? (
+            bikes.map((garageBike) => (
+              <GarageBikeCard key={garageBike.id} garageBike={garageBike} linkToDetails />
+            ))
+          ) : (
+            <EmptyState
+              icon={Wrench}
+              title="No motorcycles added yet"
+              description="Your registered bikes will appear here."
+            />
+          )}
           <MemberPanel title="Setup readiness" headingLevel="h3">
-            <SetupChecklist items={setupChecklist} variant="compact" />
+            {setupChecklist.length > 0 ? (
+              <SetupChecklist items={setupChecklist} variant="compact" />
+            ) : (
+              <p className="mt-4 text-sm text-muted-foreground">
+                Your trip-readiness checklist will appear here once it's connected to your gear.
+              </p>
+            )}
           </MemberPanel>
         </div>
 

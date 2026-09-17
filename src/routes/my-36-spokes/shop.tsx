@@ -39,7 +39,10 @@ function MemberShopPage() {
         </MemberPanel>
 
         <MemberPanel title="Wishlist" headingLevel="h3">
-          <WishlistGrid products={products} bikeId={primaryBike.bikeId} />
+          <WishlistGrid
+            products={products}
+            {...(primaryBike ? { bikeId: primaryBike.bikeId } : {})}
+          />
         </MemberPanel>
 
         <MemberPanel title="Orders" headingLevel="h3">

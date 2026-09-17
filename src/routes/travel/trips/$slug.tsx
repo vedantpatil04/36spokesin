@@ -81,7 +81,8 @@ function TripPage() {
               <DepartureList departures={trip.departures} />
             </div>
             <p className="mt-3 text-xs text-muted-foreground">
-              Booking opens when rider accounts go live. Reserving asks you to create a profile.
+              Reserving a seat takes you to create your rider profile. Trip booking and payment
+              aren't connected yet.
             </p>
           </div>
         </div>
