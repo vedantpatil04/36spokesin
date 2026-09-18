@@ -23,8 +23,8 @@ export const riders: Rider[] = [
   },
   {
     id: "u-sahil",
-    slug: "sammets",
-    name: "sammets",
+    slug: "Maitrayi",
+    name: "Maitrayi",
     bike: "BMW G 310 GS",
     bikeId: "bmw-g310gs",
     location: "Pune",
@@ -33,8 +33,8 @@ export const riders: Rider[] = [
   },
   {
     id: "u-tenzin",
-    slug: "maitrayi-s",
-    name: "Maitrayi S.",
+    slug: "Amol Drago",
+    name: "Amol Drago",
     bike: "Scrambler 400 X",
     bikeId: "triumph-scrambler-400x",
     location: "Leh",

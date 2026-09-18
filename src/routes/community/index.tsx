@@ -62,7 +62,7 @@ function CommunityPage() {
       <Section>
         <SectionHeader
           eyebrow="Riders"
-          title="People on the road"
+          title="People  "
           action={
             <ButtonLink to="/community/riders" variant="outline">
               All riders
