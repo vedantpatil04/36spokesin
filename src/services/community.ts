@@ -35,7 +35,7 @@ export async function listFounders(): Promise<Founder[]> {
     toFounder({
       id: "01a0c331-8e80-7abf-b106-44a4292a1309",
       name: "Abhishek Sharma",
-      role: "Founder",
+      role: "Founding",
       shortBio: null,
       story: null,
       quote: null,
@@ -47,7 +47,7 @@ export async function listFounders(): Promise<Founder[]> {
     toFounder({
       id: "01a0c331-8e81-7e5e-a32d-c1df17f3e420",
       name: "Simran Khaturia",
-      role: "Founder",
+      role: "Founding",
       shortBio: null,
       story: null,
       quote: null,

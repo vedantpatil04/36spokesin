@@ -43,7 +43,7 @@ function CommunityPage() {
         <Section id="founders" className="scroll-mt-16 pt-12 sm:pt-14 lg:pt-16 pb-16 lg:pb-24">
           <div className="mb-8 lg:mb-10">
             <p className="font-display text-xs uppercase tracking-[0.22em] text-primary mb-1.5">
-              Founders
+              Founding
             </p>
             <h2 className="font-display text-2xl uppercase tracking-[0.06em] text-foreground sm:text-3xl lg:text-4xl">
               The People Who Started It

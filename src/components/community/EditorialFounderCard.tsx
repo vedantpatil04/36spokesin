@@ -57,7 +57,7 @@ export function EditorialFounderCard({
           {founder.name}
         </h3>
         <p className="mt-0.5 font-display text-xs uppercase tracking-[0.2em] text-primary">
-          {founder.role || "Founder"}
+          {founder.role || "Founding"}
         </p>
 
         {founder.shortBio ? (

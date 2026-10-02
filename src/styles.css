@@ -157,6 +157,16 @@
   color: var(--color-primary);
 }
 
+/* Instagram embed responsiveness & mobile touch scrolling fix */
+.instagram-media,
+.instagram-media-rendered,
+iframe.instagram-media {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
 @utility hairline {
   border-bottom: 1px solid var(--color-border);
 }

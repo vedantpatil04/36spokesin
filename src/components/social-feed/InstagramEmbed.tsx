@@ -107,10 +107,21 @@ export function InstagramEmbed({ postUrl, mediaType, caption, className }: Insta
       {/* Official Instagram Embed Markup (hidden visually while loading to prevent unstyled flash) */}
       <div
         className={cn(
-          "w-full transition-opacity duration-500",
+          "relative w-full transition-opacity duration-500",
           isRendered && !hasError ? "block opacity-100" : "hidden opacity-0",
         )}
       >
+        {/* Mobile touch & scroll bridge: allows native page scrolling (pan-y) and carousel swipe gestures without iframe touch hijacking */}
+        <a
+          href={postUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="absolute inset-0 z-10 block cursor-pointer lg:hidden"
+          style={{ touchAction: "pan-y" }}
+          aria-label={caption || "Open Instagram post in new tab"}
+          title="Open post on Instagram"
+        />
+
         <blockquote
           className="instagram-media"
           data-instgrm-captioned
@@ -123,7 +134,7 @@ export function InstagramEmbed({ postUrl, mediaType, caption, className }: Insta
             boxShadow: "none",
             margin: "0 auto",
             maxWidth: "540px",
-            minWidth: "280px",
+            minWidth: "260px",
             padding: 0,
             width: "100%",
           }}

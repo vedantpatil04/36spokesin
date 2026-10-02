@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ArrowRight, Compass, Mail, MapPin, Shield, Users, Wrench } from "lucide-react";
-import { FounderCard } from "@/components/community/FounderCard";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { BrandCrest, ButtonLink, Section, SectionHeader } from "@/components/ui-kit";
 import { media } from "@/data/media";
@@ -138,18 +137,26 @@ function AboutPage() {
         </div>
       </Section>
 
-      {/* FOUNDERS SECTION */}
+      {/* FOUNDING SECTION — ONLY NAMES */}
       {founders.length > 0 ? (
-        <Section id="founders">
+        <Section id="founders" className="scroll-mt-16 lg:scroll-mt-20">
           <SectionHeader
-            eyebrow="Leadership"
+            eyebrow="Founding"
             title="The Founders"
             description="The people who started 36 Spokes, steering its vision and road culture."
           />
-          <ul className="mt-10 grid gap-6 md:grid-cols-2 lg:gap-10">
+          <ul className="mt-8 grid gap-4 sm:grid-cols-2 max-w-2xl">
             {founders.map((founder) => (
-              <li key={founder.id}>
-                <FounderCard founder={founder} />
+              <li
+                key={founder.id}
+                className="flex flex-col justify-center rounded-sm border border-border bg-card p-6 shadow-card transition-colors hover:border-primary/40"
+              >
+                <h3 className="font-display text-2xl uppercase tracking-wide text-foreground">
+                  {founder.name}
+                </h3>
+                <p className="mt-1 font-display text-xs uppercase tracking-[0.2em] text-primary">
+                  {founder.role || "Founding"}
+                </p>
               </li>
             ))}
           </ul>

@@ -80,18 +80,19 @@ export function SocialFeed({
           setApi={setApi}
           opts={{
             align: "start",
+            containScroll: "trimSnaps",
             breakpoints: {
               "(min-width: 1024px)": { loop: posts.length > 3 },
             },
             loop: posts.length > 1,
           }}
-          className="w-full"
+          className="w-full touch-pan-y"
         >
-          <CarouselContent className="-ml-3 md:-ml-4">
+          <CarouselContent className="-ml-3 md:-ml-4 touch-pan-y">
             {posts.map((post) => (
               <CarouselItem
                 key={post.id}
-                className="basis-[82%] sm:basis-1/2 lg:basis-1/3 pl-3 md:pl-4"
+                className="basis-[88%] sm:basis-1/2 lg:basis-1/3 pl-3 md:pl-4 touch-pan-y"
               >
                 <InstagramEmbed
                   postUrl={post.postUrl}
