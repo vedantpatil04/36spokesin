@@ -44,6 +44,46 @@ describe("validateEnv", () => {
     ).not.toThrow();
   });
 
+  it("validates MEDIA_PROVIDER switches between Cloudinary and R2", () => {
+    // Cloudinary requires cloud name, api key, api secret, but does NOT require R2 variables
+    expect(() =>
+      validateEnv({
+        ...base,
+        MEDIA_PROVIDER: "cloudinary",
+      }),
+    ).toThrow(/Cloudinary storage is partially configured/);
+
+    expect(() =>
+      validateEnv({
+        ...base,
+        MEDIA_PROVIDER: "cloudinary",
+        CLOUDINARY_CLOUD_NAME: "spokes",
+        CLOUDINARY_API_KEY: "key123",
+        CLOUDINARY_API_SECRET: "secret123",
+      }),
+    ).not.toThrow();
+
+    // R2 requires R2 variables, but does NOT require Cloudinary variables
+    expect(() =>
+      validateEnv({
+        ...base,
+        MEDIA_PROVIDER: "r2",
+      }),
+    ).toThrow(/Media storage is partially configured/);
+
+    expect(() =>
+      validateEnv({
+        ...base,
+        MEDIA_PROVIDER: "r2",
+        R2_ACCOUNT_ID: "acc",
+        R2_ACCESS_KEY_ID: "key",
+        R2_SECRET_ACCESS_KEY: "secret",
+        R2_BUCKET_NAME: "media",
+        R2_PUBLIC_BASE_URL: "https://media.36spokes.in",
+      }),
+    ).not.toThrow();
+  });
+
   it("refuses unsafe production settings", () => {
     const production = { ...base, NODE_ENV: "production" };
     expect(() => validateEnv({ ...production, CORS_ORIGINS: "https://36spokes.in,*" })).toThrow(

@@ -1,27 +1,37 @@
 import type { ComponentType } from "react";
-import { BedDouble, CloudSun, Fuel, IndianRupee, LoaderCircle, MapPin, Route } from "lucide-react";
+import { CloudSun, Fuel, ListChecks, LoaderCircle, MapPin, Route } from "lucide-react";
 
 type IconType = ComponentType<{ className?: string; "aria-hidden"?: boolean }>;
 
 const planContents: [IconType, string][] = [
-  [Route, "Kilometres and riding time"],
-  [BedDouble, "Where to stay"],
-  [MapPin, "Places to visit"],
-  [CloudSun, "Weather to expect"],
-  [Fuel, "Fuel stops for your bike"],
-  [IndianRupee, "Estimated cost"],
+  [Route, "The road route, its distance and riding time"],
+  [ListChecks, "Riding days with a start time"],
+  [MapPin, "Real towns, fuel and viewpoints on the way"],
+  [CloudSun, "The forecast along the route"],
+  [Fuel, "Fuel needed, when your mileage is known"],
 ];
 
-export function JourneyPlannerEmpty({ isGenerating }: { isGenerating: boolean }) {
+export function JourneyPlannerEmpty({ isPlanning }: { isPlanning: boolean }) {
   return (
     <div
-      aria-busy={isGenerating}
+      aria-busy={isPlanning}
       className="flex h-full flex-col rounded-sm border border-dashed border-border-strong bg-card/40 p-6 md:p-8"
     >
-      <h3 className="text-xl md:text-2xl">Your plan appears here</h3>
-      <p className="mt-2 max-w-md text-sm leading-relaxed text-muted-foreground">
-        Choose your route, dates and bike, then generate a plan. Each riding day covers:
-      </p>
+      <h3 className="text-xl md:text-2xl">
+        {isPlanning ? "Planning your journey" : "Your plan appears here"}
+      </h3>
+      {isPlanning ? (
+        <p className="mt-3 flex max-w-md items-start gap-2.5 text-sm leading-relaxed text-foreground">
+          <LoaderCircle className="mt-0.5 size-4 shrink-0 animate-spin text-primary" aria-hidden />
+          Looking up the road route, the forecast and places on the way, then laying out the days.
+          This can take up to a minute.
+        </p>
+      ) : (
+        <p className="mt-2 max-w-md text-sm leading-relaxed text-muted-foreground">
+          Enter where you start, where you're going, the date and how many are riding. The plan
+          covers:
+        </p>
+      )}
       <ul className="mt-6 grid gap-2.5 sm:grid-cols-2">
         {planContents.map(([Icon, label]) => (
           <li
@@ -33,12 +43,6 @@ export function JourneyPlannerEmpty({ isGenerating }: { isGenerating: boolean })
           </li>
         ))}
       </ul>
-      {isGenerating ? (
-        <p className="mt-6 flex items-center gap-2 text-sm text-foreground">
-          <LoaderCircle className="size-4 animate-spin text-primary" aria-hidden />
-          Planning your journey
-        </p>
-      ) : null}
     </div>
   );
 }

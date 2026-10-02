@@ -1,7 +1,9 @@
 import { Link } from "@tanstack/react-router";
-import { ShoppingBag } from "lucide-react";
+import { LoaderCircle, ShoppingBag } from "lucide-react";
 import { Badge, Button, Media } from "@/components/ui-kit";
-import { formatINR } from "@/lib/format";
+import { PriceTag } from "@/components/shop/PriceTag";
+import { useAccountAction } from "@/hooks/use-account-action";
+import { availabilityLabel } from "@/lib/availability";
 import { cn } from "@/lib/utils";
 import { useCartActions } from "@/state/cart";
 import { useProductFits } from "@/state/garage";
@@ -15,12 +17,13 @@ import { cardBase, stretchedCardFocus, stretchedControl } from "./card-styles";
 export function ProductCard({ product, bikeId }: { product: Product; bikeId?: ID }) {
   const fits = useProductFits(product, bikeId);
   const cart = useCartActions();
+  const action = useAccountAction();
 
   return (
     <article className={cn(cardBase, stretchedCardFocus)}>
       <Media
         asset={product.image}
-        alt={product.name}
+        alt={product.hasImage ? product.name : ""}
         ratio="1/1"
         imgClassName="group-hover:scale-[1.04]"
       />
@@ -33,18 +36,11 @@ export function ProductCard({ product, bikeId }: { product: Product; bikeId?: ID
             {product.name}
           </Link>
         </h3>
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <span aria-hidden>★</span>
-          <span>
-            <span className="sr-only">Rated </span>
-            {product.rating.toFixed(1)} ({product.reviews}
-            <span className="sr-only"> reviews</span>)
-          </span>
-          <span aria-hidden>·</span>
-          <span>{product.inStock ? "In stock" : "Back in 2 weeks"}</span>
-        </div>
+        <p className={cn("text-xs", product.inStock ? "text-muted-foreground" : "text-warning")}>
+          {availabilityLabel(product)}
+        </p>
         <div className="mt-auto flex items-center justify-between gap-3 pt-3">
-          <span className="font-display text-lg">{formatINR(product.price)}</span>
+          <PriceTag product={product} />
           {fits ? (
             <Badge tone="success">
               <span>
@@ -57,12 +53,21 @@ export function ProductCard({ product, bikeId }: { product: Product; bikeId?: ID
           size="sm"
           variant="outline"
           className="relative z-10 mt-2 w-full"
-          disabled={!product.inStock}
-          onClick={() => cart.add(product.id)}
+          disabled={!product.inStock || action.pending}
+          onClick={() => void action.run(() => cart.add(product.id))}
         >
-          <ShoppingBag className="size-3.5" aria-hidden />
-          {product.inStock ? "Add to cart" : "Back in 2 weeks"}
+          {action.pending ? (
+            <LoaderCircle className="size-3.5 animate-spin" aria-hidden />
+          ) : (
+            <ShoppingBag className="size-3.5" aria-hidden />
+          )}
+          {product.inStock ? "Add to cart" : "Out of stock"}
         </Button>
+        {action.error ? (
+          <p role="alert" className="relative z-10 text-xs text-destructive">
+            {action.error}
+          </p>
+        ) : null}
       </div>
     </article>
   );

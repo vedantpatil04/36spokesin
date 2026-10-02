@@ -3,6 +3,7 @@ import { formatINR } from "@/lib/format";
 import type { Order, OrderStatus } from "@/types";
 
 const statusLabel: Record<OrderStatus, string> = {
+  pending_payment: "Awaiting payment",
   placed: "Placed",
   packed: "Packed",
   shipped: "Shipped",

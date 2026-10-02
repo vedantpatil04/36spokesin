@@ -13,14 +13,14 @@ export function TripCard({ trip }: { trip: Trip }) {
     <article className={cardBase}>
       <Media
         asset={trip.image}
-        alt={trip.name}
+        alt={trip.hasImage ? trip.name : ""}
         ratio="16/10"
         imgClassName="group-hover:scale-[1.04]"
       >
         {departure ? (
           <span className="absolute left-4 top-4">
-            <Badge tone={departure.seatsLeft <= 5 ? "warning" : "neutral"}>
-              {departure.seatsLeft} seats left
+            <Badge tone={departure.status === "open" ? "neutral" : "warning"}>
+              {departure.status === "open" ? `${departure.seatsTotal} seats` : "Full"}
             </Badge>
           </span>
         ) : null}
@@ -36,14 +36,16 @@ export function TripCard({ trip }: { trip: Trip }) {
           className="mt-4"
           items={[
             { label: "Duration", value: `${trip.days} days` },
-            { label: "Distance", value: `${formatNumber(trip.distanceKm)} km` },
+            ...(trip.distanceKm !== null
+              ? [{ label: "Distance", value: `${formatNumber(trip.distanceKm)} km` }]
+              : []),
             { label: "Starts", value: trip.startLocation },
             { label: "Grade", value: trip.difficulty },
           ]}
         />
         <div className="mt-5 flex items-center justify-between border-t border-border pt-4">
           <span className="font-display text-lg">
-            {departure ? formatINR(departure.price) : null}
+            {departure?.price != null ? formatINR(departure.price) : null}
           </span>
           <Link
             to="/travel/trips/$slug"

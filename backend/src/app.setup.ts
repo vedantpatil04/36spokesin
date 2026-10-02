@@ -13,6 +13,19 @@ export const REQUEST_BODY_LIMIT = "100kb";
 export const API_PREFIX = "api";
 export const DOCS_PATH = "api/docs";
 
+export function isOriginAllowed(origin: string, allowedOrigins: Set<string>): boolean {
+  if (allowedOrigins.has(origin)) return true;
+  for (const allowed of allowedOrigins) {
+    if (allowed.startsWith("https://") && allowed.endsWith(".vercel.app")) {
+      const prefix = allowed.slice(0, -".vercel.app".length);
+      if (origin.startsWith(`${prefix}-`) && origin.endsWith(".vercel.app")) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 /**
  * HTTP-level configuration shared by the real server and the e2e tests, so tests
  * exercise the same prefix, versioning, CORS, cookies and body limits.
@@ -32,9 +45,9 @@ export function configureApp(app: NestExpressApplication): void {
   app.enableCors({
     // Requests without an Origin (curl, server-to-server, native apps) are not
     // subject to CORS. Browser origins must be listed explicitly.
-    origin: (origin, callback) => callback(null, !origin || allowedOrigins.has(origin)),
+    origin: (origin, callback) => callback(null, !origin || isOriginAllowed(origin, allowedOrigins)),
     credentials: true,
-    methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Authorization", "Content-Type", "X-Request-Id", "X-Client-Platform"],
     exposedHeaders: ["X-Request-Id"],
     maxAge: 600,

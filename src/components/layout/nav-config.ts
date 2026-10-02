@@ -1,4 +1,4 @@
-import { Compass, Home, Map, ShoppingBag, Wrench } from "lucide-react";
+import { Compass, Home, Map, ShoppingBag, Users, Wrench } from "lucide-react";
 
 /**
  * Every navigation list in one place. `as const` keeps `to` values literal so
@@ -6,39 +6,43 @@ import { Compass, Home, Map, ShoppingBag, Wrench } from "lucide-react";
  */
 
 export const primaryNav = [
-  { label: "Garage", to: "/garage" },
-  { label: "Travel", to: "/travel" },
-  { label: "Shop", to: "/shop" },
   { label: "Rides", to: "/rides" },
+  { label: "Plan", to: "/plan" },
+  { label: "Shop", to: "/shop" },
+  { label: "Garage", to: "/garage" },
   { label: "Community", to: "/community" },
+  { label: "About", to: "/about" },
 ] as const;
 
 /** Extra destinations shown only in the mobile menu. */
-export const mobileMenuExtras = [
-  { label: "Stories", to: "/stories" },
+export const mobileMenuExtras = [{ label: "Stories", to: "/stories" }] as const;
+
+/** The signed-in rider's account menu. Log out is rendered after these. */
+export const accountNav = [
+  { label: "My Profile", to: "/profile" },
   { label: "My 36 Spokes", to: "/my-36-spokes" },
 ] as const;
 
 export const mobileTabs = [
   { label: "Home", to: "/", icon: Home },
-  { label: "Travel", to: "/travel", icon: Map },
-  { label: "Shop", to: "/shop", icon: ShoppingBag },
   { label: "Rides", to: "/rides", icon: Compass },
+  { label: "Plan", to: "/plan", icon: Map },
+  { label: "Community", to: "/community", icon: Users },
   { label: "Garage", to: "/garage", icon: Wrench },
 ] as const;
 
 export const footerColumns = [
   {
-    title: "Explore",
+    title: "The Ride",
     links: [
-      { label: "Travel", to: "/travel" },
       { label: "Rides", to: "/rides" },
-      { label: "Stories", to: "/stories" },
+      { label: "Plan", to: "/plan" },
       { label: "Community", to: "/community" },
+      { label: "Stories", to: "/stories" },
     ],
   },
   {
-    title: "Ride & Gear",
+    title: "Bike & Gear",
     links: [
       { label: "Shop", to: "/shop" },
       { label: "Garage", to: "/garage" },
@@ -46,21 +50,22 @@ export const footerColumns = [
     ],
   },
   {
-    title: "Account",
+    title: "About & Account",
     links: [
+      { label: "About", to: "/about" },
       { label: "Login", to: "/login" },
       { label: "Join 36 Spokes", to: "/join" },
     ],
   },
 ] as const;
 
-/** My 36 Spokes sections. `exact` keeps Dashboard from matching every sub-page. */
+/** My 36 Spokes sections. `exact` keeps Overview from matching every sub-page. */
 export const memberNav = [
-  { label: "Dashboard", to: "/my-36-spokes", exact: true },
+  { label: "Overview", to: "/my-36-spokes", exact: true },
   { label: "My Garage", to: "/my-36-spokes/garage", exact: false },
   { label: "My Rides", to: "/my-36-spokes/rides", exact: false },
+  { label: "My Journeys", to: "/my-36-spokes/journeys", exact: false },
   { label: "My Travel", to: "/my-36-spokes/travel", exact: false },
   { label: "My Shop", to: "/my-36-spokes/shop", exact: false },
   { label: "My Community", to: "/my-36-spokes/community", exact: false },
-  { label: "My Profile", to: "/profile", exact: false },
 ] as const;

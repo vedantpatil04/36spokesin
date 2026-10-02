@@ -1,7 +1,7 @@
 import type { ID, Slug } from "./common";
 import type { MediaAsset } from "./media";
 
-export type BikeSegment = "Adventure" | "Scrambler" | "Touring" | "Street" | "Cruiser";
+export type BikeSegment = "Adventure" | "Scrambler" | "Touring" | "Street" | "Cruiser" | "Sport";
 
 /** A purchasable configuration of a model (trim, colourway or edition). */
 export type BikeVariant = {
@@ -15,12 +15,14 @@ export type Bike = {
   slug: Slug;
   brand: string;
   model: string;
-  /** Display name of the featured variant. */
+  /** Display name of the featured (first) variant; empty when none are listed. */
   variant: string;
   variants: BikeVariant[];
   segment: BikeSegment;
   image: MediaAsset;
-  /** Approximate real-world figures. Used by the journey planner for fuel range. */
-  fuelEfficiencyKmpl: number;
-  tankLitres: number;
+  /** Approximate real-world figures. Null when the catalogue doesn't list them. */
+  fuelEfficiencyKmpl: number | null;
+  tankLitres: number | null;
+  displacementCc?: number | null;
+  description?: string | null;
 };

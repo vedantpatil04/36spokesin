@@ -5,7 +5,6 @@ import type { Departure, DepartureStatus } from "@/types";
 
 const statusLabel: Record<DepartureStatus, string> = {
   open: "Open",
-  filling: "Filling fast",
   full: "Full",
   closed: "Closed",
 };
@@ -25,17 +24,21 @@ export function DepartureList({ departures }: { departures: Departure[] }) {
               </time>
             </p>
             <p className="mt-1 text-sm text-muted-foreground">
-              {formatINR(departure.price)} per rider <span aria-hidden>·</span>{" "}
-              {departure.seatsLeft} of {departure.seatsTotal} seats left
+              {departure.price !== null
+                ? `${formatINR(departure.price)} per rider`
+                : "Price on request"}{" "}
+              <span aria-hidden>·</span> {departure.seatsTotal} seats
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <Badge tone={departure.status === "filling" ? "warning" : "neutral"}>
+            <Badge tone={departure.status === "open" ? "neutral" : "warning"}>
               {statusLabel[departure.status]}
             </Badge>
-            <ButtonLink to="/join" size="sm">
-              Reserve a seat
-            </ButtonLink>
+            {departure.status === "open" ? (
+              <ButtonLink to="/join" size="sm">
+                Reserve a seat
+              </ButtonLink>
+            ) : null}
           </div>
         </li>
       ))}

@@ -6,9 +6,24 @@ import { Button, FormField, TextInput } from "@/components/ui-kit";
 import { media } from "@/data/media";
 import { seo } from "@/lib/seo";
 import { describeAuthError } from "@/services/auth";
-import { useAuthActions, useAuthStatus } from "@/state/auth";
+import { useAuthActions, useAuthStatus, useAuthUser } from "@/state/auth";
+
+/**
+ * `redirect` returns the rider to where they were (e.g. a product they tried to
+ * add to their cart). Only same-site paths are accepted.
+ */
+function safeRedirect(value: unknown): string | undefined {
+  if (typeof value !== "string" || !value.startsWith("/") || value.startsWith("//"))
+    return undefined;
+  if (value.startsWith("/login") || value.startsWith("/join")) return undefined;
+  return value;
+}
 
 export const Route = createFileRoute("/login")({
+  validateSearch: (search: Record<string, unknown>): { redirect?: string } => {
+    const redirect = safeRedirect(search["redirect"]);
+    return redirect ? { redirect } : {};
+  },
   head: () =>
     seo({
       title: "Rider Login | 36 Spokes",
@@ -23,15 +38,24 @@ export const Route = createFileRoute("/login")({
 
 function LoginPage() {
   const navigate = useNavigate();
+  const { redirect } = Route.useSearch();
   const status = useAuthStatus();
+  const user = useAuthUser();
   const { login } = useAuthActions();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Already signed in (or just signed in): head to the member area.
+  // Already signed in (or just signed in): return to where the user was, or their role-specific area.
   useEffect(() => {
-    if (status === "authenticated") navigate({ to: "/my-36-spokes", replace: true });
-  }, [status, navigate]);
+    if (status !== "authenticated" || !user) return;
+    if (redirect) {
+      void navigate({ to: redirect as any, replace: true });
+    } else if (user.role === "ADMIN") {
+      void navigate({ to: "/admin/products", replace: true });
+    } else {
+      void navigate({ to: "/my-36-spokes", replace: true });
+    }
+  }, [status, user, navigate, redirect]);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -42,7 +66,6 @@ function LoginPage() {
     setError(null);
     setIsSubmitting(true);
     login(email, password)
-      .then(() => navigate({ to: "/my-36-spokes", replace: true }))
       .catch((submitError: unknown) => setError(describeAuthError(submitError)))
       .finally(() => setIsSubmitting(false));
   };

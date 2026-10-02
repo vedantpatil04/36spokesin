@@ -8,6 +8,7 @@ import { seo } from "@/lib/seo";
 import { describeAuthError } from "@/services/auth";
 import { listBikes } from "@/services/catalog";
 import { useAuthActions, useAuthStatus } from "@/state/auth";
+import { useGarageActions } from "@/state/garage";
 
 export const Route = createFileRoute("/join")({
   loader: async () => ({ bikes: await listBikes() }),
@@ -27,6 +28,7 @@ function JoinPage() {
   const navigate = useNavigate();
   const status = useAuthStatus();
   const { register } = useAuthActions();
+  const garage = useGarageActions();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,6 +44,7 @@ function JoinPage() {
     const [firstName = name, ...rest] = name.split(/\s+/).filter(Boolean);
     const email = String(form.get("email") ?? "");
     const password = String(form.get("password") ?? "");
+    const bikeId = String(form.get("bikeId") ?? "");
 
     setError(null);
     setIsSubmitting(true);
@@ -51,7 +54,15 @@ function JoinPage() {
       firstName,
       ...(rest.length > 0 ? { lastName: rest.join(" ") } : {}),
     })
-      .then(() => navigate({ to: "/my-36-spokes", replace: true }))
+      .then(async () => {
+        // The account exists now; saving the bike is best-effort (it can be added later in My Garage).
+        if (bikeId) {
+          await garage
+            .add({ bikeId, variantId: null, nickname: null, year: null, odometerKm: null })
+            .catch(() => undefined);
+        }
+        await navigate({ to: "/my-36-spokes", replace: true });
+      })
       .catch((submitError: unknown) => setError(describeAuthError(submitError)))
       .finally(() => setIsSubmitting(false));
   };
@@ -116,8 +127,13 @@ function JoinPage() {
             disabled={isSubmitting}
           />
         </FormField>
-        <FormField id="bike" label="Your motorcycle">
-          <SelectInput id="bike" name="bikeId" disabled={isSubmitting}>
+        <FormField
+          id="bike"
+          label="Your motorcycle"
+          hint="Saved to your garage. You can change it later."
+        >
+          <SelectInput id="bike" name="bikeId" disabled={isSubmitting} aria-describedby="bike-hint">
+            <option value="">I'll add it later</option>
             {bikes.map((bike) => (
               <option key={bike.id} value={bike.id}>
                 {bike.brand} {bike.model}

@@ -13,5 +13,5 @@ export default defineConfig({
     server: { entry: "server" },
   },
   // Only pass a nitro override on Vercel; omitting the key keeps the Lovable default target.
-  ...(process.env["VERCEL"] ? { nitro: { preset: "vercel" } } : {}),
+  ...(process.env["VERCEL"] || process.env["VERCEL_ENV"] ? { nitro: { preset: "vercel" } } : {}),
 });

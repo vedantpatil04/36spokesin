@@ -27,7 +27,7 @@ function DestinationsPage() {
       <PageHeader
         eyebrow="Travel"
         title="Destinations"
-        description="Regions we ride, with the typical trip length, how hard the roads are and what a place on the trip starts at."
+        description="Regions we ride, with the recommended trip length, how hard the roads are and, where dates are set, what a place starts at."
       >
         <ButtonLink to="/travel/trips" variant="outline">
           See confirmed departures

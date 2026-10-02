@@ -1,4 +1,4 @@
-import type { ID, ISODate } from "./common";
+import type { ID, ISODate, ISODateTime } from "./common";
 
 export type SetupCheckStatus = "ready" | "missing";
 
@@ -18,8 +18,24 @@ export type GarageService = {
 export type OwnedBike = {
   id: ID;
   bikeId: ID;
-  odometerKm: number;
-  serviceDueInKm: number;
+  variantId: ID | null;
+  variantName: string | null;
+  nickname: string | null;
+  year: number | null;
+  odometerKm: number | null;
+  isPrimary: boolean;
+  /** The model has since been archived from the catalogue. */
+  archived: boolean;
+  addedAt: ISODateTime;
+};
+
+export type OwnedBikeInput = {
+  bikeId: ID;
+  variantId: ID | null;
+  nickname: string | null;
+  year: number | null;
+  odometerKm: number | null;
+  isPrimary?: boolean;
 };
 
 export type MaintenanceRecord = {

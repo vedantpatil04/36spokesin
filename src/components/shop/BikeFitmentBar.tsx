@@ -8,7 +8,9 @@ export function BikeFitmentBar({ bikes }: { bikes: Bike[] }) {
   const selectId = useId();
   const selectedBikeId = useSelectedBikeId();
   const selectBike = useSelectBike();
-  const bike = bikes.find((entry) => entry.id === selectedBikeId) ?? bikes[0];
+  const bike = bikes.find((entry) => entry.id === selectedBikeId) ?? null;
+
+  if (bikes.length === 0) return null;
 
   return (
     <div className="flex flex-col gap-4 rounded-sm border border-border bg-surface p-4 md:flex-row md:items-center md:justify-between">
@@ -20,9 +22,10 @@ export function BikeFitmentBar({ bikes }: { bikes: Bike[] }) {
         <select
           id={selectId}
           value={bike?.id ?? ""}
-          onChange={(event) => selectBike(event.target.value)}
+          onChange={(event) => selectBike(event.target.value || null)}
           className="h-11 rounded-sm border border-input bg-background px-3 font-display text-sm uppercase tracking-[0.1em] text-foreground [color-scheme:dark]"
         >
+          <option value="">Any motorcycle</option>
           {bikes.map((entry) => (
             <option key={entry.id} value={entry.id}>
               {entry.brand} {entry.model}
@@ -36,7 +39,9 @@ export function BikeFitmentBar({ bikes }: { bikes: Bike[] }) {
             <span aria-hidden>✓ </span>Fitment shown for {bike.model}
           </span>
         </Badge>
-      ) : null}
+      ) : (
+        <p className="text-xs text-muted-foreground">Choose your bike to see what fits it.</p>
+      )}
     </div>
   );
 }

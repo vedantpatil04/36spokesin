@@ -37,21 +37,32 @@ function StoriesPage() {
           <article className="grid gap-8 lg:grid-cols-2 lg:items-center">
             <Media
               asset={lead.image}
-              alt={lead.title}
+              alt={lead.hasImage === false ? "" : lead.title}
               ratio="4/3"
               className="rounded-sm border border-border"
             />
             <div>
               <p className="eyebrow">
-                {lead.destination} <span aria-hidden>·</span> {lead.readMinutes} min read
+                {lead.destination ? (
+                  <>
+                    {lead.destination} <span aria-hidden>·</span>{" "}
+                  </>
+                ) : null}
+                {lead.readMinutes} min read
               </p>
               <h2 className="mt-4 text-3xl leading-tight lg:text-4xl">
                 <Link to="/stories/$slug" params={{ slug: lead.slug }}>
                   {lead.title}
                 </Link>
               </h2>
-              <p className="mt-5 text-base leading-relaxed text-muted-foreground">{lead.excerpt}</p>
-              <p className="mt-6 text-sm text-muted-foreground">By {lead.rider}</p>
+              {lead.excerpt ? (
+                <p className="mt-5 text-base leading-relaxed text-muted-foreground">
+                  {lead.excerpt}
+                </p>
+              ) : null}
+              {lead.rider ? (
+                <p className="mt-6 text-sm text-muted-foreground">By {lead.rider}</p>
+              ) : null}
             </div>
           </article>
         </Section>

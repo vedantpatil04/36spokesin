@@ -10,6 +10,7 @@
 import "reflect-metadata";
 import { parseArgs } from "node:util";
 import { PrismaPg } from "@prisma/adapter-pg";
+import pg from "pg";
 import { PasswordService } from "../auth/password.service.js";
 import { PrismaClient } from "../generated/prisma/client.js";
 import { UserRole } from "../generated/prisma/enums.js";
@@ -38,7 +39,15 @@ async function main(): Promise<void> {
   const databaseUrl = process.env["DATABASE_URL"];
   if (!databaseUrl) throw new Error("DATABASE_URL is not set");
 
-  const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: databaseUrl }) });
+  const isSsl =
+    databaseUrl.includes("sslmode=require") ||
+    databaseUrl.includes("supabase.co") ||
+    databaseUrl.includes("pooler.supabase.com");
+  const pool = new pg.Pool({
+    connectionString: databaseUrl,
+    ssl: isSsl ? { rejectUnauthorized: false } : undefined,
+  });
+  const prisma = new PrismaClient({ adapter: new PrismaPg(pool) });
   try {
     const existing = await prisma.user.findUnique({ where: { email }, select: { id: true } });
     if (existing) {

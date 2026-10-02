@@ -9,12 +9,15 @@ export interface PresignedUpload {
 export interface StoredObjectInfo {
   contentLength: number;
   contentType: string | null;
+  width?: number | null;
+  height?: number | null;
 }
 
 /**
  * Object storage used by the media module. The production implementation is
- * Cloudflare R2 (S3 API); tests substitute an in-memory fake. A future image
- * pipeline or CDN URL builder plugs in here without touching MediaService.
+ * Cloudflare R2 (S3 API); Cloudinary is supported for local development / testing;
+ * tests substitute an in-memory fake. A future image pipeline or CDN URL builder
+ * plugs in here without touching MediaService.
  */
 export interface ObjectStorage {
   readonly isConfigured: boolean;
@@ -31,6 +34,9 @@ export interface ObjectStorage {
   /** Idempotent. */
   deleteObject(key: string): Promise<void>;
   publicUrl(key: string): string;
+  /** Optional handler for providers that accept uploads streamed via the API server (e.g. Cloudinary) */
+  handleUpload?(key: string, stream: NodeJS.ReadableStream, contentType?: string): Promise<void>;
+  verifyUploadToken?(key: string, expires: number, token: string): boolean;
 }
 
 export const OBJECT_STORAGE = Symbol("OBJECT_STORAGE");

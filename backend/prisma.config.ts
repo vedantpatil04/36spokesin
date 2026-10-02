@@ -12,6 +12,9 @@ export default defineConfig({
   schema: "prisma/schema.prisma",
   migrations: {
     path: "prisma/migrations",
+    // Development bootstrap data. Only ever run explicitly (`npm run db:seed` or
+    // `prisma db seed`); never on start-up or deploy.
+    seed: "tsx prisma/seed.ts",
   },
   datasource: {
     // `prisma generate` does not connect, so an empty value is fine at build time.

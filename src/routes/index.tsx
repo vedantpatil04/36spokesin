@@ -1,195 +1,115 @@
-import { Link, createFileRoute } from "@tanstack/react-router";
-import { ArrowRight } from "lucide-react";
-import { PathCard, UpcomingEventCard } from "@/components/cards";
-import { JourneyPlanner } from "@/components/journey-planner/JourneyPlanner";
+import { createFileRoute } from "@tanstack/react-router";
+import { ArrowRight, Compass, Shield, Users, Wrench } from "lucide-react";
+import { CinematicHero } from "@/components/hero/CinematicHero";
+import { BrandStatement } from "@/components/home/BrandStatement";
+import { ChooseYourPath } from "@/components/home/ChooseYourPath";
+import { FeaturedRides } from "@/components/home/FeaturedRides";
+import { PlanTeaser } from "@/components/home/PlanTeaser";
 import { MemoryLane } from "@/components/memory-lane/MemoryLane";
-import {
-  BrandCrest,
-  ButtonLink,
-  Media,
-  Rail,
-  RailItem,
-  Section,
-  SectionHeader,
-} from "@/components/ui-kit";
-import { media } from "@/data/media";
+import { SocialFeed } from "@/components/social-feed/SocialFeed";
+import { BrandCrest, ButtonLink, Section, SectionHeader } from "@/components/ui-kit";
 import { seo } from "@/lib/seo";
-import { cn } from "@/lib/utils";
-import { listEvents, listMemories } from "@/services/community";
-import { listPillars } from "@/services/site";
+import { listMemories } from "@/services/community";
+import { listRides } from "@/services/rides";
+import { listHeroSlides, listPillars } from "@/services/site";
+import { listPublishedSocialPosts } from "@/services/social-posts";
 
 export const Route = createFileRoute("/")({
   loader: async () => {
-    const [pillars, events, memories] = await Promise.all([
+    const [heroSlides, pillars, rides, memories, socialPosts] = await Promise.all([
+      listHeroSlides(),
       listPillars(),
-      listEvents({ limit: 3 }),
+      listRides({ when: "upcoming" }),
       listMemories(),
+      listPublishedSocialPosts(),
     ]);
-    return { pillars, events, memories };
+    return { heroSlides, pillars, rides, memories, socialPosts };
   },
   head: () =>
     seo({
-      title: "36 Spokes | Motorcycle Rides, Travel, Gear & Rider Community",
+      title: "36 Spokes | Motorcycle Rides, Journey Planning & Rider Culture",
       description:
-        "36 Spokes brings your motorcycle, the gear that fits it, the journeys you plan and the riders you meet into one place. Find a ride, plan a trip and join upcoming events.",
+        "The motorcycle lifestyle ecosystem. Group rides across India, intelligent journey planning, gear matched to your motorcycle, and a community of authentic riders.",
       socialDescription:
-        "Your bike, your gear, your next journey and the riders you share it with.",
+        "Your motorcycle, your gear, your next journey and the riders you share it with.",
       path: "/",
     }),
   component: Home,
 });
 
-/** Tablet layout: two wide cards, then three. Desktop: five across. */
-const pathLayout = [
-  "md:col-span-3",
-  "md:col-span-3",
-  "md:col-span-2",
-  "md:col-span-2",
-  "md:col-span-2",
+const connectionSteps = [
+  { label: "Your Bike", desc: "The foundation in your garage" },
+  { label: "Your Gear", desc: "Matched protection & luggage" },
+  { label: "Your Journey", desc: "Day-by-day fuel & halts" },
+  { label: "Your Route", desc: "Tarmac, passes & gravel" },
+  { label: "Your People", desc: "Riders who turn up" },
 ];
 
-const connection = ["Bike", "Gear", "Trip", "Route", "Riders"];
-
 function Home() {
-  const { pillars, events, memories } = Route.useLoaderData();
+  const { heroSlides, pillars, rides, memories, socialPosts } = Route.useLoaderData();
 
   return (
     <>
-      {/* A. HERO */}
-      <section className="relative">
-        <Media
-          asset={media.site.heroRide}
-          ratio="auto"
-          className="h-[78svh] min-h-125 w-full lg:h-[88svh]"
-          sizes="100vw"
-          priority
-        >
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/55 to-background/25" />
-        </Media>
-        <div className="absolute inset-0 flex items-end">
-          <div className="container-page pb-14 md:pb-20">
-            <div className="max-w-3xl rise">
-              <div className="mb-5 inline-flex items-center gap-2.5 rounded-full border border-border/60 bg-background/70 px-3.5 py-1.5 backdrop-blur-md shadow-sm">
-                <BrandCrest className="size-5 ring-1 ring-primary/40" />
-                <span className="font-display text-xs uppercase tracking-[0.2em] text-foreground/90">
-                  Official 36 Spokes Rider Network
-                </span>
-              </div>
-              <h1 className="text-4xl leading-[0.98] sm:text-6xl lg:text-7xl">
-                The road starts where the map runs out
-              </h1>
-              <p className="mt-5 max-w-xl text-base leading-relaxed text-muted-foreground md:text-lg">
-                Expeditions across the Himalaya, gear matched to the motorcycle in your garage, and
-                riders who turn up when you post a route.
-              </p>
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <ButtonLink to="/" hash="choose-your-path" size="lg">
-                  Choose your path <ArrowRight className="size-4" aria-hidden />
-                </ButtonLink>
-                <ButtonLink to="/" hash="plan-your-journey" variant="outline" size="lg">
-                  Plan a journey
-                </ButtonLink>
-              </div>
+      {/* A. CINEMATIC HERO (Custom 5s auto-advance carousel, image + video, CMS-backed) */}
+      <CinematicHero slides={heroSlides} />
+
+      {/* B. WHAT IS 36 SPOKES? (Continuous editorial narrative) */}
+      <Section id="what-is-36-spokes" className="scroll-mt-16 lg:scroll-mt-20">
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)] lg:gap-16">
+          <div>
+            <span className="font-display text-xs uppercase tracking-[0.24em] text-primary">
+              THE 36 SPOKES PRINCIPLE
+            </span>
+            <h2 className="mt-3 text-3xl leading-[1.05] sm:text-4xl lg:text-5xl">
+              What is 36 Spokes?
+            </h2>
+          </div>
+
+          <div>
+            <p className="max-w-2xl text-xl leading-snug text-foreground md:text-2xl">
+              A home for Indian motorcyclists, built from the motorcycle you ride. The gear that
+              fits it, the journeys you take it on, and the riders you meet along the way all
+              connect back to that machine.
+            </p>
+
+            <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-5 sm:gap-3">
+              {connectionSteps.map((step, index) => (
+                <div
+                  key={step.label}
+                  className="relative rounded-sm border border-border/80 bg-surface/40 p-3.5 backdrop-blur-xs transition-colors hover:border-primary/50"
+                >
+                  <span className="font-display text-[0.65rem] uppercase tracking-[0.2em] text-primary">
+                    0{index + 1}
+                  </span>
+                  <h4 className="mt-1 font-display text-sm uppercase text-foreground">
+                    {step.label}
+                  </h4>
+                  <p className="mt-1 text-[0.7rem] text-muted-foreground">{step.desc}</p>
+                </div>
+              ))}
             </div>
           </div>
         </div>
-      </section>
-
-      {/* B. WHAT IS 36 SPOKES? */}
-      <Section id="what-is-36-spokes">
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)] lg:gap-16">
-          <h2 className="text-3xl leading-[1.05] sm:text-4xl lg:text-5xl">What is 36 Spokes?</h2>
-          <div>
-            <p className="max-w-2xl text-xl leading-snug text-foreground md:text-2xl">
-              A home for Indian motorcyclists, built around the bike you ride. The gear that fits
-              it, the trips you take it on and the riders you meet along the way all start from
-              there.
-            </p>
-            <ol
-              aria-label="How 36 Spokes connects"
-              className="mt-8 flex flex-wrap items-center gap-x-2 gap-y-3 font-display text-[0.8rem] uppercase tracking-[0.12em] sm:gap-x-3 sm:text-sm sm:tracking-[0.18em] md:text-base"
-            >
-              {connection.map((step, index) => (
-                <li key={step} className="flex items-center gap-2 sm:gap-3">
-                  {index > 0 ? (
-                    <span aria-hidden className="h-px w-3 bg-primary/70 sm:w-6 md:w-10" />
-                  ) : null}
-                  <span className={index === 0 ? "text-primary" : "text-foreground/85"}>
-                    {step}
-                  </span>
-                </li>
-              ))}
-            </ol>
-          </div>
-        </div>
       </Section>
 
-      {/* C. CHOOSE YOUR PATH */}
-      <Section id="choose-your-path" tone="surface" className="scroll-mt-16 lg:scroll-mt-20">
-        <SectionHeader
-          title="Choose your path"
-          description="What do you want to do today? Each path opens its own section with the full detail."
-        />
-        <ul className="mt-10 grid gap-3 md:grid-cols-6 md:gap-4 lg:grid-cols-5">
-          {pillars.map((pillar, index) => (
-            <li key={pillar.id} className={cn(pathLayout[index], "lg:col-span-1")}>
-              <PathCard pillar={pillar} className="h-44 sm:h-52 md:h-72 lg:h-[30rem]" />
-            </li>
-          ))}
-        </ul>
-      </Section>
+      {/* C. CHOOSE YOUR PATH (Editorial/Asymmetrical composition: Rides, Plan, Shop, Garage, Community) */}
+      <ChooseYourPath paths={pillars} />
 
-      {/* D. 36 SPOKES UPCOMING EVENTS */}
-      <Section id="upcoming-events">
-        <SectionHeader
-          title="36 Spokes Upcoming Events"
-          description="Rides, meetups and workshops run by 36 Spokes crews. The listings below are sample events for this preview."
-          action={
-            <ButtonLink to="/community" hash="events" variant="outline">
-              All events
-            </ButtonLink>
-          }
-        />
-        <Rail className="mt-10 md:grid-cols-3">
-          {events.map((event) => (
-            <RailItem key={event.id}>
-              <UpcomingEventCard
-                event={event}
-                action={
-                  <Link
-                    to="/community"
-                    hash={event.id}
-                    aria-label={`View event: ${event.title}`}
-                    className="shrink-0 font-display text-xs uppercase tracking-[0.18em] text-primary hover:underline"
-                  >
-                    View event
-                  </Link>
-                }
-              />
-            </RailItem>
-          ))}
-        </Rail>
-      </Section>
+      {/* D. FEATURED RIDES (What is happening on the road) */}
+      <FeaturedRides rides={rides} />
 
-      {/* E. PLAN YOUR JOURNEY */}
-      <Section id="plan-your-journey" tone="surface" className="scroll-mt-16 lg:scroll-mt-20">
-        <SectionHeader
-          title="Plan your journey"
-          description="An early look at the 36 Spokes journey planner. Pick your route, dates, bike and riding style, and get a day-by-day plan with distance, stays, places to visit, weather, fuel and cost."
-        />
-        <div className="mt-10">
-          <JourneyPlanner />
-        </div>
-      </Section>
+      {/* E. PLAN YOUR NEXT JOURNEY (Compelling teaser pointing to Plan hub) */}
+      <PlanTeaser />
 
-      {/* F. 36 SPOKES MEMORY LANE */}
+      {/* F. MEMORY LANE (Visual storytelling for past rides / milestones) */}
       <Section id="memory-lane">
         <SectionHeader
+          eyebrow="The Archive"
           title="36 Spokes Memory Lane"
-          description="Where the community has been: the expeditions, Sunday rides and garage nights that made 36 Spokes. Sample memories for this preview."
+          description="Where the community has been: the high passes, monsoon runs, Sunday meets and garage nights that made 36 Spokes."
           action={
             <ButtonLink to="/stories" variant="outline">
-              Read ride stories
+              Read ride stories <ArrowRight className="size-3.5" aria-hidden />
             </ButtonLink>
           }
         />
@@ -198,26 +118,36 @@ function Home() {
         </div>
       </Section>
 
-      {/* G. JOIN / DISCOVER */}
+      {/* G. FOLLOW THE RIDE (Dynamic Instagram / Social feed with video support) */}
+      <SocialFeed posts={socialPosts} />
+
+      {/* H. ABOUT / BRAND STATEMENT */}
+      <BrandStatement />
+
+      {/* I. FINAL CTA */}
       <Section className="pt-0 md:pt-0">
-        <div className="rounded-sm border border-border bg-card px-6 py-14 text-center md:px-16 md:py-20">
+        <div className="relative overflow-hidden rounded-sm border border-border bg-card px-6 py-16 text-center md:px-16 md:py-24 shadow-lift">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -inset-10 bg-radial from-primary/10 via-transparent to-transparent blur-2xl"
+          />
           <BrandCrest
-            className="mx-auto size-16 ring-2 ring-primary/40 shadow-card"
+            className="relative mx-auto size-16 ring-2 ring-primary/40 shadow-card"
             loading="lazy"
           />
-          <h2 className="mx-auto mt-6 max-w-3xl text-3xl leading-tight sm:text-4xl lg:text-5xl">
+          <h2 className="relative mx-auto mt-6 max-w-3xl text-3xl uppercase leading-tight sm:text-4xl lg:text-5xl">
             Keep your bike, your gear and your next ride in one place
           </h2>
-          <p className="mx-auto mt-5 max-w-xl text-base text-muted-foreground">
-            Create a rider profile, add your motorcycle, and everything on 36 Spokes starts speaking
-            your bike's language.
+          <p className="relative mx-auto mt-5 max-w-xl text-base text-muted-foreground">
+            Create a rider profile, register your motorcycle, and everything on 36 Spokes starts
+            speaking your bike's language.
           </p>
-          <div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
-            <ButtonLink to="/join" size="lg">
+          <div className="relative mt-9 flex flex-col justify-center gap-3 sm:flex-row">
+            <ButtonLink to="/join" size="lg" className="px-8 shadow-card">
               Create your rider profile
             </ButtonLink>
-            <ButtonLink to="/travel" variant="outline" size="lg">
-              Browse expeditions
+            <ButtonLink to="/rides" variant="outline" size="lg">
+              Explore upcoming rides
             </ButtonLink>
           </div>
         </div>

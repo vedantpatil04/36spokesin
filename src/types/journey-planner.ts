@@ -1,105 +1,144 @@
 /**
  * Journey planner contract.
  *
- * The planner UI is built against TravelPlan. In Phase 1–2 a deterministic mock
- * generator (src/lib/mock-travel-plan.ts) produces it from sample routes; a
- * future routing / weather / stays service must return the same shape.
+ * A JourneyPlan is built by the API (backend/src/plan): the places, route,
+ * distance, riding time, weather and stops come from real data sources, named in
+ * `sources`; an AI model only lays out the days and writes the notes. The UI
+ * shows a plan as it arrives and never adds figures of its own.
  */
 
-import type { ISODate } from "./common";
+import type { ID, ISODate } from "./common";
 
-export type TripStyle = "Adventure" | "Scenic" | "Relaxed" | "Fast-paced" | "Weekend";
+export type RidingStyle = "relaxed" | "balanced" | "spirited";
 
-export type ClimateZone =
-  "konkan-coast" | "western-ghats" | "deccan-plateau" | "himalaya-mid" | "himalaya-high";
+/** What a rider enters. The first four are enough; the rest refine the plan. */
+export type JourneyPlanInput = {
+  origin: string;
+  destination: string;
+  date: ISODate;
+  riders: number;
+  /** A motorcycle from the catalogue; its listed mileage and tank size are used. */
+  bikeId?: ID;
+  /** The rider's own mileage, in km per litre. Overrides the catalogue's. */
+  mileageKmpl?: number;
+  /** INR per litre. Without it no fuel cost is shown. */
+  fuelPricePerLitre?: number;
+  ridingStyle?: RidingStyle;
+  dailyDistanceKm?: number;
+  tripDays?: number;
+  /** INR. Context for the planner; costs other than fuel aren't estimated. */
+  budget?: number;
+};
 
-export type Terrain = "plains" | "ghats" | "coast" | "high-altitude";
-
-export type Season = "winter" | "summer" | "monsoon" | "post-monsoon";
-
-export type StayKind = "Homestay" | "Hotel" | "Guesthouse" | "Camp" | "Beach hut";
-
-export type Stay = {
+/** A place name as the geocoder resolved it. */
+export type JourneyPlace = {
   name: string;
-  kind: StayKind;
-  pricePerNight: number;
+  displayName: string;
+  lat: number;
+  lon: number;
 };
 
-export type RouteStop = {
+export type JourneyStopKind = "town" | "fuel" | "food" | "viewpoint";
+
+export type JourneyStop = {
   name: string;
-  region: string;
-  kmFromPrevious: number;
-  climate: ClimateZone;
-  elevationM?: number;
-  fuel?: boolean;
-  /** Present when riders can realistically stop overnight here. */
-  stay?: Stay;
-  /** Places worth stopping for on the way into, or around, this stop. */
-  highlights: string[];
+  kind: JourneyStopKind;
+  lat: number;
+  lon: number;
+  kmFromStart: number;
+  /** Why the planner suggests stopping here. Written by the AI. */
+  reason: string;
+  suggestedMinutes: number | null;
 };
 
-export type JourneyRoute = {
-  id: string;
-  from: string;
-  to: string;
-  via: string;
-  terrain: Terrain;
-  /** Shown when the chosen pace is too quick for the route (e.g. altitude). */
-  advisory?: string;
-  stops: RouteStop[];
+/** One day's forecast at one point. Any figure the provider didn't give is null. */
+export type JourneyDailyWeather = {
+  date: ISODate;
+  tempMaxC: number | null;
+  tempMinC: number | null;
+  rainChancePct: number | null;
+  windKph: number | null;
+  condition: string | null;
 };
 
-export type WeatherOutlook = {
-  summary: string;
-  minC: number;
-  maxC: number;
-  note?: string;
-};
-
-export type TravelPlanRequest = {
-  routeId: string;
-  bikeId: string;
-  style: TripStyle;
-  startDate: ISODate;
-  endDate: ISODate;
-};
-
-export type TravelPlanNotice = {
-  tone: "info" | "warning";
-  message: string;
-};
-
-export type TravelPlanDay = {
+export type JourneyDay = {
   day: number;
   date: ISODate;
-  from: string;
-  to: string;
+  start: string;
+  end: string;
   distanceKm: number;
-  ridingMinutes: number;
-  elevationM?: number;
-  stay: Stay | null;
-  places: string[];
-  weather: WeatherOutlook;
-  fuel: { stop: string; note?: string };
-  cost: { fuel: number; stay: number; food: number; total: number };
+  estimatedRideMinutes: number;
+  stops: JourneyStop[];
+  /** Forecast near where the day ends; null when unavailable. */
+  weather: (JourneyDailyWeather & { at: string }) | null;
+  notes: string[];
 };
 
-export type TravelPlan = {
-  request: TravelPlanRequest;
-  from: string;
-  to: string;
-  via: string;
-  bikeName: string;
-  style: TripStyle;
-  styleTip: string;
-  /** Overnight points in order, starting point first. */
-  overnights: string[];
-  totalKm: number;
-  totalCost: number;
-  /** Approximate distance the chosen bike covers on one tank on this terrain. */
-  tankRangeKm: number;
-  days: TravelPlanDay[];
-  notices: TravelPlanNotice[];
-  /** Phase 1 plans are generated from sample data only. */
-  source: "sample";
+/** Per motorcycle, for the whole route. Fields are null when there isn't enough information. */
+export type JourneyFuelEstimate = {
+  mileageKmpl: number | null;
+  mileageSource: "rider" | "catalogue" | null;
+  tankLitres: number | null;
+  rangeKm: number | null;
+  requiredLitres: number | null;
+  pricePerLitre: number | null;
+  priceSource: "rider" | "configured" | null;
+  /** INR. */
+  estimatedCost: number | null;
 };
+
+export type JourneyPlan = {
+  version: 1;
+  origin: JourneyPlace;
+  destination: JourneyPlace;
+  travelDate: ISODate;
+  riders: number;
+  distanceKm: number;
+  estimatedRideMinutes: number;
+  /** 24-hour "HH:MM". */
+  recommendedStart: string;
+  overview: string;
+  days: JourneyDay[];
+  breakAdvice: string;
+  ridingNotes: string[];
+  weather: {
+    available: boolean;
+    reason: string | null;
+    /** The AI's reading of the forecast in `points`. */
+    summary: string | null;
+    points: { label: string; kmFromStart: number; days: JourneyDailyWeather[] }[];
+  };
+  fuel: JourneyFuelEstimate;
+  bikeName: string | null;
+  preferences: { ridingStyle: RidingStyle; dailyTargetKm: number; budget: number | null };
+  /** False when the places source didn't answer, so no stops could be suggested. */
+  placesAvailable: boolean;
+  /** The road geometry from the routing service, as [lat, lon] pairs. */
+  route: { geometry: [number, number][] };
+  /** Where each kind of fact came from. Null when that source gave nothing. */
+  sources: {
+    geocoding: string;
+    routing: string;
+    weather: string | null;
+    places: string | null;
+    itinerary: string;
+  };
+  generatedAt: string;
+};
+
+/** A plan with the token that proves the API made it; both are sent back to save it. */
+export type PlannedJourney = { plan: JourneyPlan; token: string };
+
+export type SavedJourneySummary = {
+  id: ID;
+  title: string;
+  originName: string;
+  destinationName: string;
+  travelDate: ISODate;
+  riders: number;
+  distanceKm: number;
+  rideMinutes: number;
+  createdAt: string;
+};
+
+export type SavedJourney = SavedJourneySummary & { plan: JourneyPlan };

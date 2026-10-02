@@ -9,8 +9,16 @@ const inr = new Intl.NumberFormat("en-IN", {
   maximumFractionDigits: 0,
 });
 
-/** 34900 → "₹34,900" */
-export const formatINR = (value: number) => inr.format(value);
+const inrWithPaise = new Intl.NumberFormat("en-IN", {
+  style: "currency",
+  currency: "INR",
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+
+/** 34900 → "₹34,900"; 8499.5 → "₹8,499.50" (paise only when there are any). */
+export const formatINR = (value: number) =>
+  Number.isInteger(value) ? inr.format(value) : inrWithPaise.format(value);
 
 /** 1820 → "1,820" (Indian digit grouping) */
 export const formatNumber = (value: number) => value.toLocaleString("en-IN");

@@ -35,9 +35,45 @@ export async function createTestApp(
   return { app, prisma: app.get(PrismaService), http: request(app.getHttpServer()) };
 }
 
+const APPLICATION_TABLES = [
+  "founders",
+  "stories",
+  "rider_spotlights",
+  "community_groups",
+  "social_posts",
+  "gallery_images",
+  "payments",
+  "payment_settings",
+  "ride_registrations",
+  "rides",
+  "trip_departures",
+  "trip_itinerary_days",
+  "trips",
+  "destinations",
+  "order_items",
+  "orders",
+  "cart_items",
+  "carts",
+  "wishlist_items",
+  "rider_bikes",
+  "product_compatibility",
+  "product_specifications",
+  "product_images",
+  "products",
+  "product_brands",
+  "product_categories",
+  "bike_variants",
+  "bike_models",
+  "bike_brands",
+  "auth_sessions",
+  "rider_profiles",
+  "media_assets",
+  "users",
+];
+
 /** Empties every application table. The migrations table is untouched. */
 export async function resetDatabase(prisma: PrismaService): Promise<void> {
   await prisma.$executeRawUnsafe(
-    'TRUNCATE TABLE "auth_sessions", "rider_profiles", "media_assets", "users" CASCADE',
+    `TRUNCATE TABLE ${APPLICATION_TABLES.map((table) => `"${table}"`).join(", ")} CASCADE`,
   );
 }

@@ -1,6 +1,9 @@
+import { setDefaultResultOrder } from "node:dns";
 import { NestFactory } from "@nestjs/core";
 import type { NestExpressApplication } from "@nestjs/platform-express";
 import { Logger } from "nestjs-pino";
+
+setDefaultResultOrder("ipv4first");
 import { AppModule } from "./app.module.js";
 import { DOCS_PATH, configureApp, setupSwagger } from "./app.setup.js";
 import { AppConfigService } from "./config/app-config.service.js";
@@ -20,8 +23,10 @@ async function bootstrap(): Promise<void> {
   const logger = app.get(Logger);
   logger.log(`36 Spokes API listening on port ${config.app.port} (${config.app.env})`, "Bootstrap");
   if (config.docs.enabled) logger.log(`API docs at ${config.app.apiUrl}/${DOCS_PATH}`, "Bootstrap");
-  if (!config.storage) {
-    logger.warn("R2 variables are not set: media endpoints will return 503", "Bootstrap");
+  if (!config.mediaProvider) {
+    logger.warn("Media storage is not configured: media endpoints will return 503", "Bootstrap");
+  } else {
+    logger.log(`Media storage provider: ${config.mediaProvider}`, "Bootstrap");
   }
 }
 

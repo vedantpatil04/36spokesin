@@ -1,6 +1,6 @@
 /**
- * Rider accounts, backed by the 36 Spokes API. Used by the Login and Join
- * routes, the Navbar and the `/my-36-spokes` guard (see `@/state/auth`).
+ * Rider accounts, backed by the 36 Spokes API. Used by the Login, Join and
+ * Profile routes, the Navbar and the `/my-36-spokes` guard (see `@/state/auth`).
  */
 
 import { ApiError, getApiClient } from "@/lib/api";
@@ -55,8 +55,22 @@ export function getCurrentUser(): Promise<ApiUser> {
   return getApiClient().request<ApiUser>("/users/me");
 }
 
+export type UpdateAccountInput = {
+  firstName: string;
+  lastName: string | null;
+  phone: string | null;
+};
+
+export function updateCurrentUser(input: UpdateAccountInput): Promise<ApiUser> {
+  return getApiClient().request<ApiUser>("/users/me", { method: "PATCH", body: input });
+}
+
 export function getRiderProfile(): Promise<ApiRiderProfile> {
   return getApiClient().request<ApiRiderProfile>("/riders/me");
+}
+
+export function updateRiderProfile(input: { city: string | null }): Promise<ApiRiderProfile> {
+  return getApiClient().request<ApiRiderProfile>("/riders/me", { method: "PATCH", body: input });
 }
 
 /** A message safe to show under a form: field-level details when present, else the API's own message. */

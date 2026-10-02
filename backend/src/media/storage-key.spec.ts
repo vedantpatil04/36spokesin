@@ -13,6 +13,26 @@ describe("buildStorageKey", () => {
     expect(isSafeStorageKey(key)).toBe(true);
   });
 
+  it("builds valid keys for video formats", () => {
+    const mp4 = buildStorageKey(
+      MediaCategory.SITE,
+      "video/mp4",
+      new Date("2026-09-28T00:00:00Z"),
+      "0f8fad5b-d9cb-469f-a165-70867728950e",
+    );
+    expect(mp4).toBe("site/2026/09/0f8fad5b-d9cb-469f-a165-70867728950e.mp4");
+    expect(isSafeStorageKey(mp4)).toBe(true);
+
+    const webm = buildStorageKey(
+      MediaCategory.COMMUNITY,
+      "video/webm",
+      new Date("2026-09-28T00:00:00Z"),
+      "0f8fad5b-d9cb-469f-a165-70867728950e",
+    );
+    expect(webm).toBe("community/2026/09/0f8fad5b-d9cb-469f-a165-70867728950e.webm");
+    expect(isSafeStorageKey(webm)).toBe(true);
+  });
+
   it("generates unique keys", () => {
     const keys = new Set(
       Array.from({ length: 50 }, () => buildStorageKey(MediaCategory.RIDER, "image/jpeg")),

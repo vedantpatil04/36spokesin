@@ -1,0 +1,7 @@
+Files removed in Phase 4. Delete them from the working tree when merging this package
+(the ZIP only contains added and modified files).
+
+src/data/products.ts
+  Bundled mock products and categories. The catalogue now comes from the API
+  (PostgreSQL + R2) and is managed in the admin CMS; `npm run db:seed` in
+  backend/ creates equivalent development data.

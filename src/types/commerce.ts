@@ -1,19 +1,40 @@
 import type { ID, ISODateTime, RupeeAmount } from "./common";
+import type { Product } from "./product";
 
-export type CartItem = {
-  productId: ID;
+/** Why a cart line can't be bought as it stands. */
+export type CartLineIssue = "not_available" | "out_of_stock" | "insufficient_stock";
+
+export type CartLine = {
+  id: ID;
+  product: Product;
   quantity: number;
+  unitPrice: RupeeAmount;
+  lineTotal: RupeeAmount;
+  issue: CartLineIssue | null;
+};
+
+/** The signed-in rider's cart, as stored on the server. */
+export type Cart = {
+  lines: CartLine[];
+  itemCount: number;
+  /** Lines without an issue only. */
+  subtotal: RupeeAmount;
+  readyForCheckout: boolean;
 };
 
 export type WishlistItem = {
-  productId: ID;
+  id: ID;
+  product: Product;
+  /** Still for sale in the shop. */
+  available: boolean;
   addedAt: ISODateTime;
 };
 
-export type OrderStatus = "placed" | "packed" | "shipped" | "delivered" | "cancelled";
+export type OrderStatus =
+  "pending_payment" | "placed" | "packed" | "shipped" | "delivered" | "cancelled";
 
 export type OrderItem = {
-  productId: ID;
+  productId: ID | null;
   name: string;
   quantity: number;
   unitPrice: RupeeAmount;
@@ -23,7 +44,6 @@ export type Order = {
   id: ID;
   /** Customer-facing number, e.g. "10428". */
   number: string;
-  riderId: ID;
   status: OrderStatus;
   items: OrderItem[];
   total: RupeeAmount;

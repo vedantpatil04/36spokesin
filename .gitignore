@@ -38,6 +38,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+.claude/
 
 # Extracted zip backups
 pixel-perfect-clone-*/

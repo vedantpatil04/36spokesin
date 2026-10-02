@@ -1,0 +1,19 @@
+Files removed in Phase 6. Delete them from the working tree when merging this package
+(the ZIP only contains added and modified files).
+
+src/routes/community/groups.tsx
+  Moved to src/routes/community/groups/index.tsx so the group page
+  (src/routes/community/groups/$slug.tsx) can sit beside it. Keeping the old file
+  would turn it into a layout route and break both pages.
+
+src/data/stories.ts
+src/data/riders.ts
+src/data/groups.ts
+  Sample community content. It credited the founders with stories, bikes, home
+  towns and riding stats that were never supplied by the business, and gave
+  groups invented member counts. Stories, rider spotlights and groups now come
+  from the API and are managed at /admin/community.
+
+src/components/cards/RiderCard.tsx
+  Rendered the sample riders' invented stats. Replaced by
+  src/components/community/RiderSpotlightCard.tsx.

@@ -18,6 +18,12 @@ export const env = {
   apiUrl: stripTrailingSlash(read(import.meta.env.VITE_API_URL)),
   mapboxToken: read(import.meta.env.VITE_MAPBOX_TOKEN),
   razorpayKeyId: read(import.meta.env.VITE_RAZORPAY_KEY_ID),
+  whatsappGroupUrl:
+    read(import.meta.env["VITE_WHATSAPP_GROUP_URL"]) ??
+    read(import.meta.env["VITE_WHATSAPP_URL"]) ??
+    "https://chat.whatsapp.com/invite/36spokes",
+  instagramUrl:
+    read(import.meta.env["VITE_INSTAGRAM_URL"]) ?? "https://www.instagram.com/36spokes/",
 } as const;
 
 /** Which integrations have configuration. */

@@ -5,12 +5,15 @@ import { MediaCategory, UserRole } from "../generated/prisma/enums.js";
  * upload is a change to this file only.
  */
 
-/** Accepted image formats and the file extension used in storage keys. SVG is excluded (scriptable). */
+/** Accepted media formats and the file extension used in storage keys. SVG is excluded (scriptable). */
 export const MEDIA_MIME_EXTENSIONS = {
   "image/jpeg": "jpg",
   "image/png": "png",
   "image/webp": "webp",
   "image/avif": "avif",
+  "video/mp4": "mp4",
+  "video/webm": "webm",
+  "video/quicktime": "mov",
 } as const;
 
 export type AllowedMediaMimeType = keyof typeof MEDIA_MIME_EXTENSIONS;
@@ -21,6 +24,10 @@ export const ALLOWED_MEDIA_MIME_TYPES = Object.keys(
 
 export function isAllowedMimeType(value: string): value is AllowedMediaMimeType {
   return Object.hasOwn(MEDIA_MIME_EXTENSIONS, value);
+}
+
+export function isVideoMimeType(mimeType: string): boolean {
+  return mimeType.startsWith("video/");
 }
 
 /** Top-level storage prefix per category, e.g. `products/2026/09/<uuid>.webp`. */
@@ -35,6 +42,9 @@ export const MEDIA_CATEGORY_PREFIX: Record<MediaCategory, string> = {
   [MediaCategory.GROUP]: "groups",
   [MediaCategory.GARAGE_SERVICE]: "garage-services",
   [MediaCategory.SITE]: "site",
+  [MediaCategory.RIDE]: "rides",
+  [MediaCategory.COMMUNITY]: "community",
+  [MediaCategory.PAYMENT_PROOF]: "payment-proofs",
 };
 
 /**
@@ -53,6 +63,10 @@ export const MEDIA_UPLOAD_ROLES: Record<MediaCategory, readonly UserRole[]> = {
   [MediaCategory.GROUP]: [],
   [MediaCategory.GARAGE_SERVICE]: [],
   [MediaCategory.SITE]: [],
+  [MediaCategory.RIDE]: [],
+  [MediaCategory.COMMUNITY]: [],
+  // Riders upload the screenshot of their own payment.
+  [MediaCategory.PAYMENT_PROOF]: [UserRole.RIDER],
 };
 
 export function canUploadCategory(role: UserRole, category: MediaCategory): boolean {

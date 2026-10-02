@@ -33,7 +33,14 @@ export function EntityNotFound({
   /** Lower-case noun, e.g. "trip". */
   entity: string;
   /** The listing that contains this kind of entity. */
-  backTo: "/garage" | "/shop" | "/travel/destinations" | "/travel/trips" | "/rides" | "/stories";
+  backTo:
+    | "/garage"
+    | "/shop"
+    | "/travel/destinations"
+    | "/travel/trips"
+    | "/rides"
+    | "/stories"
+    | "/community/groups";
   backLabel: string;
 }) {
   return (

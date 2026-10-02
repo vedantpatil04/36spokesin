@@ -1,64 +1,63 @@
 import { useMemo } from "react";
-import type { CartItem, ID } from "@/types";
-import { useAppStores } from "./app-stores";
+import {
+  addToCart,
+  clearCart,
+  getCart,
+  removeCartLine,
+  setCartLineQuantity,
+} from "@/services/commerce";
+import type { Cart, ID } from "@/types";
+import { assertSignedIn, type LoadStatus, useAppStores } from "./app-stores";
 import { useStoreSelector } from "./create-store";
 
+/** The API's per-line limit. The API also caps each line at the stock on hand. */
 export const MAX_CART_QUANTITY = 10;
 
-const clampQuantity = (quantity: number) =>
-  Math.max(1, Math.min(MAX_CART_QUANTITY, Math.round(quantity)));
-
-export function useCartItems(): CartItem[] {
+export function useCart(): Cart | null {
   const { cart } = useAppStores();
-  return useStoreSelector(cart, (state) => state.items);
+  return useStoreSelector(cart, (state) => state.cart);
+}
+
+export function useCartStatus(): LoadStatus {
+  const { cart } = useAppStores();
+  return useStoreSelector(cart, (state) => state.status);
 }
 
 /** Total units in the cart. */
 export function useCartCount(): number {
   const { cart } = useAppStores();
-  return useStoreSelector(cart, (state) =>
-    state.items.reduce((total, item) => total + item.quantity, 0),
-  );
+  return useStoreSelector(cart, (state) => state.cart?.itemCount ?? 0);
 }
 
 export function useCartQuantity(productId: ID): number {
   const { cart } = useAppStores();
   return useStoreSelector(
     cart,
-    (state) => state.items.find((item) => item.productId === productId)?.quantity ?? 0,
+    (state) => state.cart?.lines.find((line) => line.product.id === productId)?.quantity ?? 0,
   );
 }
 
+/**
+ * Cart changes go to the API; the store is replaced by the cart it returns, so
+ * prices and availability always come from the server. Actions throw
+ * SignInRequiredError when signed out, and ApiError when the API refuses.
+ */
 export function useCartActions() {
-  const { cart } = useAppStores();
-  return useMemo(
-    () => ({
-      add: (productId: ID, quantity = 1) =>
-        cart.setState((state) => {
-          const existing = state.items.find((item) => item.productId === productId);
-          if (!existing) {
-            return { items: [...state.items, { productId, quantity: clampQuantity(quantity) }] };
-          }
-          return {
-            items: state.items.map((item) =>
-              item.productId === productId
-                ? { ...item, quantity: clampQuantity(item.quantity + quantity) }
-                : item,
-            ),
-          };
-        }),
-      setQuantity: (productId: ID, quantity: number) =>
-        cart.setState((state) => ({
-          items: state.items.map((item) =>
-            item.productId === productId ? { ...item, quantity: clampQuantity(quantity) } : item,
-          ),
-        })),
-      remove: (productId: ID) =>
-        cart.setState((state) => ({
-          items: state.items.filter((item) => item.productId !== productId),
-        })),
-      clear: () => cart.setState(() => ({ items: [] })),
-    }),
-    [cart],
-  );
+  const stores = useAppStores();
+  return useMemo(() => {
+    const apply = async (request: () => Promise<Cart>) => {
+      assertSignedIn(stores);
+      const cart = await request();
+      stores.cart.setState((state) => ({ status: "ready", cart, revision: state.revision + 1 }));
+      return cart;
+    };
+    return {
+      add: (productId: ID, quantity = 1) => apply(() => addToCart(productId, quantity)),
+      setQuantity: (lineId: ID, quantity: number) =>
+        apply(() => setCartLineQuantity(lineId, quantity)),
+      remove: (lineId: ID) => apply(() => removeCartLine(lineId)),
+      clear: () => apply(() => clearCart()),
+      refresh: () => apply(() => getCart()),
+    };
+  }, [stores]);
 }

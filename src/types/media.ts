@@ -16,7 +16,9 @@ export type MediaCategory =
   | "riders"
   | "stories"
   | "events"
+  | "rides"
   | "garage"
+  | "community"
   | "site";
 
 /** Point of interest as fractions of width and height (0–1). Drives `object-position`. */

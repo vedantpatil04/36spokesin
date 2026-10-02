@@ -1,4 +1,4 @@
-import { detectImageMimeType, readImageDimensions } from "./image-inspection.js";
+import { detectImageMimeType, detectVideoMimeType, readImageDimensions } from "./image-inspection.js";
 
 const bytes = (...values: (number | string)[]) =>
   Uint8Array.from(
@@ -44,5 +44,38 @@ describe("readImageDimensions", () => {
   it("returns null when the header cannot be parsed", () => {
     expect(readImageDimensions(bytes("not an image at all"))).toBeNull();
     expect(readImageDimensions(TINY_PNG.subarray(0, 12))).toBeNull();
+  });
+});
+
+describe("detectVideoMimeType", () => {
+  it("recognises MP4 video by ftyp header", () => {
+    expect(detectVideoMimeType(bytes(0, 0, 0, 0x18, "ftyp", "isom", 0, 0, 0, 0))).toBe(
+      "video/mp4",
+    );
+    expect(detectVideoMimeType(bytes(0, 0, 0, 0x18, "ftyp", "mp42", 0, 0, 0, 0))).toBe(
+      "video/mp4",
+    );
+  });
+
+  it("recognises QuickTime MOV by qt brand or moov/mdat atom", () => {
+    expect(detectVideoMimeType(bytes(0, 0, 0, 0x14, "ftyp", "qt  ", 0, 0, 0, 0))).toBe(
+      "video/quicktime",
+    );
+    expect(detectVideoMimeType(bytes(0, 0, 0, 0x10, "moov", 0, 0, 0, 0))).toBe(
+      "video/quicktime",
+    );
+  });
+
+  it("recognises WebM video by EBML signature", () => {
+    expect(detectVideoMimeType(bytes(0x1a, 0x45, 0xdf, 0xa3, 0x9f, 0, 0, 0))).toBe(
+      "video/webm",
+    );
+  });
+
+  it("rejects non-video content", () => {
+    expect(detectVideoMimeType(bytes(0xff, 0xd8, 0xff, 0xe0))).toBeNull();
+    expect(detectVideoMimeType(TINY_PNG)).toBeNull();
+    expect(detectVideoMimeType(bytes("hello world"))).toBeNull();
+    expect(detectVideoMimeType(new Uint8Array())).toBeNull();
   });
 });

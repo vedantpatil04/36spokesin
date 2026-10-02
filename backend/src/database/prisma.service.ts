@@ -1,5 +1,6 @@
 import { Injectable, Logger, type OnModuleDestroy, type OnModuleInit } from "@nestjs/common";
 import { PrismaPg } from "@prisma/adapter-pg";
+import pg from "pg";
 import { AppConfigService } from "../config/app-config.service.js";
 import { PrismaClient } from "../generated/prisma/client.js";
 
@@ -9,7 +10,19 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
   private readonly logger = new Logger(PrismaService.name);
 
   constructor(config: AppConfigService) {
-    super({ adapter: new PrismaPg({ connectionString: config.database.url }) });
+    const rawUrl = config.database.url;
+    const isSsl =
+      rawUrl.includes("sslmode=require") ||
+      rawUrl.includes("supabase.co") ||
+      rawUrl.includes("pooler.supabase.com");
+    const cleanUrl = rawUrl
+      .replace(/[?&]sslmode=[^&]+/, (match) => (match.startsWith("?") ? "?" : ""))
+      .replace(/\?$/, "");
+    const pool = new pg.Pool({
+      connectionString: cleanUrl,
+      ssl: isSsl ? { rejectUnauthorized: false } : undefined,
+    });
+    super({ adapter: new PrismaPg(pool) });
   }
 
   async onModuleInit(): Promise<void> {

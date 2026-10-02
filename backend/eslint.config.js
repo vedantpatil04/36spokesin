@@ -18,7 +18,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ["src/cli/**/*.ts"],
+    files: ["src/cli/**/*.ts", "prisma/**/*.ts"],
     rules: { "no-console": "off" },
   },
   eslintPluginPrettier,

@@ -1,0 +1,9 @@
+Files removed in Phase 5. Delete them from the working tree when merging this package
+(the ZIP only contains added and modified files).
+
+src/data/destinations.ts
+src/data/trips.ts
+src/data/rides.ts
+  Bundled sample travel and ride content. Destinations, trips and rides now come
+  from the API (PostgreSQL + R2) and are managed in the admin CMS;
+  `npm run db:seed` in backend/ creates equivalent development data.

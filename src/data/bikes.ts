@@ -1,10 +1,14 @@
 import { media } from "@/data/media";
 import type { Bike } from "@/types";
 
-/** Bike selected for visitors who have not chosen one. */
-export const DEFAULT_BIKE_ID = "re-himalayan-450";
+/**
+ * Sample motorcycles for the journey planner's fuel-range estimates only.
+ * The Garage and Shop read the real bike catalogue from the API
+ * (`@/services/catalog`); admins manage it in the CMS.
+ */
+export type SampleBike = Bike & { fuelEfficiencyKmpl: number; tankLitres: number };
 
-export const bikes: Bike[] = [
+export const bikes: SampleBike[] = [
   {
     id: "re-himalayan-450",
     slug: "royal-enfield-himalayan-450",

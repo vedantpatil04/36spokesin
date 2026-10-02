@@ -1,4 +1,5 @@
-// 36 Spokes — database schema (Phase 3 foundation)
+// 36 Spokes — database schema (Phase 3 foundation, Phase 4 catalogue, garage and
+// commerce, Phase 5 travel and rides, Phase 6 community)
 //
 // Workflow: edit this file → `npm run db:migrate -- --name <change>` → commit the
 // generated folder in prisma/migrations. Never edit the database by hand.
@@ -8,12 +9,18 @@
 // - Primary keys are UUIDv7: time-ordered, so B-tree inserts stay local as tables grow.
 // - Timestamps are timestamptz.
 // - Media binaries live in Cloudflare R2. Postgres stores metadata only.
+// - Money is stored as integers in minor units (paise for INR). Never floats.
+// - Relations to MediaAsset use onDelete: Restrict, so an asset that is still in
+//   use can never be deleted by accident (see src/media/media-references.ts).
 
 generator client {
   provider            = "prisma-client"
   output              = "../src/generated/prisma"
   moduleFormat        = "esm"
   importFileExtension = "js"
+  // Partial unique indexes enforce "one primary image per product" and
+  // "one primary bike per rider" in the database, not just in application code.
+  previewFeatures     = ["partialIndexes"]
 }
 
 datasource db {
@@ -41,6 +48,11 @@ enum MediaCategory {
   GROUP
   GARAGE_SERVICE
   SITE
+  RIDE
+  /// Founder portraits and rider spotlight photos. Admin uploads only.
+  COMMUNITY
+  /// Screenshots riders upload as proof of a manual (UPI) payment.
+  PAYMENT_PROOF
 
   @@map("media_category")
 }
@@ -68,9 +80,25 @@ model User {
   createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  riderProfile RiderProfile?
-  sessions     AuthSession[]
-  mediaAssets  MediaAsset[]
+  riderProfile       RiderProfile?
+  sessions           AuthSession[]
+  mediaAssets        MediaAsset[]
+  productsCreated    Product[]          @relation("ProductCreatedBy")
+  productsUpdated    Product[]          @relation("ProductUpdatedBy")
+  riderBikes         RiderBike[]
+  wishlistItems      WishlistItem[]
+  cart               Cart?
+  orders             Order[]
+  rideRegistrations  RideRegistration[]
+  socialPostsCreated SocialPost[]       @relation("SocialPostCreatedBy")
+  socialPostsUpdated SocialPost[]       @relation("SocialPostUpdatedBy")
+  foundersCreated    Founder[]          @relation("FounderCreatedBy")
+  foundersUpdated    Founder[]          @relation("FounderUpdatedBy")
+  heroSlidesCreated  HeroSlide[]        @relation("HeroSlideCreatedBy")
+  heroSlidesUpdated  HeroSlide[]        @relation("HeroSlideUpdatedBy")
+  paymentsReviewed   Payment[]          @relation("PaymentReviewedBy")
+  paymentSettings    PaymentSettings[]  @relation("PaymentSettingsUpdatedBy")
+  savedJourneys      SavedJourney[]
 
   @@map("users")
 }
@@ -140,9 +168,1025 @@ model MediaAsset {
   createdAt        DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt        DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  owner        User?          @relation(fields: [ownerId], references: [id], onDelete: SetNull)
-  riderAvatars RiderProfile[] @relation("RiderAvatar")
+  owner                User?             @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+  // Every relation below must also be listed in src/media/media-references.ts.
+  riderAvatars         RiderProfile[]    @relation("RiderAvatar")
+  productImages        ProductImage[]
+  categoryImages       ProductCategory[] @relation("ProductCategoryImage")
+  bikeModelImages      BikeModel[]       @relation("BikeModelImage")
+  galleryImages        GalleryImage[]
+  socialPosts          SocialPost[]
+  founderImages        Founder[]         @relation("FounderImage")
+  storyCovers          Story[]           @relation("StoryCover")
+  riderSpotlightImages RiderSpotlight[]  @relation("RiderSpotlightImage")
+  groupCovers          CommunityGroup[]  @relation("CommunityGroupCover")
+  heroImages           HeroSlide[]       @relation("HeroSlideImage")
+  heroVideos           HeroSlide[]       @relation("HeroSlideVideo")
+  heroPosters          HeroSlide[]       @relation("HeroSlidePoster")
+  heroMobileMedia      HeroSlide[]       @relation("HeroSlideMobileMedia")
+  pathCardImages       PathCard[]        @relation("PathCardImage")
+  paymentProofs        Payment[]         @relation("PaymentProof")
+  paymentQrs           PaymentSettings[] @relation("PaymentSettingsQr")
 
   @@index([ownerId, status, createdAt(sort: Desc), id(sort: Desc)])
   @@map("media_assets")
+}
+
+// ─── Phase 4: catalogue ─────────────────────────────────────────────────────
+
+/// Storefront visibility. Only PUBLISHED products are served publicly. Products
+/// are archived rather than deleted so carts, wishlists and orders keep their
+/// references.
+enum ProductStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+
+  @@map("product_status")
+}
+
+enum StockStatus {
+  IN_STOCK
+  LOW_STOCK
+  OUT_OF_STOCK
+  /// Orderable while out of stock; ships when restocked.
+  BACKORDER
+
+  @@map("stock_status")
+}
+
+/// Grouped by what the gear does on a ride (Protect, Carry, …), not by brand.
+model ProductCategory {
+  id           String   @id @default(uuid(7)) @db.Uuid
+  slug         String   @unique
+  name         String
+  /// One line on what the category holds, e.g. "Helmets, armour, guards".
+  description  String?
+  sortOrder    Int      @default(0) @map("sort_order")
+  imageMediaId String?  @map("image_media_id") @db.Uuid
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  image    MediaAsset? @relation("ProductCategoryImage", fields: [imageMediaId], references: [id], onDelete: Restrict)
+  products Product[]
+
+  @@index([sortOrder])
+  @@index([imageMediaId])
+  @@map("product_categories")
+}
+
+model ProductBrand {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  slug      String   @unique
+  name      String   @unique
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  products Product[]
+
+  @@map("product_brands")
+}
+
+model Product {
+  id               String        @id @default(uuid(7)) @db.Uuid
+  slug             String        @unique
+  /// Stored upper-cased and trimmed.
+  sku              String        @unique
+  name             String
+  shortDescription String?       @map("short_description")
+  description      String?
+  brandId          String?       @map("brand_id") @db.Uuid
+  categoryId       String        @map("category_id") @db.Uuid
+  /// Minor units (paise for INR).
+  price            Int
+  /// Minor units. Shown struck through when higher than `price`.
+  compareAtPrice   Int?          @map("compare_at_price")
+  currency         String        @default("INR") @db.VarChar(3)
+  status           ProductStatus @default(DRAFT)
+  featured         Boolean       @default(false)
+  stockQuantity    Int           @default(0) @map("stock_quantity")
+  stockStatus      StockStatus   @default(IN_STOCK) @map("stock_status")
+  weightGrams      Int?          @map("weight_grams")
+  /// Rider gear that fits any motorcycle. Bike-mounted parts list
+  /// ProductCompatibility rows instead.
+  universalFit     Boolean       @default(false) @map("universal_fit")
+  /// Set the first time the product is published.
+  publishedAt      DateTime?     @map("published_at") @db.Timestamptz(3)
+  createdById      String?       @map("created_by_id") @db.Uuid
+  updatedById      String?       @map("updated_by_id") @db.Uuid
+  createdAt        DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  brand          ProductBrand?          @relation(fields: [brandId], references: [id], onDelete: Restrict)
+  category       ProductCategory        @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  createdBy      User?                  @relation("ProductCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy      User?                  @relation("ProductUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  images         ProductImage[]
+  specifications ProductSpecification[]
+  compatibility  ProductCompatibility[]
+  wishlistItems  WishlistItem[]
+  cartItems      CartItem[]
+  orderItems     OrderItem[]
+
+  @@index([status, publishedAt(sort: Desc), id(sort: Desc)])
+  @@index([categoryId, status])
+  @@index([brandId])
+  @@index([createdById])
+  @@index([updatedById])
+  @@index([updatedAt(sort: Desc), id(sort: Desc)])
+  @@map("products")
+}
+
+/// A product's use of a media asset. Ordering, the primary flag and alt text
+/// belong to this relation, so the same asset can serve several products.
+model ProductImage {
+  id           String   @id @default(uuid(7)) @db.Uuid
+  productId    String   @map("product_id") @db.Uuid
+  mediaAssetId String   @map("media_asset_id") @db.Uuid
+  sortOrder    Int      @map("sort_order")
+  isPrimary    Boolean  @default(false) @map("is_primary")
+  /// Overrides the asset's own alt text on this product.
+  altText      String?  @map("alt_text")
+  caption      String?
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  product    Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  mediaAsset MediaAsset @relation(fields: [mediaAssetId], references: [id], onDelete: Restrict)
+
+  @@unique([productId, mediaAssetId])
+  @@unique([productId], map: "product_images_one_primary_key", where: { isPrimary: true })
+  @@index([productId, sortOrder])
+  @@index([mediaAssetId])
+  @@map("product_images")
+}
+
+model ProductSpecification {
+  id        String  @id @default(uuid(7)) @db.Uuid
+  productId String  @map("product_id") @db.Uuid
+  /// Optional heading rows are grouped under, e.g. "Dimensions".
+  groupName String? @map("group_name")
+  label     String
+  value     String
+  sortOrder Int     @map("sort_order")
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId, sortOrder])
+  @@map("product_specifications")
+}
+
+/// A product confirmed to fit a bike model, or one variant of it.
+model ProductCompatibility {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  productId     String   @map("product_id") @db.Uuid
+  bikeModelId   String   @map("bike_model_id") @db.Uuid
+  /// Null: every variant of the model.
+  bikeVariantId String?  @map("bike_variant_id") @db.Uuid
+  note          String?
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  product     Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  bikeModel   BikeModel    @relation(fields: [bikeModelId], references: [id], onDelete: Restrict)
+  bikeVariant BikeVariant? @relation(fields: [bikeVariantId], references: [id], onDelete: Restrict)
+
+  @@unique([productId, bikeModelId, bikeVariantId])
+  @@index([bikeModelId])
+  @@index([bikeVariantId])
+  @@map("product_compatibility")
+}
+
+// ─── Phase 4: bike catalogue and garage ─────────────────────────────────────
+
+enum BikeSegment {
+  ADVENTURE
+  SCRAMBLER
+  TOURING
+  STREET
+  CRUISER
+  SPORT
+
+  @@map("bike_segment")
+}
+
+/// Bike catalogue rows are archived, never deleted: riders' garages and product
+/// fitment keep pointing at them.
+model BikeBrand {
+  id         String    @id @default(uuid(7)) @db.Uuid
+  slug       String    @unique
+  name       String    @unique
+  archivedAt DateTime? @map("archived_at") @db.Timestamptz(3)
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt  DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  models BikeModel[]
+
+  @@map("bike_brands")
+}
+
+model BikeModel {
+  id                 String      @id @default(uuid(7)) @db.Uuid
+  brandId            String      @map("brand_id") @db.Uuid
+  /// Includes the brand, e.g. "royal-enfield-himalayan-450".
+  slug               String      @unique
+  name               String
+  segment            BikeSegment
+  description        String?
+  displacementCc     Int?        @map("displacement_cc")
+  /// Approximate real-world figures, used for range estimates.
+  fuelEfficiencyKmpl Float?      @map("fuel_efficiency_kmpl")
+  tankLitres         Float?      @map("tank_litres")
+  imageMediaId       String?     @map("image_media_id") @db.Uuid
+  archivedAt         DateTime?   @map("archived_at") @db.Timestamptz(3)
+  createdAt          DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt          DateTime    @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  brand         BikeBrand              @relation(fields: [brandId], references: [id], onDelete: Restrict)
+  image         MediaAsset?            @relation("BikeModelImage", fields: [imageMediaId], references: [id], onDelete: Restrict)
+  variants      BikeVariant[]
+  compatibility ProductCompatibility[]
+  riderBikes    RiderBike[]
+
+  @@unique([brandId, name])
+  @@index([imageMediaId])
+  @@map("bike_models")
+}
+
+/// A trim, edition or colourway of a model.
+model BikeVariant {
+  id         String    @id @default(uuid(7)) @db.Uuid
+  modelId    String    @map("model_id") @db.Uuid
+  name       String
+  sortOrder  Int       @default(0) @map("sort_order")
+  archivedAt DateTime? @map("archived_at") @db.Timestamptz(3)
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt  DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  model         BikeModel              @relation(fields: [modelId], references: [id], onDelete: Restrict)
+  compatibility ProductCompatibility[]
+  riderBikes    RiderBike[]
+
+  @@unique([modelId, name])
+  @@map("bike_variants")
+}
+
+/// A motorcycle in a rider's own garage.
+model RiderBike {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  userId        String   @map("user_id") @db.Uuid
+  bikeModelId   String   @map("bike_model_id") @db.Uuid
+  bikeVariantId String?  @map("bike_variant_id") @db.Uuid
+  nickname      String?
+  year          Int?
+  odometerKm    Int?     @map("odometer_km")
+  isPrimary     Boolean  @default(false) @map("is_primary")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bikeModel   BikeModel    @relation(fields: [bikeModelId], references: [id], onDelete: Restrict)
+  bikeVariant BikeVariant? @relation(fields: [bikeVariantId], references: [id], onDelete: Restrict)
+
+  @@unique([userId], map: "rider_bikes_one_primary_key", where: { isPrimary: true })
+  @@index([userId, createdAt])
+  @@index([bikeModelId])
+  @@index([bikeVariantId])
+  @@map("rider_bikes")
+}
+
+// ─── Phase 4: wishlist, cart and order foundation ───────────────────────────
+
+model WishlistItem {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  productId String   @map("product_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@index([productId])
+  @@map("wishlist_items")
+}
+
+/// One cart per rider. Prices are read live from the product; only quantities
+/// are stored here.
+model Cart {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  userId    String   @unique @map("user_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items CartItem[]
+
+  @@map("carts")
+}
+
+model CartItem {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  cartId    String   @map("cart_id") @db.Uuid
+  productId String   @map("product_id") @db.Uuid
+  quantity  Int
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  cart    Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([cartId, productId])
+  @@index([productId])
+  @@map("cart_items")
+}
+
+/// Order foundation. Payment, shipping and invoicing arrive in later phases;
+/// nothing in Phase 4 places an order.
+enum OrderStatus {
+  PENDING_PAYMENT
+  PLACED
+  PACKED
+  SHIPPED
+  DELIVERED
+  CANCELLED
+
+  @@map("order_status")
+}
+
+model Order {
+  id        String      @id @default(uuid(7)) @db.Uuid
+  /// Customer-facing order number.
+  number    Int         @unique @default(autoincrement())
+  /// Null once the account is deleted; the order record outlives it.
+  userId    String?     @map("user_id") @db.Uuid
+  status    OrderStatus @default(PENDING_PAYMENT)
+  currency  String      @default("INR") @db.VarChar(3)
+  /// Minor units.
+  subtotal  Int
+  /// Minor units.
+  total     Int
+  placedAt  DateTime?   @map("placed_at") @db.Timestamptz(3)
+  createdAt DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime    @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user  User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  items OrderItem[]
+
+  @@index([userId, createdAt(sort: Desc), id(sort: Desc)])
+  @@index([status])
+  @@map("orders")
+}
+
+/// Snapshot of what was bought: later catalogue edits never rewrite history.
+model OrderItem {
+  id                  String   @id @default(uuid(7)) @db.Uuid
+  orderId             String   @map("order_id") @db.Uuid
+  productId           String?  @map("product_id") @db.Uuid
+  productNameSnapshot String   @map("product_name_snapshot")
+  skuSnapshot         String   @map("sku_snapshot")
+  /// Unit price in minor units at the time of the order.
+  priceSnapshot       Int      @map("price_snapshot")
+  quantity            Int
+  /// priceSnapshot × quantity, minor units.
+  total               Int
+  createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  order   Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@index([orderId])
+  @@index([productId])
+  @@map("order_items")
+}
+
+// ─── Phase 5: travel and rides ──────────────────────────────────────────────
+
+/// Visibility of editorial content. Only PUBLISHED is served publicly.
+enum ContentStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+
+  @@map("content_status")
+}
+
+enum Difficulty {
+  EASY
+  MODERATE
+  CHALLENGING
+  EXPERT
+
+  @@map("difficulty")
+}
+
+model Destination {
+  id                     String        @id @default(uuid(7)) @db.Uuid
+  slug                   String        @unique
+  name                   String
+  shortDescription       String?       @map("short_description")
+  description            String?
+  region                 String
+  country                String        @default("India")
+  difficulty             Difficulty
+  /// Free text, e.g. "June to September".
+  bestSeason             String?       @map("best_season")
+  /// Free text, e.g. "8–12 days".
+  durationRecommendation String?       @map("duration_recommendation")
+  /// Permits, altitude, fuel stops: shown as "Useful information".
+  usefulInfo             String?       @map("useful_info")
+  status                 ContentStatus @default(DRAFT)
+  featured               Boolean       @default(false)
+  publishedAt            DateTime?     @map("published_at") @db.Timestamptz(3)
+  createdAt              DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt              DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  trips   Trip[]
+  rides   Ride[]
+  images  GalleryImage[]
+  stories Story[]
+
+  @@index([status, featured])
+  @@map("destinations")
+}
+
+enum DepartureStatus {
+  OPEN
+  FULL
+  CLOSED
+  CANCELLED
+
+  @@map("departure_status")
+}
+
+model Trip {
+  id               String        @id @default(uuid(7)) @db.Uuid
+  slug             String        @unique
+  name             String
+  shortDescription String?       @map("short_description")
+  description      String?
+  destinationId    String        @map("destination_id") @db.Uuid
+  durationDays     Int           @map("duration_days")
+  distanceKm       Int?          @map("distance_km")
+  difficulty       Difficulty
+  startingLocation String        @map("starting_location")
+  endingLocation   String?       @map("ending_location")
+  status           ContentStatus @default(DRAFT)
+  featured         Boolean       @default(false)
+  publishedAt      DateTime?     @map("published_at") @db.Timestamptz(3)
+  createdAt        DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  destination Destination        @relation(fields: [destinationId], references: [id], onDelete: Restrict)
+  itinerary   TripItineraryDay[]
+  departures  TripDeparture[]
+  images      GalleryImage[]
+  rides       Ride[]
+
+  @@index([destinationId, status])
+  @@index([status, featured])
+  @@map("trips")
+}
+
+model TripItineraryDay {
+  id            String  @id @default(uuid(7)) @db.Uuid
+  tripId        String  @map("trip_id") @db.Uuid
+  dayNumber     Int     @map("day_number")
+  title         String
+  description   String?
+  routeSummary  String? @map("route_summary")
+  distanceKm    Int?    @map("distance_km")
+  accommodation String?
+  notes         String?
+
+  trip Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  @@unique([tripId, dayNumber])
+  @@map("trip_itinerary_days")
+}
+
+/// A dated run of a trip. Capacity is recorded; seat booking arrives with payments.
+model TripDeparture {
+  id        String          @id @default(uuid(7)) @db.Uuid
+  tripId    String          @map("trip_id") @db.Uuid
+  startDate DateTime        @map("start_date") @db.Date
+  endDate   DateTime        @map("end_date") @db.Date
+  /// Minor units (paise) per rider. Null: price on request.
+  price     Int?
+  capacity  Int
+  status    DepartureStatus @default(OPEN)
+  createdAt DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime        @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  trip Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  @@index([tripId, startDate])
+  @@map("trip_departures")
+}
+
+enum RideType {
+  WEEKEND
+  DAY_RIDE
+  GROUP_RIDE
+  EVENT
+
+  @@map("ride_type")
+}
+
+/// DRAFT and ARCHIVED are never public. Riders can join only UPCOMING rides
+/// that haven't started and have spots left.
+enum RideStatus {
+  DRAFT
+  UPCOMING
+  FULL
+  COMPLETED
+  CANCELLED
+  ARCHIVED
+
+  @@map("ride_status")
+}
+
+model Ride {
+  id               String     @id @default(uuid(7)) @db.Uuid
+  slug             String     @unique
+  title            String
+  shortDescription String?    @map("short_description")
+  description      String?
+  type             RideType
+  /// Town or region, e.g. "Pune".
+  location         String
+  meetingPoint     String     @map("meeting_point")
+  startsAt         DateTime   @map("starts_at") @db.Timestamptz(3)
+  /// Display text, e.g. "5 hrs" or "2 days".
+  durationLabel    String?    @map("duration_label")
+  routeStart       String?    @map("route_start")
+  routeFinish      String?    @map("route_finish")
+  waypoints        String[]   @default([])
+  routeSummary     String?    @map("route_summary")
+  distanceKm       Int?       @map("distance_km")
+  difficulty       Difficulty
+  rideLeader       String?    @map("ride_leader")
+  capacity         Int
+  /// Minor units (paise) per rider. Null: free ride.
+  price            Int?
+  status           RideStatus @default(DRAFT)
+  featured         Boolean    @default(false)
+  destinationId    String?    @map("destination_id") @db.Uuid
+  tripId           String?    @map("trip_id") @db.Uuid
+  publishedAt      DateTime?  @map("published_at") @db.Timestamptz(3)
+  createdAt        DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime   @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  destination   Destination?       @relation(fields: [destinationId], references: [id], onDelete: SetNull)
+  trip          Trip?              @relation(fields: [tripId], references: [id], onDelete: SetNull)
+  registrations RideRegistration[]
+  images        GalleryImage[]
+
+  @@index([status, startsAt])
+  @@index([destinationId])
+  @@index([tripId])
+  @@map("rides")
+}
+
+enum RideRegistrationStatus {
+  /// Paid ride: the seat is held while the rider pays and the payment is verified.
+  PENDING_PAYMENT
+  /// Confirmed. Free rides start here; paid rides arrive once the payment is verified.
+  REGISTERED
+  CANCELLED
+
+  @@map("ride_registration_status")
+}
+
+/// A rider's booking on a ride. One row per rider per ride; leaving and booking
+/// again flips the status and replaces the booking details.
+model RideRegistration {
+  id            String                 @id @default(uuid(7)) @db.Uuid
+  /// Rider-facing booking number.
+  number        Int                    @unique @default(autoincrement())
+  rideId        String                 @map("ride_id") @db.Uuid
+  userId        String                 @map("user_id") @db.Uuid
+  status        RideRegistrationStatus @default(REGISTERED)
+  /// Number the ride crew can reach the rider on, as given when booking.
+  contactPhone  String?                @map("contact_phone")
+  /// The rider's motorcycle as text, so the booking survives garage edits.
+  bikeLabel     String?                @map("bike_label")
+  note          String?
+  /// The ride's price per rider (minor units) when the booking was made; null for
+  /// a free ride. A record of what was quoted, not of a payment.
+  amount        Int?
+  currency      String?                @db.VarChar(3)
+  /// While PENDING_PAYMENT: when the seat is released if no payment proof has
+  /// arrived. Null while a proof is under review. Left set on a booking that
+  /// was cancelled because the hold ran out.
+  holdExpiresAt DateTime?              @map("hold_expires_at") @db.Timestamptz(3)
+  /// When the current booking was made. Booking again after a cancellation
+  /// reuses the row and resets this; payments older than it are history.
+  bookedAt      DateTime               @default(now()) @map("booked_at") @db.Timestamptz(3)
+  cancelledAt   DateTime?              @map("cancelled_at") @db.Timestamptz(3)
+  createdAt     DateTime               @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime               @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  ride     Ride      @relation(fields: [rideId], references: [id], onDelete: Cascade)
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  payments Payment[]
+
+  @@unique([rideId, userId])
+  @@index([rideId, status])
+  @@index([userId, status])
+  @@map("ride_registrations")
+}
+
+/// Photo galleries for destinations, trips and rides. Same rules as product
+/// images: ordered, one primary per owner, alt text on the relation. Exactly one
+/// owner column is set (CHECK constraint in the migration).
+model GalleryImage {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  mediaAssetId  String   @map("media_asset_id") @db.Uuid
+  destinationId String?  @map("destination_id") @db.Uuid
+  tripId        String?  @map("trip_id") @db.Uuid
+  rideId        String?  @map("ride_id") @db.Uuid
+  sortOrder     Int      @map("sort_order")
+  isPrimary     Boolean  @default(false) @map("is_primary")
+  altText       String?  @map("alt_text")
+  caption       String?
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  mediaAsset  MediaAsset   @relation(fields: [mediaAssetId], references: [id], onDelete: Restrict)
+  destination Destination? @relation(fields: [destinationId], references: [id], onDelete: Cascade)
+  trip        Trip?        @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  ride        Ride?        @relation(fields: [rideId], references: [id], onDelete: Cascade)
+
+  @@unique([destinationId, mediaAssetId])
+  @@unique([tripId, mediaAssetId])
+  @@unique([rideId, mediaAssetId])
+  @@unique([destinationId], map: "gallery_images_one_primary_destination", where: { isPrimary: true })
+  @@unique([tripId], map: "gallery_images_one_primary_trip", where: { isPrimary: true })
+  @@unique([rideId], map: "gallery_images_one_primary_ride", where: { isPrimary: true })
+  @@index([destinationId, sortOrder])
+  @@index([tripId, sortOrder])
+  @@index([rideId, sortOrder])
+  @@index([mediaAssetId])
+  @@map("gallery_images")
+}
+
+// ─── Payments ───────────────────────────────────────────────────────────────
+
+enum PaymentProvider {
+  /// Reserved for the gateway phase. Nothing creates these yet.
+  RAZORPAY
+  /// The rider pays by UPI outside the app and uploads a screenshot; an admin verifies it.
+  MANUAL_UPI
+
+  @@map("payment_provider")
+}
+
+enum PaymentStatus {
+  // Gateway states, reserved for the gateway phase.
+  CREATED
+  PENDING
+  /// Verified. For MANUAL_UPI only an admin's approval sets this.
+  PAID
+  FAILED
+  /// The booking was cancelled while the proof was awaiting review.
+  CANCELLED
+  REFUNDED
+  /// MANUAL_UPI: proof uploaded, awaiting an admin's review.
+  PROOF_SUBMITTED
+  /// MANUAL_UPI: an admin rejected the proof; `failureReason` says why.
+  REJECTED
+
+  @@map("payment_status")
+}
+
+/// One payment attempt. For a ride booking paid by UPI: one row per proof the
+/// rider submits, kept as history whether it is approved or rejected. Exactly one
+/// owner column is set (CHECK constraint in the migration).
+model Payment {
+  id                 String          @id @default(uuid(7)) @db.Uuid
+  /// Owners reserved for later phases (shop orders, trip bookings).
+  orderId            String?         @map("order_id") @db.Uuid
+  tripBookingId      String?         @map("trip_booking_id") @db.Uuid
+  rideRegistrationId String?         @map("ride_registration_id") @db.Uuid
+  provider           PaymentProvider @default(RAZORPAY)
+  providerOrderId    String?         @unique @map("provider_order_id")
+  providerPaymentId  String?         @unique @map("provider_payment_id")
+  /// Minor units. Always taken from the booking on the server, never from the client.
+  amount             Int
+  currency           String          @default("INR") @db.VarChar(3)
+  status             PaymentStatus   @default(CREATED)
+  /// Why a payment failed or a proof was rejected.
+  failureReason      String?         @map("failure_reason")
+  /// MANUAL_UPI: the uploaded screenshot.
+  proofMediaId       String?         @unique @map("proof_media_id") @db.Uuid
+  reviewedById       String?         @map("reviewed_by_id") @db.Uuid
+  reviewedAt         DateTime?       @map("reviewed_at") @db.Timestamptz(3)
+  createdAt          DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt          DateTime        @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  rideRegistration RideRegistration? @relation(fields: [rideRegistrationId], references: [id], onDelete: Cascade)
+  proof            MediaAsset?       @relation("PaymentProof", fields: [proofMediaId], references: [id], onDelete: Restrict)
+  reviewedBy       User?             @relation("PaymentReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  @@index([orderId])
+  @@index([tripBookingId])
+  @@index([rideRegistrationId])
+  @@index([status, createdAt])
+  @@index([reviewedById])
+  @@map("payments")
+}
+
+/// Where riders send money for paid rides: one row (id 1), edited in the CMS.
+/// Nothing here is a credential; it is what a rider sees on the payment step.
+model PaymentSettings {
+  id           Int      @id @default(1)
+  upiId        String?  @map("upi_id")
+  /// Name the rider should see in their UPI app.
+  payeeName    String?  @map("payee_name")
+  instructions String?
+  qrMediaId    String?  @map("qr_media_id") @db.Uuid
+  updatedById  String?  @map("updated_by_id") @db.Uuid
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  qr        MediaAsset? @relation("PaymentSettingsQr", fields: [qrMediaId], references: [id], onDelete: Restrict)
+  updatedBy User?       @relation("PaymentSettingsUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@index([qrMediaId])
+  @@index([updatedById])
+  @@map("payment_settings")
+}
+
+// ─── Phase 8: journey planner ───────────────────────────────────────────────
+
+/// A journey plan a rider chose to keep. `plan` is the structured plan as it was
+/// generated (facts with their sources plus the AI-written itinerary), never raw
+/// provider responses. The summary columns exist so lists don't read the JSON.
+model SavedJourney {
+  id              String   @id @default(uuid(7)) @db.Uuid
+  userId          String   @map("user_id") @db.Uuid
+  /// The plan's signature: proves it came from this API and stops double saves.
+  signature       String
+  title           String
+  originName      String   @map("origin_name")
+  destinationName String   @map("destination_name")
+  travelDate      DateTime @map("travel_date") @db.Date
+  riders          Int
+  distanceKm      Int      @map("distance_km")
+  rideMinutes     Int      @map("ride_minutes")
+  plan            Json
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, signature])
+  @@index([userId, createdAt(sort: Desc), id(sort: Desc)])
+  @@map("saved_journeys")
+}
+
+// ─── Social feed: homepage social & Instagram posts ──────────────────────────
+
+enum SocialPlatform {
+  INSTAGRAM
+
+  @@map("social_platform")
+}
+
+enum SocialPostStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+
+  @@map("social_post_status")
+}
+
+enum SocialMediaType {
+  IMAGE
+  VIDEO
+
+  @@map("social_media_type")
+}
+
+model SocialPost {
+  id           String           @id @default(uuid(7)) @db.Uuid
+  postUrl      String           @map("post_url")
+  mediaType    SocialMediaType  @default(IMAGE) @map("media_type")
+  imageUrl     String?          @map("image_url")
+  videoUrl     String?          @map("video_url")
+  mediaAssetId String?          @map("media_asset_id") @db.Uuid
+  caption      String?
+  username     String?
+  platform     SocialPlatform   @default(INSTAGRAM) @map("platform")
+  status       SocialPostStatus @default(DRAFT) @map("status")
+  sortOrder    Int              @default(0) @map("sort_order")
+  isFeatured   Boolean          @default(false) @map("is_featured")
+  createdAt    DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime         @updatedAt @map("updated_at") @db.Timestamptz(3)
+  createdById  String?          @map("created_by_id") @db.Uuid
+  updatedById  String?          @map("updated_by_id") @db.Uuid
+
+  mediaAsset MediaAsset? @relation(fields: [mediaAssetId], references: [id], onDelete: SetNull)
+  createdBy  User?       @relation("SocialPostCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy  User?       @relation("SocialPostUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@index([status, sortOrder(sort: Asc), createdAt(sort: Desc)])
+  @@index([mediaAssetId])
+  @@map("social_posts")
+}
+
+// ─── Phase 6: community ─────────────────────────────────────────────────────
+// Founders, rider stories, rider spotlights and groups. Admin-managed editorial
+// content: only PUBLISHED rows are public, nothing is hard-deleted (archive
+// instead), and every image is a MediaAsset in R2 (ON DELETE RESTRICT).
+// Community events are Rides (Phase 5); Memory Lane is not modelled yet.
+
+/// A founder of 36 Spokes. Only the name is required: role, bio, story, quote,
+/// links and photo stay empty until the business supplies them. The confirmed
+/// founders are inserted once by the Phase 6 migration, never on start-up.
+model Founder {
+  id           String        @id @default(uuid(7)) @db.Uuid
+  name         String
+  role         String?
+  shortBio     String?       @map("short_bio")
+  /// Longer story. Blank lines start paragraphs.
+  story        String?
+  quote        String?
+  instagramUrl String?       @map("instagram_url")
+  linkedinUrl  String?       @map("linkedin_url")
+  imageMediaId String?       @map("image_media_id") @db.Uuid
+  sortOrder    Int           @default(0) @map("sort_order")
+  status       ContentStatus @default(DRAFT)
+  createdById  String?       @map("created_by_id") @db.Uuid
+  updatedById  String?       @map("updated_by_id") @db.Uuid
+  createdAt    DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  image     MediaAsset? @relation("FounderImage", fields: [imageMediaId], references: [id], onDelete: Restrict)
+  createdBy User?       @relation("FounderCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy User?       @relation("FounderUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@index([status, sortOrder])
+  @@index([imageMediaId])
+  @@index([createdById])
+  @@index([updatedById])
+  @@map("founders")
+}
+
+/// A rider story. Plain text content; blank lines start paragraphs.
+model Story {
+  id            String        @id @default(uuid(7)) @db.Uuid
+  slug          String        @unique
+  title         String
+  excerpt       String?
+  content       String?
+  /// Credit as it should appear on the site. Free text on purpose: a story is
+  /// never linked to a rider's account or personal data.
+  authorName    String?       @map("author_name")
+  coverMediaId  String?       @map("cover_media_id") @db.Uuid
+  destinationId String?       @map("destination_id") @db.Uuid
+  status        ContentStatus @default(DRAFT)
+  featured      Boolean       @default(false)
+  sortOrder     Int           @default(0) @map("sort_order")
+  /// Set the first time the story is published.
+  publishedAt   DateTime?     @map("published_at") @db.Timestamptz(3)
+  createdAt     DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  cover       MediaAsset?  @relation("StoryCover", fields: [coverMediaId], references: [id], onDelete: Restrict)
+  destination Destination? @relation(fields: [destinationId], references: [id], onDelete: SetNull)
+
+  @@index([status, featured, sortOrder])
+  @@index([coverMediaId])
+  @@index([destinationId])
+  @@map("stories")
+}
+
+/// A rider featured on the Community page. Holds only what the rider chose to
+/// share through an admin; deliberately not linked to a user account.
+model RiderSpotlight {
+  id            String        @id @default(uuid(7)) @db.Uuid
+  name          String
+  bike          String?
+  location      String?
+  favouriteRide String?       @map("favourite_ride")
+  shortStory    String?       @map("short_story")
+  imageMediaId  String?       @map("image_media_id") @db.Uuid
+  sortOrder     Int           @default(0) @map("sort_order")
+  status        ContentStatus @default(DRAFT)
+  createdAt     DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  image MediaAsset? @relation("RiderSpotlightImage", fields: [imageMediaId], references: [id], onDelete: Restrict)
+
+  @@index([status, sortOrder])
+  @@index([imageMediaId])
+  @@map("rider_spotlights")
+}
+
+/// A local 36 Spokes group or chapter. `memberCount` stays null unless the
+/// number is actually known.
+model CommunityGroup {
+  id           String        @id @default(uuid(7)) @db.Uuid
+  slug         String        @unique
+  name         String
+  description  String?
+  /// Where the group rides from, e.g. "Pune, Maharashtra".
+  region       String?
+  /// Display text, e.g. "Sunday mornings".
+  rideCadence  String?       @map("ride_cadence")
+  memberCount  Int?          @map("member_count")
+  coverMediaId String?       @map("cover_media_id") @db.Uuid
+  sortOrder    Int           @default(0) @map("sort_order")
+  status       ContentStatus @default(DRAFT)
+  createdAt    DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  cover MediaAsset? @relation("CommunityGroupCover", fields: [coverMediaId], references: [id], onDelete: Restrict)
+
+  @@index([status, sortOrder])
+  @@index([coverMediaId])
+  @@map("community_groups")
+}
+
+// ─── Phase 7: Site & Homepage CMS ──────────────────────────────────────────
+
+enum HeroMediaType {
+  IMAGE
+  VIDEO
+
+  @@map("hero_media_type")
+}
+
+enum HeroAutoAdvanceMode {
+  FIXED_DURATION
+  VIDEO_END
+
+  @@map("hero_auto_advance_mode")
+}
+
+model HeroSlide {
+  id                String              @id @default(uuid(7)) @db.Uuid
+  title             String
+  eyebrow           String?
+  description       String?
+  location          String?
+  mediaType         HeroMediaType       @default(IMAGE) @map("media_type")
+  imageUrl          String?             @map("image_url")
+  videoUrl          String?             @map("video_url")
+  posterUrl         String?             @map("poster_url")
+  mobileUrl         String?             @map("mobile_url")
+  imageMediaId      String?             @map("image_media_id") @db.Uuid
+  videoMediaId      String?             @map("video_media_id") @db.Uuid
+  posterMediaId     String?             @map("poster_media_id") @db.Uuid
+  mobileMediaId     String?             @map("mobile_media_id") @db.Uuid
+  ctaLabel          String?             @map("cta_label")
+  ctaUrl            String?             @map("cta_url")
+  secondaryCtaLabel String?             @map("secondary_cta_label")
+  secondaryCtaUrl   String?             @map("secondary_cta_url")
+  durationSeconds   Int                 @default(5) @map("duration_seconds")
+  autoAdvanceMode   HeroAutoAdvanceMode @default(FIXED_DURATION) @map("auto_advance_mode")
+  sortOrder         Int                 @default(0) @map("sort_order")
+  status            ContentStatus       @default(PUBLISHED)
+  createdById       String?             @map("created_by_id") @db.Uuid
+  updatedById       String?             @map("updated_by_id") @db.Uuid
+  createdAt         DateTime            @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt         DateTime            @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  image       MediaAsset? @relation("HeroSlideImage", fields: [imageMediaId], references: [id], onDelete: Restrict)
+  video       MediaAsset? @relation("HeroSlideVideo", fields: [videoMediaId], references: [id], onDelete: Restrict)
+  poster      MediaAsset? @relation("HeroSlidePoster", fields: [posterMediaId], references: [id], onDelete: Restrict)
+  mobileMedia MediaAsset? @relation("HeroSlideMobileMedia", fields: [mobileMediaId], references: [id], onDelete: Restrict)
+  createdBy   User?       @relation("HeroSlideCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy   User?       @relation("HeroSlideUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@index([status, sortOrder])
+  @@index([imageMediaId])
+  @@index([videoMediaId])
+  @@index([posterMediaId])
+  @@index([mobileMediaId])
+  @@map("hero_slides")
+}
+
+model PathCard {
+  id             String        @id @default(uuid(7)) @db.Uuid
+  slug           String        @unique
+  title          String
+  tagline        String?
+  description    String?
+  ctaLabel       String        @map("cta_label")
+  destinationUrl String        @map("destination_url")
+  badge          String?
+  imageUrl       String?       @map("image_url")
+  imageMediaId   String?       @map("image_media_id") @db.Uuid
+  sortOrder      Int           @default(0) @map("sort_order")
+  status         ContentStatus @default(PUBLISHED)
+  createdAt      DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  image MediaAsset? @relation("PathCardImage", fields: [imageMediaId], references: [id], onDelete: Restrict)
+
+  @@index([status, sortOrder])
+  @@index([imageMediaId])
+  @@map("path_cards")
 }

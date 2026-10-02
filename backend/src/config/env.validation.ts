@@ -20,6 +20,14 @@ export enum NodeEnv {
   Production = "production",
 }
 
+export enum MediaProvider {
+  Cloudinary = "cloudinary",
+  R2 = "r2",
+}
+
+export const AI_PROVIDERS = ["gemini", "ollama"] as const;
+export type AiProviderName = (typeof AI_PROVIDERS)[number];
+
 const LOG_LEVELS = ["fatal", "error", "warn", "info", "debug", "trace", "silent"] as const;
 const SAME_SITE_VALUES = ["lax", "strict", "none"] as const;
 
@@ -58,7 +66,10 @@ export class EnvironmentVariables {
   @Max(65535)
   PORT: number = 3000;
 
-  @Transform(emptyToUndefined)
+  @Transform(({ value }) => {
+    const trimmed = typeof value === "string" ? value.trim() : "";
+    return trimmed ? trimmed : process.env["RENDER_EXTERNAL_URL"] || undefined;
+  })
   @IsOptional()
   @IsUrl(URL_OPTIONS)
   API_URL?: string;
@@ -110,6 +121,26 @@ export class EnvironmentVariables {
   @IsOptional()
   @IsBoolean()
   AUTH_COOKIE_SECURE?: boolean;
+
+  @Transform(emptyToUndefined)
+  @IsOptional()
+  @IsEnum(MediaProvider)
+  MEDIA_PROVIDER?: MediaProvider;
+
+  @Transform(emptyToUndefined)
+  @IsOptional()
+  @IsString()
+  CLOUDINARY_CLOUD_NAME?: string;
+
+  @Transform(emptyToUndefined)
+  @IsOptional()
+  @IsString()
+  CLOUDINARY_API_KEY?: string;
+
+  @Transform(emptyToUndefined)
+  @IsOptional()
+  @IsString()
+  CLOUDINARY_API_SECRET?: string;
 
   @Transform(emptyToUndefined)
   @IsOptional()
@@ -168,6 +199,90 @@ export class EnvironmentVariables {
   @Min(1)
   RATE_LIMIT_AUTH_MAX: number = 10;
 
+  // ─── Journey planner: travel data sources ───────────────────────────────
+
+  /** Nominatim-compatible geocoder (OpenStreetMap). */
+  @IsUrl(URL_OPTIONS)
+  PLAN_GEOCODER_URL: string = "https://nominatim.openstreetmap.org";
+
+  /** OSRM-compatible routing service. */
+  @IsUrl(URL_OPTIONS)
+  PLAN_ROUTER_URL: string = "https://router.project-osrm.org";
+
+  /** Open-Meteo-compatible forecast service. */
+  @IsUrl(URL_OPTIONS)
+  PLAN_WEATHER_URL: string = "https://api.open-meteo.com";
+
+  /** Overpass API interpreter (OpenStreetMap places). */
+  @IsUrl(URL_OPTIONS)
+  PLAN_PLACES_URL: string = "https://overpass-api.de/api/interpreter";
+
+  /** Asked only when PLAN_PLACES_URL doesn't answer: the public instance is often busy. */
+  @Transform(emptyToUndefined)
+  @IsOptional()
+  @IsUrl(URL_OPTIONS)
+  PLAN_PLACES_FALLBACK_URL?: string;
+
+  /** Identifies this app to the public OpenStreetMap services, as their usage policies require. */
+  @Transform(emptyToUndefined)
+  @IsOptional()
+  @IsString()
+  PLAN_USER_AGENT?: string;
+
+  /** Comma-separated ISO country codes the geocoder searches in. Empty: worldwide. */
+  @IsString()
+  PLAN_GEOCODER_COUNTRY_CODES: string = "in";
+
+  /** Fuel price (INR per litre) used when the rider doesn't enter one. Unset: no cost estimate. */
+  @Transform(emptyToUndefined)
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(1000)
+  PLAN_FUEL_PRICE_PER_LITRE?: number;
+
+  /** Journey plans one client may request per minute. */
+  @IsInt()
+  @Min(1)
+  PLAN_RATE_LIMIT_MAX: number = 6;
+
+  // ─── Journey planner: AI providers ──────────────────────────────────────
+
+  @IsIn(AI_PROVIDERS)
+  AI_PRIMARY_PROVIDER: AiProviderName = "gemini";
+
+  /** Tried when the primary fails. "none" disables the fallback. */
+  @IsIn([...AI_PROVIDERS, "none"])
+  AI_FALLBACK_PROVIDER: AiProviderName | "none" = "ollama";
+
+  @IsInt()
+  @Min(5)
+  @Max(300)
+  AI_TIMEOUT_SECONDS: number = 60;
+
+  @Transform(emptyToUndefined)
+  @IsOptional()
+  @IsString()
+  GEMINI_API_KEY?: string;
+
+  /** Leave empty to use a current Flash model reported by the API. */
+  @Transform(emptyToUndefined)
+  @IsOptional()
+  @IsString()
+  GEMINI_MODEL?: string;
+
+  @IsUrl(URL_OPTIONS)
+  GEMINI_BASE_URL: string = "https://generativelanguage.googleapis.com";
+
+  @IsUrl(URL_OPTIONS)
+  OLLAMA_BASE_URL: string = "http://localhost:11434";
+
+  /** Leave empty to use the first model installed in Ollama. */
+  @Transform(emptyToUndefined)
+  @IsOptional()
+  @IsString()
+  OLLAMA_MODEL?: string;
+
   @Transform(emptyToUndefined)
   @IsOptional()
   @IsIn(LOG_LEVELS)
@@ -186,6 +301,12 @@ const R2_REQUIRED_KEYS = [
   "R2_PUBLIC_BASE_URL",
 ] as const satisfies readonly (keyof EnvironmentVariables)[];
 
+const CLOUDINARY_REQUIRED_KEYS = [
+  "CLOUDINARY_CLOUD_NAME",
+  "CLOUDINARY_API_KEY",
+  "CLOUDINARY_API_SECRET",
+] as const satisfies readonly (keyof EnvironmentVariables)[];
+
 function crossFieldErrors(env: EnvironmentVariables): string[] {
   const errors: string[] = [];
 
@@ -195,11 +316,33 @@ function crossFieldErrors(env: EnvironmentVariables): string[] {
 
   const r2Values = [...R2_REQUIRED_KEYS, "R2_ACCOUNT_ID", "R2_ENDPOINT"] as const;
   const anyR2 = r2Values.some((key) => env[key] !== undefined);
-  if (anyR2) {
+  const anyCloudinary = CLOUDINARY_REQUIRED_KEYS.some((key) => env[key] !== undefined);
+
+  if (env.MEDIA_PROVIDER === MediaProvider.Cloudinary) {
+    const missing = CLOUDINARY_REQUIRED_KEYS.filter((key) => env[key] === undefined);
+    if (missing.length > 0) {
+      errors.push(`Cloudinary storage is partially configured. Missing: ${missing.join(", ")}`);
+    }
+  } else if (env.MEDIA_PROVIDER === MediaProvider.R2) {
     const missing: string[] = R2_REQUIRED_KEYS.filter((key) => env[key] === undefined);
     if (!env.R2_ACCOUNT_ID && !env.R2_ENDPOINT) missing.push("R2_ACCOUNT_ID (or R2_ENDPOINT)");
     if (missing.length > 0) {
       errors.push(`Media storage is partially configured. Missing: ${missing.join(", ")}`);
+    }
+  } else {
+    // Unset MEDIA_PROVIDER: validate if either provider was partially configured
+    if (anyCloudinary) {
+      const missing = CLOUDINARY_REQUIRED_KEYS.filter((key) => env[key] === undefined);
+      if (missing.length > 0) {
+        errors.push(`Cloudinary storage is partially configured. Missing: ${missing.join(", ")}`);
+      }
+    }
+    if (anyR2) {
+      const missing: string[] = R2_REQUIRED_KEYS.filter((key) => env[key] === undefined);
+      if (!env.R2_ACCOUNT_ID && !env.R2_ENDPOINT) missing.push("R2_ACCOUNT_ID (or R2_ENDPOINT)");
+      if (missing.length > 0) {
+        errors.push(`Media storage is partially configured. Missing: ${missing.join(", ")}`);
+      }
     }
   }
 

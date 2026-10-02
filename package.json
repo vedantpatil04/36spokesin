@@ -9,7 +9,11 @@
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
     "lint": "eslint .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "db:migrate": "npm --prefix backend run db:migrate",
+    "db:deploy": "npm --prefix backend run db:deploy",
+    "db:generate": "npm --prefix backend run db:generate",
+    "db:seed": "npm --prefix backend run db:seed"
   },
   "overrides": {
     "rolldown": "1.2.1"

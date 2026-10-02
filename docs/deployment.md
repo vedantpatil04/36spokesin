@@ -59,7 +59,7 @@ Create the database **first** — you need its URL before configuring the API se
 | Variable | Value |
 |---|---|
 | `VITE_API_URL` | `https://<your-render-service>.onrender.com/api/v1` (no trailing slash) |
-| `VITE_SITE_URL` | `https://<your-vercel-app>.vercel.app` (or custom domain) |
+| `VITE_SITE_URL` | `https://36spokesin.vercel.app` (or custom domain) |
 
 > `VITE_MAPBOX_TOKEN` and `VITE_RAZORPAY_KEY_ID` are optional Phase 4 variables — leave them empty.
 
@@ -72,11 +72,11 @@ All variables are set in the Render dashboard under **Environment → Secret Fil
 | Variable | Production value |
 |---|---|
 | `NODE_ENV` | `production` |
-| `API_URL` | `https://<your-render-service>.onrender.com` |
-| `WEB_URL` | `https://<your-vercel-app>.vercel.app` |
-| `CORS_ORIGINS` | `https://<your-vercel-app>.vercel.app` (comma-separate multiple) |
+| `API_URL` | `https://<your-render-service>.onrender.com` (or leave empty to use Render auto-detected `RENDER_EXTERNAL_URL`) |
+| `WEB_URL` | `https://36spokesin.vercel.app` |
+| `CORS_ORIGINS` | `https://36spokesin.vercel.app` (preview branches like `https://36spokesin-*.vercel.app` are also allowed automatically) |
 | `TRUST_PROXY` | `1` |
-| `DATABASE_URL` | Internal Database URL from Render PostgreSQL |
+| `DATABASE_URL` | Internal Database URL from Render PostgreSQL (or Supabase connection string) |
 | `JWT_SECRET` | Random ≥ 32 chars — generate with command below |
 | `JWT_REFRESH_SECRET` | Random ≥ 32 chars, **different from JWT_SECRET** |
 
@@ -129,6 +129,24 @@ To check migration status locally:
 cd backend && npm run db:status
 ```
 
+### Phase 4: catalogue data
+
+Phase 4 adds the migration `20260918090000_phase4_catalog_garage_commerce` (products, images,
+categories, bikes, garages, cart, wishlist, orders). It applies on the next deploy like any other.
+
+A fresh production database has an empty catalogue, and **nothing ever seeds it automatically**,
+so restarts and redeploys can't overwrite CMS edits. To fill it:
+
+1. Create an administrator from the Render shell:
+   `ADMIN_PASSWORD='…' node dist/cli/create-admin.js --email you@36spokes.in --first-name Ved`
+2. Sign in on the website and open `/admin`: add categories, bikes, then products and their photos.
+
+(`npm run db:seed` loads the demo catalogue for development. It refuses to run against
+`NODE_ENV=production` unless given `--allow-production`, and it only ever creates missing rows.)
+
+Product and bike photos upload straight from the admin's browser to R2, so the bucket's CORS
+rules must allow `PUT` from the Vercel origin (the same rule avatar uploads use).
+
 ---
 
 ## 6. Health Check URLs
@@ -148,10 +166,10 @@ Render uses `/api/v1/health/live` (configured in `render.yaml` / service setting
 
 ```
 # Single Vercel deployment
-CORS_ORIGINS=https://36spokes.vercel.app
+CORS_ORIGINS=https://36spokesin.vercel.app
 
-# Multiple origins (main + preview + custom domain)
-CORS_ORIGINS=https://36spokes.vercel.app,https://preview.36spokes.vercel.app,https://www.36spokes.in
+# Multiple origins (main + custom domain)
+CORS_ORIGINS=https://36spokesin.vercel.app,https://www.36spokes.in
 ```
 
 The API validates this at startup. Wildcard (`*`) is rejected in production by the env validator.
@@ -202,6 +220,8 @@ Also set in Render:
 - [ ] `GET /api/v1/health` returns 200 with `"database":"up"`
 - [ ] Register a test account via the Vercel frontend
 - [ ] Login, refresh, and logout work end-to-end
+- [ ] Administrator created with `create-admin`; `/admin` opens for them and is refused for riders
+- [ ] R2 CORS allows `PUT` from the Vercel origin; a product photo uploads from `/admin` and shows in the shop
 
 ---
 
@@ -212,17 +232,17 @@ Browser
   │  HTTPS
   ▼
 Vercel  (TanStack Start SSR)
-  https://<app>.vercel.app
+  https://36spokesin.vercel.app
   VITE_API_URL → https://<api>.onrender.com/api/v1
   │
   │  HTTPS + credentials: "include"
   ▼
 Render  (NestJS API)
   https://<api>.onrender.com
-  CORS_ORIGINS → https://<app>.vercel.app
+  CORS_ORIGINS → https://36spokesin.vercel.app
   AUTH_COOKIE_SAMESITE=none, AUTH_COOKIE_SECURE=true
   │
-  │  Internal Database URL
+  │  Internal Database URL (or Supabase connection string)
   ▼
-Render PostgreSQL
+PostgreSQL (Render or Supabase)
 ```

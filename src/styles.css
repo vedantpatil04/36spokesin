@@ -50,30 +50,36 @@
 
 :root {
   --radius: 0.25rem;
-  --background: oklch(0.16 0.008 60);
-  --foreground: oklch(0.96 0.004 80);
-  --surface: oklch(0.2 0.009 60);
-  --surface-2: oklch(0.24 0.01 60);
-  --card: oklch(0.2 0.009 60);
-  --card-foreground: oklch(0.96 0.004 80);
-  --popover: oklch(0.2 0.009 60);
-  --popover-foreground: oklch(0.96 0.004 80);
-  --primary: oklch(0.68 0.17 46);
-  --primary-foreground: oklch(0.16 0.02 50);
-  --secondary: oklch(0.28 0.01 60);
-  --secondary-foreground: oklch(0.96 0.004 80);
-  --muted: oklch(0.26 0.008 60);
-  --muted-foreground: oklch(0.72 0.012 70);
+  /* Deep warm charcoal / graphite stone base */
+  --background: oklch(0.15 0.012 55);
+  /* Ivory / warm white text */
+  --foreground: oklch(0.96 0.008 75);
+  /* Rich warm weathered stone surface */
+  --surface: oklch(0.21 0.014 55);
+  /* Elevated stone tone with subtle warm tint */
+  --surface-2: oklch(0.27 0.016 55);
+  /* Editorial card surface */
+  --card: oklch(0.20 0.013 55);
+  --card-foreground: oklch(0.96 0.008 75);
+  --popover: oklch(0.21 0.014 55);
+  --popover-foreground: oklch(0.96 0.008 75);
+  /* Signature 36 Spokes high-impact amber/orange */
+  --primary: oklch(0.70 0.17 48);
+  --primary-foreground: oklch(0.14 0.02 50);
+  --secondary: oklch(0.29 0.014 55);
+  --secondary-foreground: oklch(0.96 0.008 75);
+  --muted: oklch(0.25 0.011 55);
+  --muted-foreground: oklch(0.74 0.014 70);
   --accent: oklch(0.78 0.13 85);
-  --accent-foreground: oklch(0.18 0.02 50);
+  --accent-foreground: oklch(0.16 0.02 50);
   --destructive: oklch(0.6 0.2 25);
   --destructive-foreground: oklch(0.97 0.01 80);
   --success: oklch(0.72 0.14 155);
   --warning: oklch(0.8 0.14 75);
-  --border: oklch(1 0 0 / 10%);
-  --border-strong: oklch(1 0 0 / 20%);
+  --border: oklch(1 0 0 / 12%);
+  --border-strong: oklch(1 0 0 / 22%);
   --input: oklch(1 0 0 / 14%);
-  --ring: oklch(0.68 0.17 46);
+  --ring: oklch(0.70 0.17 48);
 }
 
 .light {
@@ -175,6 +181,78 @@
 
 @utility rise {
   animation: rise-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Mobile hero sequential text reveal */
+@keyframes hero-reveal-eyebrow {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes hero-reveal-headline {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes hero-reveal-desc {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes hero-reveal-cta {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero-animate-eyebrow {
+  animation: hero-reveal-eyebrow 500ms cubic-bezier(0.16, 1, 0.3, 1) 0ms both;
+}
+
+.hero-animate-headline {
+  animation: hero-reveal-headline 550ms cubic-bezier(0.16, 1, 0.3, 1) 100ms both;
+}
+
+.hero-animate-desc {
+  animation: hero-reveal-desc 500ms cubic-bezier(0.16, 1, 0.3, 1) 200ms both;
+}
+
+.hero-animate-cta {
+  animation: hero-reveal-cta 500ms cubic-bezier(0.16, 1, 0.3, 1) 300ms both;
+}
+
+@media (min-width: 640px) {
+  .hero-animate-eyebrow,
+  .hero-animate-headline,
+  .hero-animate-desc,
+  .hero-animate-cta {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

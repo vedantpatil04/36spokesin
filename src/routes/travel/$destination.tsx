@@ -2,8 +2,11 @@ import { createFileRoute, notFound } from "@tanstack/react-router";
 import { CalendarClock } from "lucide-react";
 import { TripCard } from "@/components/cards";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { ProductGallery } from "@/components/shop/ProductGallery";
 import { EmptyState, EntityNotFound, PageSkeleton } from "@/components/states";
-import { Badge, ButtonLink, Section, SectionHeader } from "@/components/ui-kit";
+import { LinkedRides } from "@/components/travel/LinkedRides";
+import { Paragraphs } from "@/components/travel/Paragraphs";
+import { Badge, ButtonLink, DetailList, Section, SectionHeader } from "@/components/ui-kit";
 import { formatINR } from "@/lib/format";
 import { seo } from "@/lib/seo";
 import { getDestination, listTrips } from "@/services/travel";
@@ -19,9 +22,11 @@ export const Route = createFileRoute("/travel/$destination")({
     loaderData
       ? seo({
           title: `${loaderData.destination.name} Motorcycle Expeditions | 36 Spokes`,
-          description: `${loaderData.destination.descriptor} ${loaderData.destination.days}-day trips from ${formatINR(loaderData.destination.startingPrice)}.`,
+          description:
+            loaderData.destination.descriptor ||
+            `Motorcycle trips to ${loaderData.destination.name}, ${loaderData.destination.region}.`,
           path: `/travel/${loaderData.destination.slug}`,
-          image: loaderData.destination.image,
+          ...(loaderData.destination.hasImage ? { image: loaderData.destination.image } : {}),
         })
       : {},
   pendingComponent: () => <PageSkeleton />,
@@ -37,6 +42,12 @@ export const Route = createFileRoute("/travel/$destination")({
 
 function DestinationPage() {
   const { destination, trips } = Route.useLoaderData();
+  const facts = [
+    { label: "Region", value: `${destination.region}, ${destination.country}` },
+    { label: "Difficulty", value: destination.difficulty },
+    ...(destination.duration ? [{ label: "Recommended", value: destination.duration }] : []),
+    ...(destination.bestSeason ? [{ label: "Best season", value: destination.bestSeason }] : []),
+  ];
 
   return (
     <>
@@ -44,22 +55,68 @@ function DestinationPage() {
         eyebrow={destination.region}
         title={destination.name}
         description={destination.descriptor}
-        image={destination.image}
+        {...(destination.hasImage ? { image: destination.image } : {})}
       >
-        <ul className="flex flex-wrap items-center gap-2" aria-label="Trip overview">
-          <li>
-            <Badge>{destination.days} days</Badge>
-          </li>
+        <ul className="flex flex-wrap items-center gap-2" aria-label="Destination overview">
+          {destination.duration ? (
+            <li>
+              <Badge>{destination.duration}</Badge>
+            </li>
+          ) : null}
           <li>
             <Badge>{destination.difficulty}</Badge>
           </li>
-          <li>
-            <Badge tone="primary">From {formatINR(destination.startingPrice)}</Badge>
-          </li>
+          {destination.startingPrice !== null ? (
+            <li>
+              <Badge tone="primary">From {formatINR(destination.startingPrice)}</Badge>
+            </li>
+          ) : null}
         </ul>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <ButtonLink to="/travel/trips" size="lg">
+            Explore trips
+          </ButtonLink>
+        </div>
       </PageHeader>
 
       <Section>
+        <div className="grid gap-12 lg:grid-cols-[1.2fr_0.8fr] lg:gap-16">
+          <div>
+            <SectionHeader eyebrow="The region" title={`Riding ${destination.name}`} />
+            {destination.description ? (
+              <Paragraphs text={destination.description} className="mt-8" />
+            ) : (
+              <p className="mt-8 text-muted-foreground">{destination.descriptor}</p>
+            )}
+            {destination.images.length > 0 ? (
+              <div className="mt-10">
+                <ProductGallery
+                  images={destination.images}
+                  fallback={destination.image}
+                  productName={destination.name}
+                />
+              </div>
+            ) : null}
+          </div>
+          <div>
+            <SectionHeader eyebrow="Plan" title="Useful information" />
+            <DetailList size="md" className="mt-8" items={facts} />
+            {destination.usefulInfo ? (
+              <Paragraphs text={destination.usefulInfo} className="mt-6 text-sm" />
+            ) : null}
+            {destination.rides.length > 0 ? (
+              <div className="mt-10">
+                <h3 className="text-lg">Upcoming rides</h3>
+                <div className="mt-4">
+                  <LinkedRides rides={destination.rides} />
+                </div>
+              </div>
+            ) : null}
+          </div>
+        </div>
+      </Section>
+
+      <Section tone="surface">
         <SectionHeader
           eyebrow="Departures"
           title={`Ride ${destination.name} with us`}

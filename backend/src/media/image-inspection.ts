@@ -31,6 +31,31 @@ export function detectImageMimeType(bytes: Uint8Array): AllowedMediaMimeType | n
 }
 
 /**
+ * Identifies the real video format from its leading bytes.
+ */
+export function detectVideoMimeType(bytes: Uint8Array): AllowedMediaMimeType | null {
+  if (bytes.length < 4) return null;
+  // WebM starts with EBML ID 0x1A 0x45 0xDF 0xA3
+  if (bytes[0] === 0x1a && bytes[1] === 0x45 && bytes[2] === 0xdf && bytes[3] === 0xa3) {
+    return "video/webm";
+  }
+  if (bytes.length >= 8) {
+    // MP4 and QuickTime (MOV) with ftyp box
+    if (ascii(bytes, 4, 8) === "ftyp") {
+      const brand = bytes.length >= 12 ? ascii(bytes, 8, 12) : "";
+      if (brand.startsWith("qt")) return "video/quicktime";
+      return "video/mp4";
+    }
+    // QuickTime MOV with other atoms
+    const box = ascii(bytes, 4, 8);
+    if (box === "moov" || box === "mdat" || box === "wide") {
+      return "video/quicktime";
+    }
+  }
+  return null;
+}
+
+/**
  * Display dimensions read from the image header, with EXIF rotation applied so a
  * portrait phone photo reports portrait dimensions. Null when the header is not
  * within the inspected bytes.

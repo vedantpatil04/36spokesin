@@ -1,144 +1,159 @@
-import { createFileRoute, getRouteApi } from "@tanstack/react-router";
-import { Wrench } from "lucide-react";
-import { RideCard, TripCard } from "@/components/cards";
-import { SetupChecklist } from "@/components/garage/SetupChecklist";
-import { GarageBikeCard } from "@/components/member/GarageBikeCard";
-import { MemberPanel } from "@/components/member/MemberPanel";
-import { ProductGrid } from "@/components/shop/ProductGrid";
-import { EmptyState } from "@/components/states";
+import { Link, createFileRoute, createLink } from "@tanstack/react-router";
+import { ArrowRight } from "lucide-react";
+import { forwardRef, type ComponentProps } from "react";
 import { ButtonLink } from "@/components/ui-kit";
-import { formatCompactDateRange } from "@/lib/dates";
-import { formatINR } from "@/lib/format";
+import { useMyRides } from "@/hooks/use-my-rides";
+import { useRiderProfile } from "@/hooks/use-rider-profile";
+import { yearOf } from "@/lib/dates";
+import { formatRideStart } from "@/lib/ride-format";
 import { seo } from "@/lib/seo";
-import { listProducts } from "@/services/catalog";
-
-const memberRoute = getRouteApi("/my-36-spokes");
+import { cn } from "@/lib/utils";
+import { useAuthUser } from "@/state/auth";
+import { useMyBikes, useMyBikesStatus } from "@/state/garage";
 
 export const Route = createFileRoute("/my-36-spokes/")({
-  loader: async () => ({ recommended: (await listProducts()).slice(0, 4) }),
   head: () =>
     seo({
-      title: "My 36 Spokes | Rider Dashboard",
-      description:
-        "Your motorcycle, gear, rides, routes, trips, bookings and orders in one rider dashboard.",
-      socialDescription: "Your bike, gear, rides and trips in one place.",
+      title: "My 36 Spokes | Rider Home",
+      description: "Your 36 Spokes rider home: your motorcycle, your rides and your next journey.",
       path: "/my-36-spokes",
       noIndex: true,
     }),
-  component: Dashboard,
+  component: RiderHome,
 });
 
-function Dashboard() {
-  const { recommended } = Route.useLoaderData();
-  const member = memberRoute.useLoaderData();
-  const { primaryBike, upcomingRide, upcomingBooking } = member;
+/** Sections that aren't a primary action; listed quietly under them. */
+const moreLinks = [
+  { label: "My journeys", to: "/my-36-spokes/journeys" },
+  { label: "My travel", to: "/my-36-spokes/travel" },
+  { label: "Cart & orders", to: "/my-36-spokes/shop" },
+  { label: "My community", to: "/my-36-spokes/community" },
+  { label: "My profile", to: "/profile" },
+] as const;
+
+// Holds a line's height while its value loads, so nothing shifts when it arrives.
+const PLACEHOLDER = " ";
+
+const HomeActionAnchor = forwardRef<
+  HTMLAnchorElement,
+  ComponentProps<"a"> & { heading: string; detail: string }
+>(function HomeActionAnchor({ heading, detail, className, ...props }, ref) {
+  return (
+    <a
+      ref={ref}
+      className={cn("group flex items-start justify-between gap-6 py-6 md:py-9", className)}
+      {...props}
+    >
+      <span className="min-w-0">
+        <span className="block font-display text-2xl font-semibold uppercase leading-tight transition-colors group-hover:text-primary sm:text-3xl">
+          {heading}
+        </span>
+        <span className="mt-2 block text-sm text-muted-foreground">{detail}</span>
+      </span>
+      <ArrowRight
+        className="mt-1.5 size-5 shrink-0 text-muted-foreground transition-all duration-200 group-hover:translate-x-1 group-hover:text-primary"
+        aria-hidden
+      />
+    </a>
+  );
+});
+
+/** One of the rider home's primary actions: a large typed link with a line of real status. */
+const HomeAction = createLink(HomeActionAnchor);
+
+function RiderHome() {
+  const user = useAuthUser();
+  const riderProfile = useRiderProfile();
+  const myRides = useMyRides();
+  const bike = useMyBikes()[0] ?? null;
+  const bikesStatus = useMyBikesStatus();
+
+  // The shell only renders this route for a signed-in rider.
+  if (!user) return null;
+
+  const profile = riderProfile.data;
+  const missing = profile
+    ? [!user.phone ? "phone number" : null, !profile.city ? "city" : null].filter(
+        (item): item is string => item !== null,
+      )
+    : [];
+
+  // Bookings arrive soonest first and include cancelled ones as history.
+  const nextRide =
+    myRides.data?.find((entry) => entry.status !== "cancelled" && entry.ride.status !== "completed")
+      ?.ride ?? null;
+
+  const bikeDetail = bike
+    ? `${bike.bike.brand} ${bike.bike.model}`
+    : bikesStatus === "ready"
+      ? "No motorcycle added yet"
+      : bikesStatus === "error"
+        ? "Your garage didn't load"
+        : PLACEHOLDER;
+
+  const ridesDetail = nextRide
+    ? [
+        nextRide.name,
+        formatRideStart(nextRide.startsAt),
+        nextRide.status === "cancelled" ? "Cancelled" : null,
+      ]
+        .filter(Boolean)
+        .join(" · ")
+    : myRides.isPending
+      ? PLACEHOLDER
+      : myRides.isError
+        ? "Your rides didn't load"
+        : "No rides joined yet";
 
   return (
-    <div className="space-y-4">
-      <div className="grid gap-4 lg:grid-cols-[1.2fr_1fr]">
-        {primaryBike ? (
-          <GarageBikeCard garageBike={primaryBike} />
-        ) : (
-          <EmptyState
-            icon={Wrench}
-            title="No motorcycle added yet"
-            description="Add your bike to see gear matched to it and its service status."
-          />
-        )}
+    <>
+      <p className="text-sm text-muted-foreground md:text-base">
+        {profile
+          ? [`Rider since ${yearOf(profile.memberSince)}`, profile.city].filter(Boolean).join(" · ")
+          : PLACEHOLDER}
+      </p>
 
-        <div className="grid gap-4">
-          <article className="rounded-sm border border-border bg-card p-5">
-            <p className="eyebrow">Upcoming ride</p>
-            {upcomingRide ? (
-              <>
-                <h2 className="mt-2 text-xl">{upcomingRide.name}</h2>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {upcomingRide.location} <span aria-hidden>·</span> {upcomingRide.route.distanceKm}{" "}
-                  km <span aria-hidden>·</span> {upcomingRide.duration}
-                </p>
-              </>
-            ) : (
-              <p className="mt-2 text-sm text-muted-foreground">No rides joined yet.</p>
-            )}
-          </article>
-          <article className="rounded-sm border border-border bg-card p-5">
-            <p className="eyebrow">Upcoming trip</p>
-            {upcomingBooking ? (
-              <>
-                <h2 className="mt-2 text-xl">{upcomingBooking.trip.name}</h2>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {formatCompactDateRange(
-                    upcomingBooking.departure.startDate,
-                    upcomingBooking.departure.endDate,
-                  )}{" "}
-                  <span aria-hidden>·</span> {formatINR(upcomingBooking.departure.price)}{" "}
-                  <span aria-hidden>·</span> {upcomingBooking.departure.seatsLeft} seats left
-                </p>
-              </>
-            ) : (
-              <p className="mt-2 text-sm text-muted-foreground">No trips booked yet.</p>
-            )}
-          </article>
+      {missing.length > 0 ? (
+        <div className="mt-6 flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:gap-6">
+          <p className="text-sm text-muted-foreground">
+            Your profile is missing your {missing.join(" and ")}.
+          </p>
+          <ButtonLink to="/profile" search={{ edit: true }} variant="outline" size="sm">
+            Complete profile
+          </ButtonLink>
         </div>
-      </div>
+      ) : null}
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <MemberPanel title="Setup readiness">
-          {member.setupChecklist.length > 0 ? (
-            <SetupChecklist items={member.setupChecklist} variant="compact" />
-          ) : (
-            <p className="mt-4 text-sm text-muted-foreground">
-              Your trip-readiness checklist will appear here once it's connected to your gear.
-            </p>
-          )}
-        </MemberPanel>
+      <nav aria-label="Rider home" className="mt-10 border-y border-border md:mt-14">
+        <ul className="grid divide-y divide-border md:grid-cols-3 md:divide-x md:divide-y-0">
+          <li className="md:pr-8">
+            <HomeAction to="/my-36-spokes/garage" heading="My bike" detail={bikeDetail} />
+          </li>
+          <li className="md:px-8">
+            <HomeAction to="/my-36-spokes/rides" heading="My rides" detail={ridesDetail} />
+          </li>
+          <li className="md:pl-8">
+            <HomeAction
+              to="/plan"
+              heading="Plan a journey"
+              detail="Routes, fuel stops and day-by-day itineraries"
+            />
+          </li>
+        </ul>
+      </nav>
 
-        <MemberPanel title="Recent activity">
-          {member.activity.length > 0 ? (
-            <ul className="mt-4 space-y-3 text-sm text-muted-foreground">
-              {member.activity.map((item) => (
-                <li key={item.id}>{item.label}</li>
-              ))}
-            </ul>
-          ) : (
-            <p className="mt-4 text-sm text-muted-foreground">
-              Rides you join, gear you order and trips you enquire about show up here.
-            </p>
-          )}
-        </MemberPanel>
-      </div>
-
-      <section>
-        <h2 className="mb-4 text-lg">Recommended gear for your bike</h2>
-        <ProductGrid
-          products={recommended}
-          {...(primaryBike ? { bikeId: primaryBike.bikeId } : {})}
-        />
-      </section>
-
-      <section>
-        <h2 className="mb-4 text-lg">Saved rides & trips</h2>
-        {member.savedRides.length + member.savedTrips.length > 0 ? (
-          <div className="grid gap-4 md:grid-cols-2">
-            {member.savedRides.map((ride) => (
-              <RideCard key={ride.id} ride={ride} />
-            ))}
-            {member.savedTrips.map((trip) => (
-              <TripCard key={trip.id} trip={trip} />
-            ))}
-          </div>
-        ) : (
-          <EmptyState
-            title="Nothing saved yet"
-            description="Save rides and trips you're considering and they'll wait for you here."
-            action={
-              <ButtonLink to="/rides" variant="outline">
-                Find a ride
-              </ButtonLink>
-            }
-          />
-        )}
-      </section>
-    </div>
+      <ul className="mt-6 flex flex-wrap gap-x-7 gap-y-1">
+        {moreLinks.map((item) => (
+          <li key={item.to}>
+            <Link
+              to={item.to}
+              className="flex h-10 items-center font-display text-xs uppercase tracking-[0.16em] text-muted-foreground transition-colors hover:text-foreground"
+            >
+              {item.label}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </>
   );
 }

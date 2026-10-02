@@ -17,9 +17,9 @@ export const Route = createFileRoute("/stories/$slug")({
     loaderData
       ? seo({
           title: `${loaderData.story.title} | 36 Spokes Stories`,
-          description: loaderData.story.excerpt,
+          description: loaderData.story.excerpt ?? loaderData.story.title,
           path: `/stories/${loaderData.story.slug}`,
-          image: loaderData.story.image,
+          ...(loaderData.story.hasImage === false ? {} : { image: loaderData.story.image }),
           type: "article",
         })
       : {},
@@ -47,41 +47,56 @@ function StoryPage() {
             </Link>
           </nav>
           <p className="eyebrow mt-8">
-            {story.destination} <span aria-hidden>·</span> {story.readMinutes} min read
+            {story.destination ? (
+              <>
+                {story.destination} <span aria-hidden>·</span>{" "}
+              </>
+            ) : null}
+            {story.readMinutes} min read
           </p>
           <h1 className="mt-4 max-w-4xl text-4xl leading-[1.02] sm:text-5xl lg:text-6xl">
             {story.title}
           </h1>
-          <p className="mt-5 max-w-2xl text-base leading-relaxed text-muted-foreground md:text-lg">
-            {story.excerpt}
-          </p>
-          <p className="mt-6 text-sm text-muted-foreground">
-            By {story.rider}
-            {published ? (
-              <>
-                {" "}
-                <span aria-hidden>·</span>{" "}
+          {story.excerpt ? (
+            <p className="mt-5 max-w-2xl text-base leading-relaxed text-muted-foreground md:text-lg">
+              {story.excerpt}
+            </p>
+          ) : null}
+          {story.rider || published ? (
+            <p className="mt-6 text-sm text-muted-foreground">
+              {story.rider ? <>By {story.rider}</> : null}
+              {story.rider && published ? (
+                <>
+                  {" "}
+                  <span aria-hidden>·</span>{" "}
+                </>
+              ) : null}
+              {published ? (
                 <time dateTime={story.publishedAt}>{formatLongDate(published)}</time>
-              </>
-            ) : null}
-          </p>
+              ) : null}
+            </p>
+          ) : null}
         </header>
-        <div className="container-page">
-          <Media
-            asset={story.image}
-            alt={story.title}
-            ratio="21/9"
-            className="rounded-sm border border-border"
-            priority
-          />
-        </div>
+        {story.hasImage === false ? null : (
+          <div className="container-page">
+            <Media
+              asset={story.image}
+              alt={story.title}
+              ratio="21/9"
+              className="rounded-sm border border-border"
+              priority
+            />
+          </div>
+        )}
         <div className="container-page py-12 md:py-16">
           <div className="max-w-2xl space-y-6 text-base leading-relaxed text-foreground/90 md:text-lg">
-            {story.body.map((paragraph) => (
-              <p key={paragraph.slice(0, 32)}>{paragraph}</p>
+            {story.body.map((paragraph, index) => (
+              <p key={index} className="whitespace-pre-line">
+                {paragraph}
+              </p>
             ))}
           </div>
-          {story.destinationSlug ? (
+          {story.destinationSlug && story.destination ? (
             <ButtonLink
               to="/travel/$destination"
               params={{ destination: story.destinationSlug }}

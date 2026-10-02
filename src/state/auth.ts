@@ -4,7 +4,9 @@ import {
   login as loginRequest,
   logout as logoutRequest,
   register as registerRequest,
+  updateCurrentUser,
   type RegisterInput,
+  type UpdateAccountInput,
 } from "@/services/auth";
 import type { AuthStatus } from "./app-stores";
 import { useAppStores } from "./app-stores";
@@ -33,6 +35,12 @@ export function useAuthActions() {
         const session = await registerRequest(input);
         auth.setState(() => ({ status: "authenticated", user: session.user }));
         return session;
+      },
+      /** Saves the rider's name and phone, then shows the API's copy everywhere. */
+      updateAccount: async (input: UpdateAccountInput) => {
+        const user = await updateCurrentUser(input);
+        auth.setState((state) => ({ ...state, user }));
+        return user;
       },
       /** Always leaves the client signed out locally, even if the API call fails. */
       logout: async () => {

@@ -1,13 +1,26 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
-import { Menu, Search, ShoppingBag, User, X } from "lucide-react";
+import { ChevronDown, Menu, Search, ShoppingBag, User, X } from "lucide-react";
 import { useEffect } from "react";
-import { Button, BrandCrest, BrandWordmark, ButtonLink } from "@/components/ui-kit";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { BrandCrest, BrandWordmark, ButtonLink } from "@/components/ui-kit";
 import { useDisclosure } from "@/hooks/use-disclosure";
 import { useAuthActions, useAuthStatus, useAuthUser } from "@/state/auth";
 import { useCartCount } from "@/state/cart";
-import { mobileMenuExtras, primaryNav } from "./nav-config";
+import { accountNav, mobileMenuExtras, primaryNav } from "./nav-config";
 
 const MOBILE_MENU_ID = "mobile-menu";
+
+const accountItemClasses =
+  "cursor-pointer px-3 py-2.5 font-display text-xs uppercase tracking-[0.18em] text-muted-foreground focus:bg-surface-2 focus:text-foreground data-[status=active]:text-foreground";
+
+const mobileRowClasses =
+  "flex h-12 w-full items-center font-display text-sm uppercase tracking-[0.2em]";
 
 export function Navbar() {
   const menu = useDisclosure();
@@ -18,6 +31,7 @@ export function Navbar() {
   const { logout } = useAuthActions();
   const navigate = useNavigate();
   const isAuthenticated = status === "authenticated" && user !== null;
+  const isAdmin = isAuthenticated && user.role === "ADMIN";
 
   // Close the mobile menu whenever the route changes (including back/forward).
   const closeMenu = menu.close;
@@ -80,24 +94,51 @@ export function Navbar() {
               </span>
             ) : null}
           </Link>
-          <Link
-            to="/my-36-spokes"
-            aria-label="My 36 Spokes"
-            className="hidden size-10 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:text-foreground lg:flex"
-          >
-            <User className="size-[1.15rem]" aria-hidden />
-          </Link>
           {isAuthenticated ? (
-            <div className="hidden items-center gap-3 lg:flex">
-              <span className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                Hi, {user.firstName}
-              </span>
-              <Button variant="outline" size="sm" onClick={handleLogout}>
-                Log out
-              </Button>
+            <div className="hidden items-center gap-1.5 lg:flex">
+              {isAdmin ? (
+                <ButtonLink to="/admin/products" variant="ghost" size="sm">
+                  Admin
+                </ButtonLink>
+              ) : null}
+              {/* Non-modal so opening it never locks page scroll under the sticky header. */}
+              <DropdownMenu modal={false}>
+                <DropdownMenuTrigger className="group flex h-10 items-center gap-2 rounded-sm pl-2.5 text-xs uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-foreground data-[state=open]:text-foreground">
+                  <User className="size-[1.15rem]" aria-hidden />
+                  <span className="max-w-40 truncate">Hi, {user.firstName}</span>
+                  <ChevronDown
+                    className="size-3.5 transition-transform duration-200 group-data-[state=open]:rotate-180"
+                    aria-hidden
+                  />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  sideOffset={10}
+                  className="min-w-52 rounded-sm p-1.5"
+                >
+                  {accountNav.map((item) => (
+                    <DropdownMenuItem key={item.to} asChild className={accountItemClasses}>
+                      <Link to={item.to} activeOptions={{ exact: true }}>
+                        {item.label}
+                      </Link>
+                    </DropdownMenuItem>
+                  ))}
+                  <DropdownMenuSeparator className="bg-border" />
+                  <DropdownMenuItem className={accountItemClasses} onSelect={handleLogout}>
+                    Log out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           ) : (
             <>
+              <Link
+                to="/my-36-spokes"
+                aria-label="My 36 Spokes"
+                className="hidden size-10 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:text-foreground lg:flex"
+              >
+                <User className="size-[1.15rem]" aria-hidden />
+              </Link>
               <ButtonLink to="/login" variant="outline" size="sm" className="hidden lg:inline-flex">
                 Login
               </ButtonLink>
@@ -128,7 +169,8 @@ export function Navbar() {
         <nav
           id={MOBILE_MENU_ID}
           aria-label="Mobile menu"
-          className="border-t border-border bg-surface lg:hidden"
+          // Scrolls within the space between the header and the bottom tab bar.
+          className="max-h-[calc(100dvh-8rem)] overflow-y-auto border-t border-border bg-surface lg:hidden"
         >
           <ul className="container-page flex flex-col py-2">
             {[...primaryNav, ...mobileMenuExtras].map((item) => (
@@ -136,36 +178,66 @@ export function Navbar() {
                 <Link
                   to={item.to}
                   onClick={menu.close}
-                  className="flex h-12 items-center font-display text-sm uppercase tracking-[0.2em] text-foreground"
+                  className={`${mobileRowClasses} text-foreground`}
                 >
                   {item.label}
                 </Link>
               </li>
             ))}
-            <li className="flex gap-3 py-3">
-              {isAuthenticated ? (
-                <Button
-                  variant="outline"
-                  className="flex-1"
-                  onClick={() => {
-                    menu.close();
-                    handleLogout();
-                  }}
-                >
-                  Log out
-                </Button>
-              ) : (
-                <>
-                  <ButtonLink to="/login" variant="outline" className="flex-1" onClick={menu.close}>
-                    Login
-                  </ButtonLink>
-                  <ButtonLink to="/join" className="flex-1" onClick={menu.close}>
-                    Join
-                  </ButtonLink>
-                </>
-              )}
-            </li>
+            {isAuthenticated ? null : (
+              <li className="flex gap-3 py-3">
+                <ButtonLink to="/login" variant="outline" className="flex-1" onClick={menu.close}>
+                  Login
+                </ButtonLink>
+                <ButtonLink to="/join" className="flex-1" onClick={menu.close}>
+                  Join
+                </ButtonLink>
+              </li>
+            )}
           </ul>
+          {isAuthenticated ? (
+            <div className="border-t border-border">
+              <div className="container-page pb-2 pt-4">
+                <p className="eyebrow">Hi, {user.firstName}</p>
+                <ul className="mt-1 flex flex-col">
+                  {accountNav.map((item) => (
+                    <li key={item.to}>
+                      <Link
+                        to={item.to}
+                        onClick={menu.close}
+                        className={`${mobileRowClasses} text-foreground`}
+                      >
+                        {item.label}
+                      </Link>
+                    </li>
+                  ))}
+                  {isAdmin ? (
+                    <li>
+                      <Link
+                        to="/admin/products"
+                        onClick={menu.close}
+                        className={`${mobileRowClasses} text-primary`}
+                      >
+                        Admin CMS
+                      </Link>
+                    </li>
+                  ) : null}
+                  <li>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        menu.close();
+                        handleLogout();
+                      }}
+                      className={`${mobileRowClasses} text-muted-foreground`}
+                    >
+                      Log out
+                    </button>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          ) : null}
         </nav>
       ) : null}
     </header>

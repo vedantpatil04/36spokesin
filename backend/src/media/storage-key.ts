@@ -6,7 +6,8 @@ import {
   MEDIA_MIME_EXTENSIONS,
 } from "./media.policy.js";
 
-const SAFE_KEY_PATTERN = /^[a-z-]+\/\d{4}\/\d{2}\/[0-9a-f-]{36}\.(jpg|png|webp|avif)$/;
+const SAFE_KEY_PATTERN =
+  /^[a-z-]+\/\d{4}\/\d{2}\/[0-9a-f-]{36}\.(jpg|png|webp|avif|mp4|webm|mov)$/;
 
 /**
  * Object keys are generated entirely on the server: category prefix, UTC year and

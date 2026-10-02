@@ -27,7 +27,7 @@ function TripsPage() {
       <PageHeader
         eyebrow="Travel"
         title="Upcoming departures"
-        description="Every confirmed date, soonest first. Seat counts shown are placeholder development content."
+        description="Every confirmed date, soonest first."
       >
         <ButtonLink to="/travel/destinations" variant="outline">
           Browse by destination

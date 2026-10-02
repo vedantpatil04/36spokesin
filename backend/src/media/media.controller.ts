@@ -8,12 +8,18 @@ import {
   Param,
   Patch,
   Post,
+  Put,
   Query,
+  Req,
 } from "@nestjs/common";
 import { ApiBearerAuth, ApiNoContentResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
+import type { Request } from "express";
 import type { AuthUser } from "../auth/auth-user.js";
 import { CurrentUser } from "../auth/decorators/current-user.decorator.js";
+import { Public } from "../auth/decorators/public.decorator.js";
 import { ApiDataResponse, ApiErrorResponses } from "../common/docs/api-responses.js";
+import { ApiException } from "../common/errors/api-exception.js";
+import { ErrorCode } from "../common/errors/error-codes.js";
 import type { CursorPage } from "../common/http/cursor-page.js";
 import { CursorPaginationQueryDto } from "../common/pagination/cursor-pagination.dto.js";
 import { ParseUuidPipe } from "../common/validation/validation.js";
@@ -28,6 +34,36 @@ import { MediaService } from "./media.service.js";
 @Controller("media")
 export class MediaController {
   constructor(private readonly media: MediaService) {}
+
+  @Public()
+  @Put("uploads/content")
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: "Upload raw file content for streaming storage providers",
+    description: "Accepts raw file binary body for presigned upload URLs with valid HMAC signature.",
+  })
+  async uploadContent(
+    @Req() req: Request,
+    @Query("key") key: string,
+    @Query("expires") expiresStr: string,
+    @Query("sig") sig: string,
+  ): Promise<void> {
+    const expires = Number(expiresStr);
+    if (!key || !Number.isFinite(expires) || !sig) {
+      throw new ApiException(
+        HttpStatus.BAD_REQUEST,
+        ErrorCode.BAD_REQUEST,
+        "Missing required upload signature parameters.",
+      );
+    }
+    await this.media.handleStreamUpload(
+      key,
+      expires,
+      sig,
+      req,
+      typeof req.headers["content-type"] === "string" ? req.headers["content-type"] : undefined,
+    );
+  }
 
   @Post("uploads")
   @ApiOperation({

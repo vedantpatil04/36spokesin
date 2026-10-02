@@ -1,0 +1,62 @@
+import { media } from "@/data/media";
+import type { HeroSlide } from "@/types";
+
+export const defaultHeroSlides: HeroSlide[] = [
+  {
+    id: "hero-1",
+    title: "The road starts where the map runs out",
+    eyebrow: "Official 36 Spokes Rider Network",
+    description:
+      "Expeditions across the Himalaya, gear matched to the motorcycle in your garage, and riders who turn up when you post a route.",
+    location: "Ladakh & Spiti Valley",
+    mediaType: "IMAGE",
+    imageUrl: media.site.heroRide.src,
+    ctaLabel: "Choose your path",
+    ctaUrl: "#choose-your-path",
+    secondaryCtaLabel: "Plan a journey",
+    secondaryCtaUrl: "/plan",
+    sortOrder: 0,
+    status: "PUBLISHED",
+    durationSeconds: 5,
+    autoAdvanceMode: "FIXED_DURATION",
+    image: media.site.heroRide,
+  },
+  {
+    id: "hero-2",
+    title: "Above the tree line, under the prayers",
+    eyebrow: "Himalayan Expedition Series",
+    description:
+      "High-altitude mountain passes, remote gravel valleys, and fixed-departure journeys built for small, disciplined packs.",
+    location: "Zanskar Gorge & Shinkula Pass",
+    mediaType: "IMAGE",
+    imageUrl: media.destinations.ladakh.src,
+    ctaLabel: "Plan your journey",
+    ctaUrl: "/plan",
+    secondaryCtaLabel: "Upcoming Rides",
+    secondaryCtaUrl: "/rides",
+    sortOrder: 1,
+    status: "PUBLISHED",
+    durationSeconds: 7,
+    autoAdvanceMode: "FIXED_DURATION",
+    image: media.destinations.ladakh,
+  },
+  {
+    id: "hero-3",
+    title: "Built by riders who know the weight of a tool roll",
+    eyebrow: "The Human Saddle",
+    description:
+      "Weekend day-loops, technical workshop nights, and the collective memory of every road taken together.",
+    location: "Western Ghats & Sahyadris",
+    mediaType: "IMAGE",
+    imageUrl: media.riders.community.src,
+    ctaLabel: "Join the community",
+    ctaUrl: "/community",
+    secondaryCtaLabel: "Meet the Founders",
+    secondaryCtaUrl: "/about",
+    sortOrder: 2,
+    status: "PUBLISHED",
+    durationSeconds: 5,
+    autoAdvanceMode: "FIXED_DURATION",
+    image: media.riders.community,
+  },
+];

@@ -8,6 +8,7 @@
 export type * from "./bike";
 export type * from "./commerce";
 export type * from "./common";
+export type * from "./community";
 export type * from "./event";
 export type * from "./garage";
 export type * from "./group";

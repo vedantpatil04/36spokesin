@@ -14,7 +14,16 @@ import type {
   UploadSessionResponseDto,
 } from "./dto/media-asset-response.dto.js";
 import type { UpdateMediaAssetDto } from "./dto/update-media-asset.dto.js";
-import { detectImageMimeType, readImageDimensions } from "./image-inspection.js";
+import { detectImageMimeType, detectVideoMimeType, readImageDimensions } from "./image-inspection.js";
+import {
+  DETACHABLE_REFERENCES,
+  MEDIA_REFERENCE_COUNT_SELECT,
+  type MediaReferenceCounts,
+  NO_REFERENCES,
+  describeReferences,
+  totalReferences,
+  type MediaReferenceKind,
+} from "./media-references.js";
 import { MEDIA_INSPECTION_BYTES, canUploadCategory } from "./media.policy.js";
 import { MEDIA_PROCESSOR, type MediaProcessor } from "./processing/media-processor.js";
 import { OBJECT_STORAGE, type ObjectStorage } from "./storage/object-storage.js";
@@ -106,15 +115,30 @@ export class MediaService {
     ) {
       return this.reject(asset, "The uploaded file size does not match the declared size.");
     }
-    if (stored.contentType !== asset.mimeType) {
+    if (stored.contentType && stored.contentType !== asset.mimeType) {
       return this.reject(asset, "The uploaded file type does not match the declared type.");
     }
 
-    const head = await this.storage.readObjectStart(asset.storageKey, MEDIA_INSPECTION_BYTES);
-    if (detectImageMimeType(head) !== asset.mimeType) {
-      return this.reject(asset, "The uploaded file is not a valid image of the declared type.");
+    let width: number | null = null;
+    let height: number | null = null;
+
+    if (asset.mimeType.startsWith("image/")) {
+      const head = await this.storage.readObjectStart(asset.storageKey, MEDIA_INSPECTION_BYTES);
+      if (detectImageMimeType(head) !== asset.mimeType) {
+        return this.reject(asset, "The uploaded file is not a valid image of the declared type.");
+      }
+      const dimensions = readImageDimensions(head);
+      width = dimensions?.width ?? stored.width ?? null;
+      height = dimensions?.height ?? stored.height ?? null;
+    } else if (asset.mimeType.startsWith("video/")) {
+      const head = await this.storage.readObjectStart(asset.storageKey, MEDIA_INSPECTION_BYTES);
+      const detected = detectVideoMimeType(head);
+      if (!detected || !detected.startsWith("video/")) {
+        return this.reject(asset, "The uploaded file is not a valid video of the declared type.");
+      }
+      width = stored.width ?? null;
+      height = stored.height ?? null;
     }
-    const dimensions = readImageDimensions(head);
 
     let ready: MediaAsset;
     try {
@@ -123,8 +147,8 @@ export class MediaService {
         data: {
           status: MediaStatus.READY,
           fileSize: stored.contentLength,
-          width: dimensions?.width ?? null,
-          height: dimensions?.height ?? null,
+          width,
+          height,
           uploadedAt: new Date(),
         },
       });
@@ -175,18 +199,103 @@ export class MediaService {
     return this.toResponse(asset);
   }
 
-  /** Removes the record (references such as rider avatars are cleared) and then the stored object. */
+  /**
+   * Removes the record and then the stored object. The owner's own profile photo
+   * is detached (Phase 3 behaviour); any other use — product, category or bike
+   * images — blocks the delete with 409 MEDIA_IN_USE so a live page never loses
+   * its image. The database backs this up: those relations are ON DELETE RESTRICT.
+   */
   async remove(user: AuthUser, id: string): Promise<void> {
     const asset = await this.findAccessible(user, id);
-    await this.prisma.mediaAsset.delete({ where: { id: asset.id } });
-    if (this.storage.isConfigured) {
-      await this.storage.deleteObject(asset.storageKey).catch((error: unknown) => {
-        this.logger.error(
-          { err: error, storageKey: asset.storageKey },
-          "Orphaned object left in storage",
-        );
-      });
+    const counts = await this.countReferences(asset.id);
+    this.assertNotInUse(counts, DETACHABLE_REFERENCES);
+
+    try {
+      await this.prisma.mediaAsset.delete({ where: { id: asset.id } });
+    } catch (error) {
+      // Attached elsewhere between the check and the delete.
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2003") {
+        this.assertNotInUse(await this.countReferences(asset.id), DETACHABLE_REFERENCES);
+      }
+      throw error;
     }
+    await this.deleteStoredObject(asset.storageKey);
+    this.logger.log({ mediaAssetId: asset.id, userId: user.id }, "Media asset deleted");
+  }
+
+  /** How many records use the asset, per relation. All zero when the asset does not exist. */
+  async countReferences(
+    assetId: string,
+    client: Prisma.TransactionClient = this.prisma,
+  ): Promise<MediaReferenceCounts> {
+    const asset = await client.mediaAsset.findUnique({
+      where: { id: assetId },
+      select: MEDIA_REFERENCE_COUNT_SELECT,
+    });
+    return asset ? asset._count : { ...NO_REFERENCES };
+  }
+
+  /**
+   * Deletes the asset and its stored object only if nothing references it any
+   * more. Called after an image is detached or replaced. Safe to call for assets
+   * that are shared (e.g. by a duplicated product): they are kept.
+   * Returns true when the asset was deleted.
+   */
+  async releaseIfUnreferenced(assetId: string): Promise<boolean> {
+    let storageKey: string | null = null;
+    try {
+      storageKey = await this.prisma.$transaction(async (tx) => {
+        const asset = await tx.mediaAsset.findUnique({
+          where: { id: assetId },
+          select: { storageKey: true, ...MEDIA_REFERENCE_COUNT_SELECT },
+        });
+        if (!asset || totalReferences(asset._count) > 0) return null;
+        await tx.mediaAsset.delete({ where: { id: assetId } });
+        return asset.storageKey;
+      });
+    } catch (error) {
+      // A concurrent attach won the race: the RESTRICT foreign key kept the asset.
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2003") {
+        return false;
+      }
+      throw error;
+    }
+    if (!storageKey) return false;
+    await this.deleteStoredObject(storageKey);
+    this.logger.log({ mediaAssetId: assetId }, "Unreferenced media asset released");
+    return true;
+  }
+
+  /**
+   * Confirms an asset can be attached to a catalogue record: it exists, it is
+   * READY and its category is one of `categories`. Catalogue categories can only
+   * be uploaded by admins (see media.policy.ts), so no ownership check is needed.
+   */
+  async assertAttachable(
+    assetId: string,
+    categories: readonly MediaCategory[],
+    client: Prisma.TransactionClient = this.prisma,
+  ): Promise<MediaAsset> {
+    const asset = await client.mediaAsset.findUnique({ where: { id: assetId } });
+    if (!asset || asset.status !== MediaStatus.READY || !categories.includes(asset.category)) {
+      throw new ApiException(
+        HttpStatus.UNPROCESSABLE_ENTITY,
+        ErrorCode.MEDIA_NOT_USABLE,
+        `The media asset does not exist, has not finished uploading, or is not a ${categories
+          .join(" or ")
+          .toLowerCase()} image.`,
+      );
+    }
+    return asset;
+  }
+
+  assertNotInUse(counts: MediaReferenceCounts, ignore: readonly MediaReferenceKind[] = []): void {
+    if (totalReferences(counts, ignore) === 0) return;
+    throw new ApiException(
+      HttpStatus.CONFLICT,
+      ErrorCode.MEDIA_IN_USE,
+      `This image is still in use. ${describeReferences(counts, ignore)} Remove it from those first.`,
+    );
   }
 
   /**
@@ -248,6 +357,13 @@ export class MediaService {
     return asset;
   }
 
+  private async deleteStoredObject(storageKey: string): Promise<void> {
+    if (!this.storage.isConfigured) return;
+    await this.storage.deleteObject(storageKey).catch((error: unknown) => {
+      this.logger.error({ err: error, storageKey }, "Orphaned object left in storage");
+    });
+  }
+
   /** Deletes an upload that failed verification, then reports why. */
   private async reject(asset: MediaAsset, message: string): Promise<never> {
     this.logger.warn({ mediaAssetId: asset.id, reason: message }, "Media upload rejected");
@@ -265,6 +381,33 @@ export class MediaService {
       ErrorCode.MEDIA_UPLOAD_INVALID,
       message,
     );
+  }
+
+  async handleStreamUpload(
+    key: string,
+    expires: number,
+    sig: string,
+    stream: NodeJS.ReadableStream,
+    contentType?: string,
+  ): Promise<void> {
+    this.assertStorage();
+    if (!this.storage.verifyUploadToken || !this.storage.handleUpload) {
+      throw new ApiException(
+        HttpStatus.BAD_REQUEST,
+        ErrorCode.BAD_REQUEST,
+        "Streaming uploads are not supported by the active storage provider.",
+      );
+    }
+
+    if (!this.storage.verifyUploadToken(key, expires, sig)) {
+      throw new ApiException(
+        HttpStatus.FORBIDDEN,
+        ErrorCode.FORBIDDEN,
+        "The upload URL signature is invalid or has expired.",
+      );
+    }
+
+    await this.storage.handleUpload(key, stream, contentType);
   }
 
   private assertStorage(): void {

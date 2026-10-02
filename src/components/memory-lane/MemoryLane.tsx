@@ -54,13 +54,13 @@ export function MilestoneMarker({
 /** The lead memory, presented as a large editorial image. */
 export function FeaturedMemory({ memory }: { memory: Memory }) {
   return (
-    <article className="overflow-hidden rounded-sm border border-border">
+    <article className="group overflow-hidden rounded-sm border border-border/80 bg-surface shadow-xs">
       <Media
         asset={memory.image}
         ratio="auto"
-        className="h-[28rem] sm:h-[34rem] lg:h-full lg:min-h-[38rem]"
+        className="h-[26rem] sm:h-[32rem] lg:h-full lg:min-h-[36rem]"
       >
-        <div className="absolute inset-0 bg-gradient-to-t from-background from-15% via-background/60 via-55% to-background/0 md:from-5% md:via-background/40 md:via-45%" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 via-55% to-background/0 md:from-5% md:via-background/40 md:via-45%" />
         <MilestoneMarker
           date={memory.date}
           place={memory.marker}
@@ -68,11 +68,13 @@ export function FeaturedMemory({ memory }: { memory: Memory }) {
           className="absolute left-5 top-5 md:left-7 md:top-7"
         />
         <div className="absolute inset-x-0 bottom-0 p-6 md:p-8">
-          <p className="text-sm text-foreground/75">
-            {memory.location}, {formatYearMonth(memory.date)}
+          <p className="font-display text-xs uppercase tracking-[0.18em] text-primary">
+            {memory.location} · {formatYearMonth(memory.date)}
           </p>
-          <h3 className="mt-2 max-w-lg text-3xl leading-[1.02] md:text-4xl">{memory.title}</h3>
-          <p className="mt-4 max-w-md text-base leading-relaxed text-foreground/85">
+          <h3 className="mt-2 max-w-lg text-2xl sm:text-3xl lg:text-4xl leading-[1.05] text-foreground font-display uppercase tracking-[0.06em]">
+            {memory.title}
+          </h3>
+          <p className="mt-3 max-w-md text-sm sm:text-base leading-relaxed text-foreground/80">
             {memory.caption}
           </p>
         </div>
@@ -92,14 +94,14 @@ export function MemoryLaneItem({ memory }: { memory: Memory }) {
         <Media
           asset={memory.image}
           ratio="4/3"
-          className="w-20 shrink-0 self-start rounded-sm border border-border sm:w-36"
+          className="w-24 sm:w-36 shrink-0 self-start rounded-sm border border-border/80 shadow-xs"
         />
         <div className="min-w-0">
-          <h3 className="text-lg leading-tight sm:text-xl">{memory.title}</h3>
-          <p className="mt-1 text-xs text-muted-foreground">
-            {memory.location}, {formatYearMonth(memory.date)}
+          <h3 className="text-base sm:text-lg font-medium leading-tight text-foreground">{memory.title}</h3>
+          <p className="mt-1 text-xs text-primary font-display uppercase tracking-[0.14em]">
+            {memory.location} · {formatYearMonth(memory.date)}
           </p>
-          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{memory.caption}</p>
+          <p className="mt-2 text-xs sm:text-sm leading-relaxed text-muted-foreground">{memory.caption}</p>
         </div>
       </article>
     </li>
@@ -111,11 +113,25 @@ export function MemoryLaneItem({ memory }: { memory: Memory }) {
  * reader walks back down the road.
  */
 export function MemoryLane({ memories }: { memories: Memory[] }) {
-  const [featured, ...earlier] = memories;
+  if (!memories || memories.length === 0) {
+    return (
+      <div className="rounded-sm border border-border/60 bg-surface/30 px-6 py-8 text-center">
+        <p className="font-display text-xs uppercase tracking-[0.2em] text-muted-foreground">
+          No memories recorded yet
+        </p>
+        <p className="mt-1.5 text-xs text-muted-foreground/70">
+          Past rides, expeditions and community moments will be archived here.
+        </p>
+      </div>
+    );
+  }
+
+  const featured = memories[0];
   if (!featured) return null;
+  const earlier = memories.slice(1);
 
   return (
-    <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-14">
+    <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:gap-14">
       <FeaturedMemory memory={featured} />
       {earlier.length > 0 ? (
         <ol

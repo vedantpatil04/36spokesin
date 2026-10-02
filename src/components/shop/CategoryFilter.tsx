@@ -30,7 +30,9 @@ export function CategoryFilter({
       </FilterChipRow>
       <p className="mt-3 text-sm text-muted-foreground">
         {active
-          ? `${active.name}: ${active.purpose}.`
+          ? active.purpose
+            ? `${active.name}: ${active.purpose}.`
+            : active.name
           : "Categories built around what the gear does on a ride, not around brand names."}
       </p>
     </>
