@@ -42,7 +42,9 @@ export function FounderCard({ founder, className }: { founder: Founder; classNam
         )}
         {founder.quote ? (
           <blockquote className="mt-6 border-l-2 border-primary pl-4">
-            <p className="text-base italic leading-snug text-foreground md:text-lg">“{founder.quote}”</p>
+            <p className="text-base italic leading-snug text-foreground md:text-lg">
+              “{founder.quote}”
+            </p>
           </blockquote>
         ) : null}
         {founder.story ? (
@@ -58,7 +60,10 @@ export function FounderCard({ founder, className }: { founder: Founder; classNam
         ) : null}
       </div>
       {links.length > 0 ? (
-        <ul className="mt-6 flex gap-2 border-t border-border/60 pt-4" aria-label={`${founder.name} online`}>
+        <ul
+          className="mt-6 flex gap-2 border-t border-border/60 pt-4"
+          aria-label={`${founder.name} online`}
+        >
           {links.map(({ href, label, icon: Icon }) => (
             <li key={label}>
               <a

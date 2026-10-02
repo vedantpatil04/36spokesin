@@ -19,8 +19,8 @@ export function BrandStatement() {
         <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
           We believe the best motorcycling moments don't happen in a showroom or on a social feed.
           They happen at 6:00 AM at the city limits, on cold switchbacks in the fog, and in the
-          garage with cold coffee and a socket wrench. 36 Spokes exists to connect every part of that
-          life.
+          garage with cold coffee and a socket wrench. 36 Spokes exists to connect every part of
+          that life.
         </p>
 
         <div className="mt-8 flex justify-center">

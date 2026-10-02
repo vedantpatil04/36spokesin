@@ -10,12 +10,7 @@ interface InstagramEmbedProps {
   className?: string;
 }
 
-export function InstagramEmbed({
-  postUrl,
-  mediaType,
-  caption,
-  className,
-}: InstagramEmbedProps) {
+export function InstagramEmbed({ postUrl, mediaType, caption, className }: InstagramEmbedProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [isRendered, setIsRendered] = useState(false);
   const [hasError, setHasError] = useState(false);
@@ -101,9 +96,7 @@ export function InstagramEmbed({
           <p className="font-display text-xs uppercase tracking-[0.2em] text-foreground">
             Instagram {isReel ? "Reel" : "Post"}
           </p>
-          <p className="mt-1.5 text-xs text-muted-foreground">
-            Loading official embed…
-          </p>
+          <p className="mt-1.5 text-xs text-muted-foreground">Loading official embed…</p>
           <div className="mt-6 flex w-3/4 flex-col gap-2">
             <div className="h-2 w-full animate-pulse rounded-full bg-border/60" />
             <div className="h-2 w-2/3 self-center animate-pulse rounded-full bg-border/40" />
@@ -161,7 +154,8 @@ export function InstagramEmbed({
             {caption || "Follow The Ride on Instagram"}
           </h4>
           <p className="mt-1.5 max-w-xs text-xs text-muted-foreground">
-            This post cannot be embedded directly. View it on Instagram to see full video and interactions.
+            This post cannot be embedded directly. View it on Instagram to see full video and
+            interactions.
           </p>
 
           <a

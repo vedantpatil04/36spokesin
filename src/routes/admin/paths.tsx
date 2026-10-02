@@ -1,12 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import {
-  ArrowDown,
-  ArrowUp,
-  LoaderCircle,
-  Pencil,
-  Upload,
-} from "lucide-react";
+import { ArrowDown, ArrowUp, LoaderCircle, Pencil, Upload } from "lucide-react";
 import { type FormEvent, useId, useState } from "react";
 import { tableClasses } from "@/components/admin/admin-format";
 import {
@@ -96,7 +90,9 @@ function AdminPathsPage() {
                 <tr key={card.id} className={tableClasses.row}>
                   <td className={tableClasses.td}>
                     <div className="flex items-center gap-1">
-                      <span className="font-mono text-xs text-muted-foreground mr-1">{card.sortOrder}</span>
+                      <span className="font-mono text-xs text-muted-foreground mr-1">
+                        {card.sortOrder}
+                      </span>
                       <button
                         type="button"
                         disabled={idx === 0}
@@ -139,10 +135,14 @@ function AdminPathsPage() {
                   </td>
                   <td className={tableClasses.td}>
                     <span className="font-bold text-foreground">{card.title}</span>
-                    <span className="ml-2 font-mono text-xs text-muted-foreground">({card.slug})</span>
+                    <span className="ml-2 font-mono text-xs text-muted-foreground">
+                      ({card.slug})
+                    </span>
                   </td>
                   <td className={tableClasses.td}>
-                    <span className="text-xs text-muted-foreground line-clamp-1">{card.tagline || "—"}</span>
+                    <span className="text-xs text-muted-foreground line-clamp-1">
+                      {card.tagline || "—"}
+                    </span>
                   </td>
                   <td className={tableClasses.td}>
                     <span className="text-xs font-mono text-foreground">{card.ctaLabel}</span>
@@ -160,11 +160,7 @@ function AdminPathsPage() {
                     )}
                   </td>
                   <td className={tableClasses.td}>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => setEditing(card)}
-                    >
+                    <Button size="sm" variant="ghost" onClick={() => setEditing(card)}>
                       <Pencil className="size-3.5" />
                       Edit
                     </Button>
@@ -260,11 +256,21 @@ function PathCardForm({
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Field id={ids.title} label="Path Title *">
-          <TextInput id={ids.title} value={title} onChange={(e) => setTitle(e.target.value)} required />
+          <TextInput
+            id={ids.title}
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
+          />
         </Field>
 
         <Field id={ids.destinationUrl} label="Destination URL *" hint="e.g. /rides, /plan">
-          <TextInput id={ids.destinationUrl} value={destinationUrl} onChange={(e) => setDestinationUrl(e.target.value)} required />
+          <TextInput
+            id={ids.destinationUrl}
+            value={destinationUrl}
+            onChange={(e) => setDestinationUrl(e.target.value)}
+            required
+          />
         </Field>
       </div>
 
@@ -273,16 +279,31 @@ function PathCardForm({
       </Field>
 
       <Field id={ids.description} label="Description" hint="Optional descriptor">
-        <TextArea id={ids.description} value={description} onChange={(e) => setDescription(e.target.value)} rows={2} />
+        <TextArea
+          id={ids.description}
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          rows={2}
+        />
       </Field>
 
       <div className="grid gap-4 sm:grid-cols-3">
         <Field id={ids.ctaLabel} label="CTA Button Label *">
-          <TextInput id={ids.ctaLabel} value={ctaLabel} onChange={(e) => setCtaLabel(e.target.value)} required />
+          <TextInput
+            id={ids.ctaLabel}
+            value={ctaLabel}
+            onChange={(e) => setCtaLabel(e.target.value)}
+            required
+          />
         </Field>
 
         <Field id={ids.badge} label="Badge" hint="e.g. Coming soon, New">
-          <TextInput id={ids.badge} value={badge} onChange={(e) => setBadge(e.target.value)} placeholder="Coming soon" />
+          <TextInput
+            id={ids.badge}
+            value={badge}
+            onChange={(e) => setBadge(e.target.value)}
+            placeholder="Coming soon"
+          />
         </Field>
 
         <Field id={ids.status} label="Status">
@@ -299,7 +320,11 @@ function PathCardForm({
       </div>
 
       {/* IMAGE */}
-      <Field id={ids.imageUrl} label="Image URL / Upload" hint="Custom background photography for this path">
+      <Field
+        id={ids.imageUrl}
+        label="Image URL / Upload"
+        hint="Custom background photography for this path"
+      >
         <div className="flex gap-2">
           <TextInput
             id={ids.imageUrl}
@@ -311,7 +336,13 @@ function PathCardForm({
           <label className="inline-flex cursor-pointer items-center gap-1.5 rounded bg-surface px-3 py-2 text-xs font-medium hover:bg-surface-2">
             <Upload className="size-3.5" />
             <span>{uploading ? "Uploading..." : "Upload photo"}</span>
-            <input type="file" accept="image/*" className="hidden" onChange={handleImageFile} disabled={uploading} />
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleImageFile}
+              disabled={uploading}
+            />
           </label>
         </div>
       </Field>

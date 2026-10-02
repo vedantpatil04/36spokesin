@@ -7,17 +7,17 @@ is `src/routes/__root.tsx`.
 
 ## Conventions
 
-| File | URL |
-| --- | --- |
-| `index.tsx` | `/` |
-| `about.tsx` | `/about` |
-| `users/index.tsx` | `/users` |
-| `users/$id.tsx` | `/users/:id` (dynamic — bare `$`, no curly braces) |
-| `posts/{-$category}.tsx` | `/posts/:category?` (optional segment) |
-| `files/$.tsx` | `/files/*` (splat — read via `_splat` param, never `*`) |
-| `_layout.tsx` | layout route (renders children via `<Outlet />`) |
-| `shop/route.tsx` | layout for `/shop` and everything under it (renders `<Outlet />`) |
-| `__root.tsx` | app shell — wraps every page; preserve `<Outlet />` |
+| File                     | URL                                                               |
+| ------------------------ | ----------------------------------------------------------------- |
+| `index.tsx`              | `/`                                                               |
+| `about.tsx`              | `/about`                                                          |
+| `users/index.tsx`        | `/users`                                                          |
+| `users/$id.tsx`          | `/users/:id` (dynamic — bare `$`, no curly braces)                |
+| `posts/{-$category}.tsx` | `/posts/:category?` (optional segment)                            |
+| `files/$.tsx`            | `/files/*` (splat — read via `_splat` param, never `*`)           |
+| `_layout.tsx`            | layout route (renders children via `<Outlet />`)                  |
+| `shop/route.tsx`         | layout for `/shop` and everything under it (renders `<Outlet />`) |
+| `__root.tsx`             | app shell — wraps every page; preserve `<Outlet />`               |
 
 `routeTree.gen.ts` is auto-generated. Don't edit it by hand.
 
@@ -31,4 +31,3 @@ is `src/routes/__root.tsx`.
   layout routes never emit a second canonical link.
 - Loading and error UI fall back to the router defaults in `src/router.tsx`;
   override with `pendingComponent` where the page shape differs.
-

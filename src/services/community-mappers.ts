@@ -55,7 +55,7 @@ export function toFounder(api: ApiFounder): Founder {
     quote: api.quote,
     instagramUrl: api.instagramUrl,
     linkedinUrl: api.linkedinUrl,
-    image: asset ?? ({ ...media.placeholders.product, alt: "", category: "community" }),
+    image: asset ?? { ...media.placeholders.product, alt: "", category: "community" },
     hasImage: asset !== null,
   };
 }

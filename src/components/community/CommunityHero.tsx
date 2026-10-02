@@ -17,11 +17,7 @@ import type { MediaAsset } from "@/types";
  * The image and content are children of this one hero component with a
  * shared background and no intermediate section divider or empty gap.
  */
-export function CommunityHero({
-  image,
-}: {
-  image: MediaAsset;
-}) {
+export function CommunityHero({ image }: { image: MediaAsset }) {
   return (
     <header className="relative w-full bg-background border-b border-border/60">
       {/* 1. HERO IMAGE (Full 4:3 frame on mobile so all 10 people are visible without side clipping; editorial height on desktop) */}

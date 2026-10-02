@@ -39,7 +39,7 @@ export function CinematicHero({ slides }: { slides: HeroSlide[] }) {
   }, []);
 
   const total = slides?.length ?? 0;
-  const currentSlide = total > 0 ? (slides[currentIndex] || slides[0]) : null;
+  const currentSlide = total > 0 ? slides[currentIndex] || slides[0] : null;
 
   // Compute slide-specific duration and mode
   const currentDurationSeconds = currentSlide?.durationSeconds ?? 5;
@@ -50,9 +50,7 @@ export function CinematicHero({ slides }: { slides: HeroSlide[] }) {
     Boolean(isMobile ? currentSlide.mobileUrl || currentSlide.videoUrl : currentSlide.videoUrl) &&
     !videoError[currentSlide.id];
 
-  const isVideoEndMode = Boolean(
-    isCurrentVideo && currentSlide?.autoAdvanceMode === "VIDEO_END",
-  );
+  const isVideoEndMode = Boolean(isCurrentVideo && currentSlide?.autoAdvanceMode === "VIDEO_END");
 
   const resetTimer = useCallback(() => {
     startTimeRef.current = Date.now();
@@ -82,7 +80,7 @@ export function CinematicHero({ slides }: { slides: HeroSlide[] }) {
       if (nextState) {
         // Resuming
         startTimeRef.current = Date.now() - (progress / 100) * currentDurationMs;
-        activeVideoRef.current?.play().catch(() => { });
+        activeVideoRef.current?.play().catch(() => {});
       } else {
         // Pausing
         activeVideoRef.current?.pause();
@@ -149,7 +147,7 @@ export function CinematicHero({ slides }: { slides: HeroSlide[] }) {
   useEffect(() => {
     if (!activeVideoRef.current) return;
     if (isPlaying) {
-      activeVideoRef.current.play().catch(() => { });
+      activeVideoRef.current.play().catch(() => {});
     } else {
       activeVideoRef.current.pause();
     }
@@ -221,11 +219,25 @@ export function CinematicHero({ slides }: { slides: HeroSlide[] }) {
                 The road starts where the map runs out
               </h1>
               <p className="mt-2 sm:mt-4 max-w-xl text-[12px] leading-[1.45] text-muted-foreground/90 sm:text-lg sm:leading-relaxed line-clamp-2 sm:line-clamp-none">
-                Expeditions across the Himalaya, gear matched to the motorcycle in your garage, and riders who turn up when you post a route.
+                Expeditions across the Himalaya, gear matched to the motorcycle in your garage, and
+                riders who turn up when you post a route.
               </p>
               <div className="mt-3.5 sm:mt-8 flex flex-wrap gap-2.5 sm:gap-4">
-                <ButtonLink to="/rides" size="lg" className="h-10 px-4.5 text-xs sm:h-13 sm:px-7 sm:text-sm">Explore Rides</ButtonLink>
-                <ButtonLink to="/plan" variant="outline" size="lg" className="h-10 px-4.5 text-xs sm:h-13 sm:px-7 sm:text-sm">Plan Journey</ButtonLink>
+                <ButtonLink
+                  to="/rides"
+                  size="lg"
+                  className="h-10 px-4.5 text-xs sm:h-13 sm:px-7 sm:text-sm"
+                >
+                  Explore Rides
+                </ButtonLink>
+                <ButtonLink
+                  to="/plan"
+                  variant="outline"
+                  size="lg"
+                  className="h-10 px-4.5 text-xs sm:h-13 sm:px-7 sm:text-sm"
+                >
+                  Plan Journey
+                </ButtonLink>
               </div>
             </div>
           </div>
@@ -254,14 +266,20 @@ export function CinematicHero({ slides }: { slides: HeroSlide[] }) {
       {/* BACKGROUND MEDIA SLIDES */}
       {slides.map((slide, idx) => {
         const isActive = idx === currentIndex;
-        const isNear = Math.abs(idx - currentIndex) <= 1 || (idx === 0 && currentIndex === total - 1);
+        const isNear =
+          Math.abs(idx - currentIndex) <= 1 || (idx === 0 && currentIndex === total - 1);
 
         // Select responsive media
-        const activeVideoUrl = (isMobile && slide.mobileUrl) ? slide.mobileUrl : slide.videoUrl;
-        const activeImageUrl = (isMobile && slide.mobileUrl) ? slide.mobileUrl : (slide.imageUrl || slide.image?.src || "/brand-logo.jpg");
-        const posterSource = slide.posterUrl || slide.imageUrl || slide.image?.src || "/brand-logo.jpg";
+        const activeVideoUrl = isMobile && slide.mobileUrl ? slide.mobileUrl : slide.videoUrl;
+        const activeImageUrl =
+          isMobile && slide.mobileUrl
+            ? slide.mobileUrl
+            : slide.imageUrl || slide.image?.src || "/brand-logo.jpg";
+        const posterSource =
+          slide.posterUrl || slide.imageUrl || slide.image?.src || "/brand-logo.jpg";
 
-        const hasVideo = slide.mediaType === "VIDEO" && Boolean(activeVideoUrl) && !videoError[slide.id];
+        const hasVideo =
+          slide.mediaType === "VIDEO" && Boolean(activeVideoUrl) && !videoError[slide.id];
 
         return (
           <div
@@ -274,8 +292,14 @@ export function CinematicHero({ slides }: { slides: HeroSlide[] }) {
           >
             {hasVideo ? (
               <video
-                ref={isActive ? (el) => { activeVideoRef.current = el; } : undefined}
-                src={isNear ? (activeVideoUrl || undefined) : undefined}
+                ref={
+                  isActive
+                    ? (el) => {
+                        activeVideoRef.current = el;
+                      }
+                    : undefined
+                }
+                src={isNear ? activeVideoUrl || undefined : undefined}
                 poster={posterSource}
                 autoPlay={isActive}
                 muted
@@ -328,10 +352,7 @@ export function CinematicHero({ slides }: { slides: HeroSlide[] }) {
       {/* FOREGROUND EDITORIAL CONTENT */}
       <div className="relative z-20 flex h-full items-end pb-6 sm:pb-16 lg:pb-20">
         <div className="container-page w-full">
-          <div
-            key={currentSlide.id}
-            className="max-w-3xl"
-          >
+          <div key={currentSlide.id} className="max-w-3xl">
             {/* EYEBROW & LOCATION PILL — Reveals at 0ms */}
             <div className="hero-animate-eyebrow mb-2 flex flex-wrap items-center gap-2 sm:mb-5 sm:gap-2.5">
               <div className="inline-flex items-center gap-1.5 sm:gap-2 rounded-full border border-border/80 bg-background/80 px-2.5 py-0.5 sm:px-3.5 sm:py-1.5 backdrop-blur-md shadow-xs">
@@ -366,7 +387,9 @@ export function CinematicHero({ slides }: { slides: HeroSlide[] }) {
               {currentSlide.ctaUrl && currentSlide.ctaLabel ? (
                 <ButtonLink
                   to={currentSlide.ctaUrl.startsWith("#") ? "/" : currentSlide.ctaUrl}
-                  hash={currentSlide.ctaUrl.startsWith("#") ? currentSlide.ctaUrl.slice(1) : undefined}
+                  hash={
+                    currentSlide.ctaUrl.startsWith("#") ? currentSlide.ctaUrl.slice(1) : undefined
+                  }
                   size="lg"
                   className="h-10 px-4.5 text-xs sm:h-13 sm:px-7 sm:text-sm shadow-lift"
                 >
@@ -391,7 +414,11 @@ export function CinematicHero({ slides }: { slides: HeroSlide[] }) {
           {/* CAROUSEL CONTROLS & VARIABLE DURATION PROGRESS INDICATOR */}
           <div className="mt-5 sm:mt-12 flex flex-col gap-3 sm:gap-4 border-t border-border/50 sm:border-border/60 pt-3 sm:pt-5 sm:flex-row sm:items-center sm:justify-between">
             {/* PROGRESS INDICATOR */}
-            <div className="flex flex-1 items-center gap-3 max-w-lg" role="tablist" aria-label="Hero slide progression">
+            <div
+              className="flex flex-1 items-center gap-3 max-w-lg"
+              role="tablist"
+              aria-label="Hero slide progression"
+            >
               {slides.map((slide, idx) => {
                 const isActive = idx === currentIndex;
                 const isPassed = idx < currentIndex;
@@ -413,7 +440,12 @@ export function CinematicHero({ slides }: { slides: HeroSlide[] }) {
                     )}
                   >
                     <div className="flex items-center justify-between font-mono text-[9.5px] tracking-wider text-muted-foreground sm:text-[0.68rem]">
-                      <span className={cn("transition-colors", isActive ? "text-primary font-bold" : "")}>
+                      <span
+                        className={cn(
+                          "transition-colors",
+                          isActive ? "text-primary font-bold" : "",
+                        )}
+                      >
                         0{idx + 1}
                       </span>
                       <span className="hidden text-[0.62rem] text-muted-foreground/80 sm:inline-block">

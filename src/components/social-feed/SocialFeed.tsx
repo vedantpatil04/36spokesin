@@ -62,11 +62,7 @@ export function SocialFeed({
   return (
     <Section id={id} className={className ?? "overflow-hidden"}>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <SectionHeader
-          {...(eyebrow ? { eyebrow } : {})}
-          title={title}
-          description={description}
-        />
+        <SectionHeader {...(eyebrow ? { eyebrow } : {})} title={title} description={description} />
         <a
           href="https://www.instagram.com/36spokes/"
           target="_blank"

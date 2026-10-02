@@ -30,9 +30,7 @@ function ShopVisualBanner() {
             <span className="text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-primary">
               CATEGORY PREVIEW
             </span>
-            <h3 className="font-display text-xl uppercase text-foreground">
-              Protection & Apparel
-            </h3>
+            <h3 className="font-display text-xl uppercase text-foreground">Protection & Apparel</h3>
             <p className="mt-1 text-xs text-muted-foreground">
               Certified armor, weather-proof outerwear, and helmets tested in all climates.
             </p>
@@ -89,7 +87,8 @@ export function ShopComingSoon() {
 
           {/* Main Title */}
           <h1 className="font-display text-4xl uppercase tracking-tight sm:text-6xl md:text-7xl lg:text-8xl">
-            GEAR FOR THE<br /> ROAD AHEAD.
+            GEAR FOR THE
+            <br /> ROAD AHEAD.
           </h1>
 
           {/* Exact required copy */}
@@ -112,7 +111,8 @@ export function ShopComingSoon() {
                 Field-Tested Durability
               </h3>
               <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                Only equipment that has proven its reliability over high mileage and difficult backcountry terrain.
+                Only equipment that has proven its reliability over high mileage and difficult
+                backcountry terrain.
               </p>
             </div>
 
@@ -124,7 +124,8 @@ export function ShopComingSoon() {
                 Chassis-Specific Fitment
               </h3>
               <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                Each product is verified against your exact motorcycle model and variant so it installs cleanly.
+                Each product is verified against your exact motorcycle model and variant so it
+                installs cleanly.
               </p>
             </div>
 
@@ -136,7 +137,8 @@ export function ShopComingSoon() {
                 Curated, Not Cluttered
               </h3>
               <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                A tight, purposeful lineup of essential gear instead of thousands of generic catalog items.
+                A tight, purposeful lineup of essential gear instead of thousands of generic catalog
+                items.
               </p>
             </div>
           </div>
@@ -147,7 +149,8 @@ export function ShopComingSoon() {
               Get ready for your next ride
             </h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              In the meantime, explore planned expeditions, join fellow riders, or discover new routes.
+              In the meantime, explore planned expeditions, join fellow riders, or discover new
+              routes.
             </p>
 
             <div className="mt-6 flex flex-wrap items-center justify-center gap-3">

@@ -64,8 +64,8 @@ function AboutPage() {
             <p>
               Everything in a rider’s world starts with the motorcycle in their garage: its tank
               range, its mounting points, its clearance, and how it behaves when the road surface
-              ends. The gear that fits it, the route it can tackle, and the companions who ride
-              at that pace must all align.
+              ends. The gear that fits it, the route it can tackle, and the companions who ride at
+              that pace must all align.
             </p>
             <p className="text-foreground">
               36 Spokes was created to unify those disparate pieces into one cohesive home: your

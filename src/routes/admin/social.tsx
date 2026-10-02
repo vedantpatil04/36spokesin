@@ -25,10 +25,7 @@ import {
 } from "@/components/admin/admin-ui";
 import { ErrorState, Skeleton } from "@/components/states";
 import { Button, SelectInput, TextInput } from "@/components/ui-kit";
-import type {
-  ApiAdminSocialPost,
-  ApiSocialPostStatus,
-} from "@/lib/api";
+import type { ApiAdminSocialPost, ApiSocialPostStatus } from "@/lib/api";
 import {
   archiveSocialPost,
   createSocialPost,
@@ -48,11 +45,7 @@ function isValidInstagramUrl(urlStr: string): boolean {
     const parsed = new URL(urlStr.trim());
     if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return false;
     const host = parsed.hostname.toLowerCase();
-    if (
-      host !== "instagram.com" &&
-      host !== "www.instagram.com" &&
-      host !== "m.instagram.com"
-    ) {
+    if (host !== "instagram.com" && host !== "www.instagram.com" && host !== "m.instagram.com") {
       return false;
     }
     return Boolean(parsed.pathname.match(/^\/(p|reel|reels)\/([A-Za-z0-9_-]+)/i));
@@ -77,11 +70,7 @@ function SocialPage() {
         title="Social feed"
         description="Manage the official Instagram embeds on the homepage. Simply paste any Instagram Post or Reel URL — Instagram's official player renders the live media, profile and interactions."
         actions={
-          <Button
-            size="sm"
-            onClick={() => setEditing("new")}
-            disabled={editing !== null}
-          >
+          <Button size="sm" onClick={() => setEditing("new")} disabled={editing !== null}>
             <Plus className="size-3.5" aria-hidden />
             New social post
           </Button>
@@ -113,10 +102,7 @@ function SocialPage() {
         {posts.isPending ? (
           <Skeleton className="h-40 w-full" />
         ) : posts.isError ? (
-          <ErrorState
-            title="Social posts didn't load"
-            onRetry={() => void posts.refetch()}
-          />
+          <ErrorState title="Social posts didn't load" onRetry={() => void posts.refetch()} />
         ) : posts.data.length === 0 ? (
           <p className="text-sm text-muted-foreground">
             No social posts yet. Click &ldquo;New social post&rdquo; to add your first post.
@@ -152,8 +138,7 @@ function SocialPostsTable({
     setBusyId(post.id);
     setError(null);
     try {
-      const nextStatus: ApiSocialPostStatus =
-        post.status === "PUBLISHED" ? "DRAFT" : "PUBLISHED";
+      const nextStatus: ApiSocialPostStatus = post.status === "PUBLISHED" ? "DRAFT" : "PUBLISHED";
       await updateSocialPost(post.id, { status: nextStatus });
       await onRefresh();
     } catch (caught) {

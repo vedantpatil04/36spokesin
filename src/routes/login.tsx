@@ -49,7 +49,7 @@ function LoginPage() {
   useEffect(() => {
     if (status !== "authenticated" || !user) return;
     if (redirect) {
-      void navigate({ to: redirect as any, replace: true });
+      void navigate({ to: redirect as never, replace: true });
     } else if (user.role === "ADMIN") {
       void navigate({ to: "/admin/products", replace: true });
     } else {

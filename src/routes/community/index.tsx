@@ -178,9 +178,7 @@ function CommunityPage() {
         </div>
 
         <div className="container-page relative z-10 text-center">
-          <p className="font-display text-xs uppercase tracking-[0.24em] text-primary">
-            36 Spokes
-          </p>
+          <p className="font-display text-xs uppercase tracking-[0.24em] text-primary">36 Spokes</p>
           <h2 className="mx-auto mt-2 max-w-3xl font-display text-2xl uppercase tracking-[0.06em] text-foreground sm:text-3xl lg:text-4xl leading-[1.08]">
             The Road Is Better Shared.
           </h2>
@@ -188,7 +186,11 @@ function CommunityPage() {
             Join the collective and ride with us.
           </p>
           <div className="mt-6 flex justify-center">
-            <ButtonLink to="/join" size="default" className="px-6 py-2.5 text-xs uppercase tracking-wider">
+            <ButtonLink
+              to="/join"
+              size="default"
+              className="px-6 py-2.5 text-xs uppercase tracking-wider"
+            >
               Join 36 Spokes
             </ButtonLink>
           </div>

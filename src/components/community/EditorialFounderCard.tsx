@@ -29,9 +29,7 @@ export function EditorialFounderCard({
     founder.instagramUrl
       ? { href: founder.instagramUrl, label: "Instagram", icon: Instagram }
       : null,
-    founder.linkedinUrl
-      ? { href: founder.linkedinUrl, label: "LinkedIn", icon: Linkedin }
-      : null,
+    founder.linkedinUrl ? { href: founder.linkedinUrl, label: "LinkedIn", icon: Linkedin } : null,
   ].filter((link) => link !== null);
 
   return (

@@ -60,11 +60,7 @@ function AdminHeroPage() {
         title="Hero slides"
         description="Manage the cinematic hero carousel on the homepage. Configure high-resolution desktop and mobile media, video loops, poster fallbacks, per-slide durations, headlines, and CTAs."
         actions={
-          <Button
-            size="sm"
-            onClick={() => setEditing("new")}
-            disabled={editing !== null}
-          >
+          <Button size="sm" onClick={() => setEditing("new")} disabled={editing !== null}>
             <Plus className="size-3.5" aria-hidden />
             New hero slide
           </Button>
@@ -120,7 +116,9 @@ function AdminHeroPage() {
                 <tr key={slide.id} className={tableClasses.row}>
                   <td className={tableClasses.td}>
                     <div className="flex items-center gap-1">
-                      <span className="font-mono text-xs text-muted-foreground mr-1">{slide.sortOrder}</span>
+                      <span className="font-mono text-xs text-muted-foreground mr-1">
+                        {slide.sortOrder}
+                      </span>
                       <button
                         type="button"
                         disabled={idx === 0}
@@ -171,7 +169,11 @@ function AdminHeroPage() {
                         />
                       ) : (
                         <div className="flex size-full items-center justify-center text-muted-foreground">
-                          {slide.mediaType === "VIDEO" ? <VideoIcon className="size-4" /> : <ImageIcon className="size-4" />}
+                          {slide.mediaType === "VIDEO" ? (
+                            <VideoIcon className="size-4" />
+                          ) : (
+                            <ImageIcon className="size-4" />
+                          )}
                         </div>
                       )}
                       <span className="absolute bottom-0 right-0 bg-background/85 px-1 py-0.5 text-[0.6rem] font-bold uppercase tracking-wider">
@@ -188,10 +190,10 @@ function AdminHeroPage() {
                     </div>
                   </td>
                   <td className={tableClasses.td}>
-                    <p className="font-semibold text-foreground text-sm line-clamp-1">{slide.title}</p>
-                    {slide.eyebrow ? (
-                      <p className="text-xs text-primary">{slide.eyebrow}</p>
-                    ) : null}
+                    <p className="font-semibold text-foreground text-sm line-clamp-1">
+                      {slide.title}
+                    </p>
+                    {slide.eyebrow ? <p className="text-xs text-primary">{slide.eyebrow}</p> : null}
                   </td>
                   <td className={tableClasses.td}>
                     <div className="space-y-1">
@@ -208,18 +210,16 @@ function AdminHeroPage() {
                     <span className="text-xs text-muted-foreground">{slide.location || "—"}</span>
                   </td>
                   <td className={tableClasses.td}>
-                    <span className="text-xs text-foreground font-mono">{slide.ctaLabel || "—"}</span>
+                    <span className="text-xs text-foreground font-mono">
+                      {slide.ctaLabel || "—"}
+                    </span>
                   </td>
                   <td className={tableClasses.td}>
                     <ProductStatusBadge status={slide.status} />
                   </td>
                   <td className={tableClasses.td}>
                     <div className="flex items-center gap-2">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => setEditing(slide)}
-                      >
+                      <Button size="sm" variant="ghost" onClick={() => setEditing(slide)}>
                         <Pencil className="size-3.5" />
                         Edit
                       </Button>
@@ -304,9 +304,13 @@ function HeroSlideForm({
   );
   const [ctaLabel, setCtaLabel] = useState(slide?.ctaLabel ?? "Choose your path");
   const [ctaUrl, setCtaUrl] = useState(slide?.ctaUrl ?? "#choose-your-path");
-  const [secondaryCtaLabel, setSecondaryCtaLabel] = useState(slide?.secondaryCtaLabel ?? "Plan a journey");
+  const [secondaryCtaLabel, setSecondaryCtaLabel] = useState(
+    slide?.secondaryCtaLabel ?? "Plan a journey",
+  );
   const [secondaryCtaUrl, setSecondaryCtaUrl] = useState(slide?.secondaryCtaUrl ?? "/plan");
-  const [status, setStatus] = useState<"DRAFT" | "PUBLISHED" | "ARCHIVED">(slide?.status ?? "PUBLISHED");
+  const [status, setStatus] = useState<"DRAFT" | "PUBLISHED" | "ARCHIVED">(
+    slide?.status ?? "PUBLISHED",
+  );
 
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -427,20 +431,42 @@ function HeroSlideForm({
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Field id={ids.eyebrow} label="Eyebrow" hint="e.g. Official 36 Spokes Rider Network">
-          <TextInput id={ids.eyebrow} value={eyebrow} onChange={(e) => setEyebrow(e.target.value)} />
+          <TextInput
+            id={ids.eyebrow}
+            value={eyebrow}
+            onChange={(e) => setEyebrow(e.target.value)}
+          />
         </Field>
 
         <Field id={ids.location} label="Location" hint="e.g. Zanskar Gorge & Shinkula Pass">
-          <TextInput id={ids.location} value={location} onChange={(e) => setLocation(e.target.value)} />
+          <TextInput
+            id={ids.location}
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+          />
         </Field>
       </div>
 
       <Field id={ids.title} label="Headline *" hint="Primary high-impact statement">
-        <TextInput id={ids.title} value={title} onChange={(e) => setTitle(e.target.value)} required />
+        <TextInput
+          id={ids.title}
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          required
+        />
       </Field>
 
-      <Field id={ids.description} label="Description" hint="1-2 sentences on the journey or atmosphere">
-        <TextArea id={ids.description} value={description} onChange={(e) => setDescription(e.target.value)} rows={3} />
+      <Field
+        id={ids.description}
+        label="Description"
+        hint="1-2 sentences on the journey or atmosphere"
+      >
+        <TextArea
+          id={ids.description}
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          rows={3}
+        />
       </Field>
 
       {/* DURATION & AUTO ADVANCE */}
@@ -484,7 +510,9 @@ function HeroSlideForm({
                     min={1}
                     max={120}
                     value={durationSeconds}
-                    onChange={(e) => setDurationSeconds(Math.max(1, parseInt(e.target.value, 10) || 5))}
+                    onChange={(e) =>
+                      setDurationSeconds(Math.max(1, parseInt(e.target.value, 10) || 5))
+                    }
                     className="w-24 rounded border border-border bg-background px-2.5 py-1 font-mono text-xs text-foreground focus:border-primary focus:outline-none"
                   />
                   <span className="text-xs text-muted-foreground">seconds</span>
@@ -506,7 +534,9 @@ function HeroSlideForm({
               <SelectInput
                 id={ids.autoAdvanceMode}
                 value={autoAdvanceMode}
-                onChange={(e) => setAutoAdvanceMode(e.target.value as "FIXED_DURATION" | "VIDEO_END")}
+                onChange={(e) =>
+                  setAutoAdvanceMode(e.target.value as "FIXED_DURATION" | "VIDEO_END")
+                }
               >
                 <option value="FIXED_DURATION">Fixed Duration (Timer loops/advances)</option>
                 <option value="VIDEO_END" disabled={mediaType !== "VIDEO"}>
@@ -557,7 +587,11 @@ function HeroSlideForm({
 
         {mediaType === "IMAGE" ? (
           <div className="space-y-4">
-            <Field id={ids.imageUrl} label="Desktop Image URL" hint="Direct URL or upload using the media provider">
+            <Field
+              id={ids.imageUrl}
+              label="Desktop Image URL"
+              hint="Direct URL or upload using the media provider"
+            >
               <div className="flex gap-2">
                 <TextInput
                   id={ids.imageUrl}
@@ -569,12 +603,22 @@ function HeroSlideForm({
                 <label className="inline-flex cursor-pointer items-center gap-1.5 rounded bg-surface px-3 py-2 text-xs font-medium hover:bg-surface-2">
                   <Upload className="size-3.5" />
                   <span>{uploadingImage ? "Uploading..." : "Upload image"}</span>
-                  <input type="file" accept="image/*" className="hidden" onChange={handleImageFile} disabled={uploadingImage} />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleImageFile}
+                    disabled={uploadingImage}
+                  />
                 </label>
               </div>
             </Field>
 
-            <Field id={ids.mobileUrl} label="Mobile Image URL (Optional)" hint="Dedicated portrait or cropped image for mobile screens">
+            <Field
+              id={ids.mobileUrl}
+              label="Mobile Image URL (Optional)"
+              hint="Dedicated portrait or cropped image for mobile screens"
+            >
               <div className="flex gap-2">
                 <TextInput
                   id={ids.mobileUrl}
@@ -586,14 +630,24 @@ function HeroSlideForm({
                 <label className="inline-flex cursor-pointer items-center gap-1.5 rounded bg-surface px-3 py-2 text-xs font-medium hover:bg-surface-2">
                   <Upload className="size-3.5" />
                   <span>{uploadingMobile ? "Uploading..." : "Upload mobile image"}</span>
-                  <input type="file" accept="image/*" className="hidden" onChange={handleMobileFile} disabled={uploadingMobile} />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleMobileFile}
+                    disabled={uploadingMobile}
+                  />
                 </label>
               </div>
             </Field>
           </div>
         ) : (
           <div className="space-y-4">
-            <Field id={ids.videoUrl} label="Desktop Video URL (MP4 / WebM)" hint="Direct URL to desktop video asset (1920x1080 recommended)">
+            <Field
+              id={ids.videoUrl}
+              label="Desktop Video URL (MP4 / WebM)"
+              hint="Direct URL to desktop video asset (1920x1080 recommended)"
+            >
               <div className="flex gap-2">
                 <TextInput
                   id={ids.videoUrl}
@@ -605,12 +659,22 @@ function HeroSlideForm({
                 <label className="inline-flex cursor-pointer items-center gap-1.5 rounded bg-surface px-3 py-2 text-xs font-medium hover:bg-surface-2">
                   <Upload className="size-3.5" />
                   <span>{uploadingVideo ? "Uploading..." : "Upload video"}</span>
-                  <input type="file" accept="video/*" className="hidden" onChange={handleVideoFile} disabled={uploadingVideo} />
+                  <input
+                    type="file"
+                    accept="video/*"
+                    className="hidden"
+                    onChange={handleVideoFile}
+                    disabled={uploadingVideo}
+                  />
                 </label>
               </div>
             </Field>
 
-            <Field id={ids.mobileUrl} label="Mobile Video URL (Optional)" hint="Mobile-optimized portrait or lightweight video for mobile devices">
+            <Field
+              id={ids.mobileUrl}
+              label="Mobile Video URL (Optional)"
+              hint="Mobile-optimized portrait or lightweight video for mobile devices"
+            >
               <div className="flex gap-2">
                 <TextInput
                   id={ids.mobileUrl}
@@ -622,12 +686,22 @@ function HeroSlideForm({
                 <label className="inline-flex cursor-pointer items-center gap-1.5 rounded bg-surface px-3 py-2 text-xs font-medium hover:bg-surface-2">
                   <Upload className="size-3.5" />
                   <span>{uploadingMobile ? "Uploading..." : "Upload mobile video"}</span>
-                  <input type="file" accept="video/*" className="hidden" onChange={handleMobileFile} disabled={uploadingMobile} />
+                  <input
+                    type="file"
+                    accept="video/*"
+                    className="hidden"
+                    onChange={handleMobileFile}
+                    disabled={uploadingMobile}
+                  />
                 </label>
               </div>
             </Field>
 
-            <Field id={ids.posterUrl} label="Poster Image URL" hint="Fallback poster image shown before video plays or if video playback fails">
+            <Field
+              id={ids.posterUrl}
+              label="Poster Image URL"
+              hint="Fallback poster image shown before video plays or if video playback fails"
+            >
               <div className="flex gap-2">
                 <TextInput
                   id={ids.posterUrl}
@@ -639,7 +713,13 @@ function HeroSlideForm({
                 <label className="inline-flex cursor-pointer items-center gap-1.5 rounded bg-surface px-3 py-2 text-xs font-medium hover:bg-surface-2">
                   <Upload className="size-3.5" />
                   <span>{uploadingPoster ? "Uploading..." : "Upload poster"}</span>
-                  <input type="file" accept="image/*" className="hidden" onChange={handlePosterFile} disabled={uploadingPoster} />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handlePosterFile}
+                    disabled={uploadingPoster}
+                  />
                 </label>
               </div>
             </Field>
@@ -650,16 +730,28 @@ function HeroSlideForm({
       {/* CTAS */}
       <div className="grid gap-4 sm:grid-cols-2">
         <Field id={ids.ctaLabel} label="Primary CTA Label">
-          <TextInput id={ids.ctaLabel} value={ctaLabel} onChange={(e) => setCtaLabel(e.target.value)} />
+          <TextInput
+            id={ids.ctaLabel}
+            value={ctaLabel}
+            onChange={(e) => setCtaLabel(e.target.value)}
+          />
         </Field>
         <Field id={ids.ctaUrl} label="Primary CTA URL" hint="e.g. #choose-your-path, /rides">
           <TextInput id={ids.ctaUrl} value={ctaUrl} onChange={(e) => setCtaUrl(e.target.value)} />
         </Field>
         <Field id={ids.secondaryCtaLabel} label="Secondary CTA Label">
-          <TextInput id={ids.secondaryCtaLabel} value={secondaryCtaLabel} onChange={(e) => setSecondaryCtaLabel(e.target.value)} />
+          <TextInput
+            id={ids.secondaryCtaLabel}
+            value={secondaryCtaLabel}
+            onChange={(e) => setSecondaryCtaLabel(e.target.value)}
+          />
         </Field>
         <Field id={ids.secondaryCtaUrl} label="Secondary CTA URL" hint="e.g. /plan, /about">
-          <TextInput id={ids.secondaryCtaUrl} value={secondaryCtaUrl} onChange={(e) => setSecondaryCtaUrl(e.target.value)} />
+          <TextInput
+            id={ids.secondaryCtaUrl}
+            value={secondaryCtaUrl}
+            onChange={(e) => setSecondaryCtaUrl(e.target.value)}
+          />
         </Field>
       </div>
 

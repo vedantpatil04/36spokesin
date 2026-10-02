@@ -3,7 +3,14 @@ import { defaultHeroSlides } from "@/data/hero-slides";
 import { pillars as defaultPillars } from "@/data/pillars";
 import { getApiClient } from "@/lib/api";
 import { features } from "@/lib/env";
-import type { GarageService, HeroSlide, Pillar, PillarId, PillarRoute, SetupCheckItem } from "@/types";
+import type {
+  GarageService,
+  HeroSlide,
+  Pillar,
+  PillarId,
+  PillarRoute,
+  SetupCheckItem,
+} from "@/types";
 
 type ApiHeroSlide = {
   id: string;

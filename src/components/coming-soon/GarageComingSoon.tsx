@@ -51,8 +51,22 @@ function MotorcycleSilhouette() {
 
               {/* Rear Wheel (36 spokes motif) */}
               <g transform="translate(130, 200)">
-                <circle cx="0" cy="0" r="54" stroke="currentColor" strokeWidth="6" className="text-muted-foreground/50" />
-                <circle cx="0" cy="0" r="44" stroke="currentColor" strokeWidth="2" className="text-primary/60" />
+                <circle
+                  cx="0"
+                  cy="0"
+                  r="54"
+                  stroke="currentColor"
+                  strokeWidth="6"
+                  className="text-muted-foreground/50"
+                />
+                <circle
+                  cx="0"
+                  cy="0"
+                  r="44"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  className="text-primary/60"
+                />
                 <circle cx="0" cy="0" r="14" fill="currentColor" className="text-primary" />
                 {/* Spokes */}
                 {Array.from({ length: 18 }).map((_, i) => (
@@ -60,8 +74,8 @@ function MotorcycleSilhouette() {
                     key={i}
                     x1="0"
                     y1="0"
-                    x2={Math.cos(((i * 20) * Math.PI) / 180) * 44}
-                    y2={Math.sin(((i * 20) * Math.PI) / 180) * 44}
+                    x2={Math.cos((i * 20 * Math.PI) / 180) * 44}
+                    y2={Math.sin((i * 20 * Math.PI) / 180) * 44}
                     stroke="currentColor"
                     strokeWidth="1.2"
                     strokeOpacity="0.55"
@@ -72,8 +86,22 @@ function MotorcycleSilhouette() {
 
               {/* Front Wheel (36 spokes motif) */}
               <g transform="translate(460, 195)">
-                <circle cx="0" cy="0" r="58" stroke="currentColor" strokeWidth="6" className="text-muted-foreground/50" />
-                <circle cx="0" cy="0" r="48" stroke="currentColor" strokeWidth="2" className="text-primary/60" />
+                <circle
+                  cx="0"
+                  cy="0"
+                  r="58"
+                  stroke="currentColor"
+                  strokeWidth="6"
+                  className="text-muted-foreground/50"
+                />
+                <circle
+                  cx="0"
+                  cy="0"
+                  r="48"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  className="text-primary/60"
+                />
                 <circle cx="0" cy="0" r="14" fill="currentColor" className="text-primary" />
                 {/* Spokes */}
                 {Array.from({ length: 18 }).map((_, i) => (
@@ -97,7 +125,15 @@ function MotorcycleSilhouette() {
                 fill="currentColor"
                 className="text-muted-foreground/30"
               />
-              <line x1="190" y1="180" x2="245" y2="135" stroke="url(#metalGrad)" strokeWidth="5" strokeLinecap="round" />
+              <line
+                x1="190"
+                y1="180"
+                x2="245"
+                y2="135"
+                stroke="url(#metalGrad)"
+                strokeWidth="5"
+                strokeLinecap="round"
+              />
 
               {/* Engine Block Silhouette */}
               <path
@@ -108,9 +144,33 @@ function MotorcycleSilhouette() {
                 className="text-surface-2 text-foreground/40"
               />
               {/* Cooling fins detail */}
-              <line x1="250" y1="145" x2="320" y2="145" stroke="currentColor" strokeWidth="2" className="text-muted-foreground/60" />
-              <line x1="255" y1="160" x2="330" y2="160" stroke="currentColor" strokeWidth="2" className="text-muted-foreground/60" />
-              <line x1="260" y1="175" x2="335" y2="175" stroke="currentColor" strokeWidth="2" className="text-muted-foreground/60" />
+              <line
+                x1="250"
+                y1="145"
+                x2="320"
+                y2="145"
+                stroke="currentColor"
+                strokeWidth="2"
+                className="text-muted-foreground/60"
+              />
+              <line
+                x1="255"
+                y1="160"
+                x2="330"
+                y2="160"
+                stroke="currentColor"
+                strokeWidth="2"
+                className="text-muted-foreground/60"
+              />
+              <line
+                x1="260"
+                y1="175"
+                x2="335"
+                y2="175"
+                stroke="currentColor"
+                strokeWidth="2"
+                className="text-muted-foreground/60"
+              />
 
               {/* Exhaust Pipe & Muffler */}
               <path
@@ -138,7 +198,15 @@ function MotorcycleSilhouette() {
               />
 
               {/* Front Fork & Handlebars */}
-              <line x1="460" y1="195" x2="430" y2="70" stroke="url(#metalGrad)" strokeWidth="6" strokeLinecap="round" />
+              <line
+                x1="460"
+                y1="195"
+                x2="430"
+                y2="70"
+                stroke="url(#metalGrad)"
+                strokeWidth="6"
+                strokeLinecap="round"
+              />
               <path
                 d="M 430 70 L 415 60 L 400 62"
                 fill="none"
@@ -154,7 +222,15 @@ function MotorcycleSilhouette() {
                 fill="currentColor"
                 className="text-primary/70"
               />
-              <line x1="455" y1="85" x2="475" y2="85" stroke="url(#orangeGlow)" strokeWidth="3" strokeLinecap="round" />
+              <line
+                x1="455"
+                y1="85"
+                x2="475"
+                y2="85"
+                stroke="url(#orangeGlow)"
+                strokeWidth="3"
+                strokeLinecap="round"
+              />
 
               {/* Ground Shadow */}
               <ellipse cx="295" cy="265" rx="220" ry="12" fill="black" opacity="0.6" />
@@ -199,7 +275,9 @@ export function GarageComingSoon() {
 
           {/* Main Title & Tagline */}
           <h1 className="font-display text-4xl uppercase tracking-tight sm:text-6xl md:text-7xl lg:text-8xl">
-            YOUR BIKE.<br className="hidden sm:inline" /> YOUR SETUP.<br className="hidden sm:inline" /> YOUR ROAD.
+            YOUR BIKE.
+            <br className="hidden sm:inline" /> YOUR SETUP.
+            <br className="hidden sm:inline" /> YOUR ROAD.
           </h1>
 
           {/* Exact required copy */}
@@ -222,7 +300,8 @@ export function GarageComingSoon() {
                 Model & Fitment Intelligence
               </h3>
               <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                Connect your motorcycle brand, model, and engine variant to eliminate fitment guesswork.
+                Connect your motorcycle brand, model, and engine variant to eliminate fitment
+                guesswork.
               </p>
             </div>
 
@@ -234,7 +313,8 @@ export function GarageComingSoon() {
                 Trip-Ready Verification
               </h3>
               <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                Tailored equipment checklists matched to extreme terrain and long-distance expedition requirements.
+                Tailored equipment checklists matched to extreme terrain and long-distance
+                expedition requirements.
               </p>
             </div>
 
@@ -246,7 +326,8 @@ export function GarageComingSoon() {
                 Build & Service History
               </h3>
               <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                Log mods, luggage setups, maintenance intervals, and track gear wear across every journey.
+                Log mods, luggage setups, maintenance intervals, and track gear wear across every
+                journey.
               </p>
             </div>
           </div>
@@ -257,7 +338,8 @@ export function GarageComingSoon() {
               While we prepare the garage, hit the road
             </h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Join upcoming rides, explore documented travel journeys, or connect with fellow riders.
+              Join upcoming rides, explore documented travel journeys, or connect with fellow
+              riders.
             </p>
 
             <div className="mt-6 flex flex-wrap items-center justify-center gap-3">

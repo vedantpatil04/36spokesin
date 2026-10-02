@@ -59,8 +59,7 @@ const api = () => getApiClient();
 
 // ─── Hero Slides ────────────────────────────────────────────────────────────
 
-export const listAdminHeroSlides = () =>
-  api().request<HeroSlide[]>("/admin/site/hero-slides");
+export const listAdminHeroSlides = () => api().request<HeroSlide[]>("/admin/site/hero-slides");
 
 export const getAdminHeroSlide = (id: string) =>
   api().request<HeroSlide>(`/admin/site/hero-slides/${id}`);
@@ -90,8 +89,7 @@ export const reorderHeroSlides = (ids: string[]) =>
 
 // ─── Path Cards ─────────────────────────────────────────────────────────────
 
-export const listAdminPathCards = () =>
-  api().request<AdminPathCard[]>("/admin/site/path-cards");
+export const listAdminPathCards = () => api().request<AdminPathCard[]>("/admin/site/path-cards");
 
 export const getAdminPathCard = (id: string) =>
   api().request<AdminPathCard>(`/admin/site/path-cards/${id}`);

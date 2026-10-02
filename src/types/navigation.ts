@@ -44,4 +44,3 @@ export type HeroSlide = {
   status: "DRAFT" | "PUBLISHED" | "ARCHIVED";
   image?: MediaAsset | null | undefined;
 };
-

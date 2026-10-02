@@ -24,7 +24,6 @@ export type SocialPostInput = {
   isFeatured?: boolean;
 };
 
-
 const api = () => getApiClient();
 
 export const listAdminSocialPosts = (query?: { status?: ApiSocialPostStatus }) =>

@@ -97,11 +97,15 @@ export function MemoryLaneItem({ memory }: { memory: Memory }) {
           className="w-24 sm:w-36 shrink-0 self-start rounded-sm border border-border/80 shadow-xs"
         />
         <div className="min-w-0">
-          <h3 className="text-base sm:text-lg font-medium leading-tight text-foreground">{memory.title}</h3>
+          <h3 className="text-base sm:text-lg font-medium leading-tight text-foreground">
+            {memory.title}
+          </h3>
           <p className="mt-1 text-xs text-primary font-display uppercase tracking-[0.14em]">
             {memory.location} · {formatYearMonth(memory.date)}
           </p>
-          <p className="mt-2 text-xs sm:text-sm leading-relaxed text-muted-foreground">{memory.caption}</p>
+          <p className="mt-2 text-xs sm:text-sm leading-relaxed text-muted-foreground">
+            {memory.caption}
+          </p>
         </div>
       </article>
     </li>

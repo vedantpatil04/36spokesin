@@ -59,12 +59,12 @@
   /* Elevated stone tone with subtle warm tint */
   --surface-2: oklch(0.27 0.016 55);
   /* Editorial card surface */
-  --card: oklch(0.20 0.013 55);
+  --card: oklch(0.2 0.013 55);
   --card-foreground: oklch(0.96 0.008 75);
   --popover: oklch(0.21 0.014 55);
   --popover-foreground: oklch(0.96 0.008 75);
   /* Signature 36 Spokes high-impact amber/orange */
-  --primary: oklch(0.70 0.17 48);
+  --primary: oklch(0.7 0.17 48);
   --primary-foreground: oklch(0.14 0.02 50);
   --secondary: oklch(0.29 0.014 55);
   --secondary-foreground: oklch(0.96 0.008 75);
@@ -79,7 +79,7 @@
   --border: oklch(1 0 0 / 12%);
   --border-strong: oklch(1 0 0 / 22%);
   --input: oklch(1 0 0 / 14%);
-  --ring: oklch(0.70 0.17 48);
+  --ring: oklch(0.7 0.17 48);
 }
 
 .light {
