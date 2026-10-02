@@ -32,29 +32,54 @@ export const Route = createFileRoute("/community/")({
 
 function CommunityPage() {
   const { founders, memories, socialPosts } = Route.useLoaderData();
+  const coreFounders = founders.filter((f) => !f.role?.toLowerCase().includes("team"));
+  const foundingTeam = founders.filter((f) => f.role?.toLowerCase().includes("team"));
 
   return (
     <>
       {/* 1. COMMUNITY HERO — ONE CONTINUOUS EDITORIAL HERO */}
       <CommunityHero image={media.riders.community} />
 
-      {/* 2. FOUNDERS SECTION — COMPACT EDITORIAL */}
+      {/* 2. FOUNDERS & FOUNDING TEAM SECTION — COMPACT EDITORIAL */}
       {founders.length > 0 ? (
-        <Section id="founders" className="scroll-mt-16 pt-12 sm:pt-14 lg:pt-16 pb-16 lg:pb-24">
-          <div className="mb-8 lg:mb-10">
-            <p className="font-display text-xs uppercase tracking-[0.22em] text-primary mb-1.5">
-              Founding
-            </p>
-            <h2 className="font-display text-2xl uppercase tracking-[0.06em] text-foreground sm:text-3xl lg:text-4xl">
-              The People Who Started It
-            </h2>
-          </div>
+        <Section id="founders" className="scroll-mt-16 pt-12 sm:pt-14 lg:pt-16 pb-16 lg:pb-24 space-y-16">
+          {coreFounders.length > 0 ? (
+            <div>
+              <div className="mb-8 lg:mb-10">
+                <p className="font-display text-xs uppercase tracking-[0.22em] text-primary mb-1.5">
+                  Founders
+                </p>
+                <h2 className="font-display text-2xl uppercase tracking-[0.06em] text-foreground sm:text-3xl lg:text-4xl">
+                  The People Who Started It
+                </h2>
+              </div>
 
-          <div className="grid grid-cols-1 gap-7 md:grid-cols-2 md:gap-9 lg:gap-12 max-w-4xl">
-            {founders.map((founder) => (
-              <EditorialFounderCard key={founder.id} founder={founder} />
-            ))}
-          </div>
+              <div className="grid grid-cols-1 gap-7 sm:grid-cols-2 md:gap-9 max-w-4xl">
+                {coreFounders.map((founder) => (
+                  <EditorialFounderCard key={founder.id} founder={founder} />
+                ))}
+              </div>
+            </div>
+          ) : null}
+
+          {foundingTeam.length > 0 ? (
+            <div className="border-t border-border/60 pt-14">
+              <div className="mb-8 lg:mb-10">
+                <p className="font-display text-xs uppercase tracking-[0.22em] text-primary mb-1.5">
+                  Founding Team
+                </p>
+                <h2 className="font-display text-2xl uppercase tracking-[0.06em] text-foreground sm:text-3xl lg:text-4xl">
+                  Founding Team
+                </h2>
+              </div>
+
+              <div className="grid grid-cols-1 gap-7 sm:grid-cols-2 lg:grid-cols-4 md:gap-7 max-w-6xl">
+                {foundingTeam.map((member) => (
+                  <EditorialFounderCard key={member.id} founder={member} />
+                ))}
+              </div>
+            </div>
+          ) : null}
         </Section>
       ) : null}
 
@@ -188,7 +213,7 @@ function CommunityPage() {
           <div className="mt-6 flex justify-center">
             <ButtonLink
               to="/join"
-              size="default"
+              size="md"
               className="px-6 py-2.5 text-xs uppercase tracking-wider"
             >
               Join 36 Spokes

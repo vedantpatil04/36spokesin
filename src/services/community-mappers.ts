@@ -49,7 +49,7 @@ export function toFounder(api: ApiFounder): Founder {
   return {
     id: api.id,
     name: api.name,
-    role: api.role || "Founding",
+    role: api.role || "Founder",
     shortBio: api.shortBio,
     story: api.story,
     quote: api.quote,

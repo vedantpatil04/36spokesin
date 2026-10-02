@@ -37,8 +37,13 @@ export const footerColumns = [
     links: [
       { label: "Rides", to: "/rides" },
       { label: "Plan", to: "/plan" },
+    ],
+  },
+  {
+    title: "The Community",
+    links: [
       { label: "Community", to: "/community" },
-      { label: "Stories", to: "/stories" },
+      { label: "About", to: "/about" },
     ],
   },
   {
@@ -46,13 +51,12 @@ export const footerColumns = [
     links: [
       { label: "Shop", to: "/shop" },
       { label: "Garage", to: "/garage" },
-      { label: "My 36 Spokes", to: "/my-36-spokes" },
     ],
   },
   {
-    title: "About & Account",
+    title: "Account",
     links: [
-      { label: "About", to: "/about" },
+      { label: "My 36 Spokes", to: "/my-36-spokes" },
       { label: "Login", to: "/login" },
       { label: "Join 36 Spokes", to: "/join" },
     ],

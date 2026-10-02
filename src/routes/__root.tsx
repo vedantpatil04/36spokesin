@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { Footer } from "@/components/layout/Footer";
+import { IntroLoader } from "@/components/layout/IntroLoader";
 import { MobileTabBar } from "@/components/layout/MobileTabBar";
 import { Navbar } from "@/components/layout/Navbar";
 import { MAIN_CONTENT_ID, SkipLink } from "@/components/layout/SkipLink";
@@ -44,6 +45,7 @@ function RootShell({ children }: { children: ReactNode }) {
         <HeadContent />
       </head>
       <body>
+        <IntroLoader />
         {children}
         <Scripts />
       </body>

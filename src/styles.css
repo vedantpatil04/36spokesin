@@ -265,6 +265,137 @@ iframe.instagram-media {
   }
 }
 
+/*
+ * Intro loader (IntroLoader.tsx): the brand starting up on a full page load.
+ * The mark settles in about 0.65s, then the app lifts it. The failsafe animation
+ * lifts it at 1.5s by itself, so slow or failed scripts can't leave it up.
+ */
+.intro-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  background-color: var(--color-background);
+  transition: opacity 320ms cubic-bezier(0.4, 0, 0.2, 1);
+  animation: intro-failsafe 300ms cubic-bezier(0.4, 0, 0.2, 1) 1500ms forwards;
+}
+
+.intro-loader[data-leaving] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.intro-loader__lockup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 320ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.intro-loader[data-leaving] .intro-loader__lockup {
+  transform: translateY(-8px) scale(0.985);
+}
+
+.intro-loader__mark {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 6.5rem;
+  height: 6.5rem;
+  animation: intro-mark 380ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.intro-loader__spokes {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  animation: intro-spokes 600ms cubic-bezier(0.22, 1, 0.36, 1) 40ms both;
+}
+
+.intro-loader__wordmark {
+  margin-top: 1.25rem;
+  /* Tracking adds space after the last letter; this re-centres the word. */
+  margin-right: -0.3em;
+  animation: intro-rise 380ms cubic-bezier(0.22, 1, 0.36, 1) 180ms both;
+}
+
+.intro-loader__accent {
+  margin-top: 0.9rem;
+  width: 2.75rem;
+  height: 2px;
+  background-color: var(--color-primary);
+  animation: intro-accent 340ms cubic-bezier(0.4, 0, 0.2, 1) 300ms both;
+}
+
+/* Wide screens: a little larger, so the lockup isn't lost in the space. */
+@media (min-width: 1024px) {
+  .intro-loader__mark {
+    width: 8rem;
+    height: 8rem;
+  }
+
+  .intro-loader__wordmark {
+    margin-top: 1.5rem;
+  }
+
+  .intro-loader__accent {
+    width: 3.25rem;
+  }
+}
+
+@keyframes intro-failsafe {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@keyframes intro-mark {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes intro-spokes {
+  from {
+    opacity: 0;
+    transform: rotate(-50deg);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes intro-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes intro-accent {
+  from {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+  to {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -276,5 +407,21 @@ iframe.instagram-media {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+
+  /* Intro loader: nothing turns or moves; it is simply there, then fades. */
+  .intro-loader {
+    transition-duration: 200ms !important;
+  }
+
+  .intro-loader__mark,
+  .intro-loader__spokes,
+  .intro-loader__wordmark,
+  .intro-loader__accent {
+    animation: none;
+  }
+
+  .intro-loader[data-leaving] .intro-loader__lockup {
+    transform: none;
   }
 }
