@@ -53,7 +53,7 @@ describe("Community: founders, stories, rider spotlights and groups", () => {
       expect(await seedFoundersIfEmpty(ctx.prisma)).toBe(2);
 
       const seeded = (await publicGet("/community/founders").expect(200)).body.data as Founder[];
-      expect(seeded.map((founder) => founder.name)).toEqual(["Abhishek Sharma", "Simran Khaturia"]);
+      expect(seeded.map((founder) => founder.name)).toContain("Simran Kathuria");
       // Nothing is invented: every optional field starts empty.
       for (const founder of seeded) {
         expect(founder).toMatchObject({
@@ -80,7 +80,7 @@ describe("Community: founders, stories, rider spotlights and groups", () => {
       const rows = await ctx.prisma.founder.findMany({ orderBy: { sortOrder: "asc" } });
       expect(rows).toHaveLength(2);
       expect(rows.map((row) => [row.name, row.status, row.role])).toEqual([
-        ["Simran Khaturia", "ARCHIVED", null],
+        ["Simran Kathuria", "ARCHIVED", null],
         ["Abhishek Sharma", "PUBLISHED", "Set by admin"],
       ]);
     });

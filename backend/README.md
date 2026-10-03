@@ -270,7 +270,7 @@ No gateway: the rider pays by UPI outside the app, uploads a screenshot, and an 
 - Only the name (title for stories) is required. Every other field stays `null` until an admin
   fills it in, and the web app leaves empty fields off the page. Group `memberCount` is `null`
   unless actually known.
-- The Phase 6 migration inserts the two confirmed founders (Abhishek Sharma, Simran Khaturia; names
+- The Phase 6 migration inserts the two confirmed founders (Abhishek Sharma, Simran Kathuria; names
   only, published) once, into an empty table. `npm run db:seed` does the same for development
   databases emptied later. Nothing runs at start-up, so CMS edits are never overwritten.
 - Images: founders and rider spotlights use the `COMMUNITY` media category, story covers `STORY`

@@ -6,12 +6,12 @@ import { ContentStatus } from "../generated/prisma/enums.js";
  * quotes, links and photos are supplied by the business through the admin CMS.
  */
 export const CONFIRMED_FOUNDERS = [
-  { name: "Simran Khaturia", role: "Founder" },
+  { name: "Simran Kathuria", role: "Founder" },
   { name: "Abhishek Sharma", role: "Founder" },
   { name: "Mayitrayi Subhedar", role: "Founding Team" },
   { name: "Amol Drago", role: "Founding Team" },
   { name: "Chatur Singh", role: "Founding Team" },
-  { name: "Geeta", role: "Founding Team" },
+  { name: "Geeta Rotti", role: "Founding Team" },
 ] as const;
 
 /**

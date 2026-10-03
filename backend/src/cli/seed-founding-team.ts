@@ -8,7 +8,7 @@ const NEW_FOUNDERS = [
   { name: "Mayitrayi Subhedar", role: "Founding Team" },
   { name: "Amol Drago", role: "Founding Team" },
   { name: "Chatur Singh", role: "Founding Team" },
-  { name: "Geeta", role: "Founding Team" },
+  { name: "Geeta Rotti", role: "Founding Team" },
 ];
 
 async function main(): Promise<void> {
@@ -35,7 +35,7 @@ async function main(): Promise<void> {
 
   try {
     await prisma.founder.updateMany({
-      where: { name: { in: ["Simran Khaturia", "Abhishek Sharma"] } },
+      where: { name: { in: ["Simran Kathuria", "Simran Khaturia", "Abhishek Sharma"] } },
       data: { role: "Founder" },
     });
 
