@@ -2,7 +2,7 @@ import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { LoaderCircle } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { AuthLayout } from "@/components/layout/AuthLayout";
-import { Button, FormField, TextInput } from "@/components/ui-kit";
+import { Button, FormField, PasswordInput, TextInput } from "@/components/ui-kit";
 import { media } from "@/data/media";
 import { seo } from "@/lib/seo";
 import { describeAuthError } from "@/services/auth";
@@ -109,10 +109,9 @@ function LoginPage() {
           />
         </FormField>
         <FormField id="password" label="Password">
-          <TextInput
+          <PasswordInput
             id="password"
             name="password"
-            type="password"
             autoComplete="current-password"
             placeholder="••••••••"
             required

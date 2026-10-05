@@ -4,6 +4,12 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Suppress browser-native password reveal and clear buttons to avoid duplicate icons */
+input::-ms-reveal,
+input::-ms-clear {
+  display: none;
+}
+
 /*
  * 36 SPOKES design system.
  * Dark, cinematic, motorcycle-editorial. All colors in oklch.

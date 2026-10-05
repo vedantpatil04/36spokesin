@@ -2,7 +2,7 @@ import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { LoaderCircle } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { AuthLayout } from "@/components/layout/AuthLayout";
-import { Button, FormField, SelectInput, TextInput } from "@/components/ui-kit";
+import { Button, FormField, PasswordInput, SelectInput, TextInput } from "@/components/ui-kit";
 import { media } from "@/data/media";
 import { seo } from "@/lib/seo";
 import { describeAuthError } from "@/services/auth";
@@ -116,10 +116,9 @@ function JoinPage() {
           />
         </FormField>
         <FormField id="join-password" label="Password" hint="At least 8 characters.">
-          <TextInput
+          <PasswordInput
             id="join-password"
             name="password"
-            type="password"
             autoComplete="new-password"
             placeholder="••••••••"
             minLength={8}

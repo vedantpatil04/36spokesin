@@ -9,6 +9,8 @@ export { FilterChipLink, FilterChipRow } from "./FilterChip";
 export { filterLinkBehavior } from "./filter-link";
 export {
   FormField,
+  PasswordInput,
+  type PasswordInputProps,
   SelectInput,
   TextInput,
   fieldControlClasses,
