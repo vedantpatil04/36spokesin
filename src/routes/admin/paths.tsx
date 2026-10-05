@@ -72,104 +72,198 @@ function AdminPathsPage() {
           onRetry={() => void refresh()}
         />
       ) : paths.data && paths.data.length > 0 ? (
-        <div className={tableClasses.wrapper}>
-          <table className={tableClasses.table}>
-            <thead>
-              <tr className={tableClasses.head}>
-                <th className={tableClasses.th}>Order</th>
-                <th className={tableClasses.th}>Path</th>
-                <th className={tableClasses.th}>Tagline</th>
-                <th className={tableClasses.th}>CTA</th>
-                <th className={tableClasses.th}>Destination</th>
-                <th className={tableClasses.th}>Badge</th>
-                <th className={tableClasses.th}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paths.data.map((card, idx) => (
-                <tr key={card.id} className={tableClasses.row}>
-                  <td className={tableClasses.td}>
-                    <div className="flex items-center gap-1">
-                      <span className="font-mono text-xs text-muted-foreground mr-1">
-                        {card.sortOrder}
-                      </span>
-                      <button
-                        type="button"
-                        disabled={idx === 0}
-                        onClick={async () => {
-                          const newOrder = paths.data?.map((p) => p.id) ?? [];
-                          const currentId = newOrder[idx];
-                          const prevId = newOrder[idx - 1];
-                          if (currentId && prevId) {
-                            newOrder[idx] = prevId;
-                            newOrder[idx - 1] = currentId;
-                            await reorderPathCards(newOrder);
-                            void refresh();
-                          }
-                        }}
-                        className="rounded p-1 text-muted-foreground hover:bg-surface hover:text-foreground disabled:opacity-20"
-                        title="Move up"
-                      >
-                        <ArrowUp className="size-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        disabled={idx === paths.data.length - 1}
-                        onClick={async () => {
-                          const newOrder = paths.data?.map((p) => p.id) ?? [];
-                          const currentId = newOrder[idx];
-                          const nextId = newOrder[idx + 1];
-                          if (currentId && nextId) {
-                            newOrder[idx] = nextId;
-                            newOrder[idx + 1] = currentId;
-                            await reorderPathCards(newOrder);
-                            void refresh();
-                          }
-                        }}
-                        className="rounded p-1 text-muted-foreground hover:bg-surface hover:text-foreground disabled:opacity-20"
-                        title="Move down"
-                      >
-                        <ArrowDown className="size-3.5" />
-                      </button>
-                    </div>
-                  </td>
-                  <td className={tableClasses.td}>
-                    <span className="font-bold text-foreground">{card.title}</span>
-                    <span className="ml-2 font-mono text-xs text-muted-foreground">
-                      ({card.slug})
+        <>
+          {/* Mobile Stacked Path Cards (< md) */}
+          <div className="space-y-3 md:hidden">
+            {paths.data.map((card, idx) => (
+              <article
+                key={card.id}
+                className="rounded-sm border border-border bg-card p-3.5 transition-colors"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <h4 className="font-bold text-foreground leading-snug">
+                      {card.title}
+                    </h4>
+                    <p className="font-mono text-xs text-muted-foreground">{card.slug}</p>
+                  </div>
+                  {card.badge ? (
+                    <span className="shrink-0 rounded bg-primary/20 px-2 py-0.5 text-[0.65rem] font-semibold uppercase text-primary">
+                      {card.badge}
                     </span>
-                  </td>
-                  <td className={tableClasses.td}>
-                    <span className="text-xs text-muted-foreground line-clamp-1">
-                      {card.tagline || "—"}
+                  ) : null}
+                </div>
+
+                {card.tagline ? (
+                  <p className="mt-2 text-xs text-muted-foreground line-clamp-2">{card.tagline}</p>
+                ) : null}
+
+                <div className="mt-2.5 rounded bg-surface/50 p-2 text-xs">
+                  <span className="text-muted-foreground">CTA: </span>
+                  <span className="font-mono font-medium text-foreground">{card.ctaLabel}</span>
+                  <span className="mx-1 text-muted-foreground">→</span>
+                  <span className="font-mono text-primary truncate">{card.destinationUrl}</span>
+                </div>
+
+                <div className="mt-3 flex items-center justify-between border-t border-border/60 pt-2.5">
+                  <div className="flex items-center gap-1">
+                    <span className="font-mono text-xs text-muted-foreground mr-1">
+                      #{card.sortOrder}
                     </span>
-                  </td>
-                  <td className={tableClasses.td}>
-                    <span className="text-xs font-mono text-foreground">{card.ctaLabel}</span>
-                  </td>
-                  <td className={tableClasses.td}>
-                    <span className="text-xs font-mono text-primary">{card.destinationUrl}</span>
-                  </td>
-                  <td className={tableClasses.td}>
-                    {card.badge ? (
-                      <span className="rounded bg-primary/20 px-2 py-0.5 text-[0.65rem] font-semibold uppercase text-primary">
-                        {card.badge}
-                      </span>
-                    ) : (
-                      <span className="text-muted-foreground text-xs">—</span>
-                    )}
-                  </td>
-                  <td className={tableClasses.td}>
-                    <Button size="sm" variant="ghost" onClick={() => setEditing(card)}>
-                      <Pencil className="size-3.5" />
-                      Edit
-                    </Button>
-                  </td>
+                    <button
+                      type="button"
+                      disabled={idx === 0}
+                      onClick={async () => {
+                        const newOrder = paths.data?.map((p) => p.id) ?? [];
+                        const currentId = newOrder[idx];
+                        const prevId = newOrder[idx - 1];
+                        if (currentId && prevId) {
+                          newOrder[idx] = prevId;
+                          newOrder[idx - 1] = currentId;
+                          await reorderPathCards(newOrder);
+                          void refresh();
+                        }
+                      }}
+                      className="flex size-8 items-center justify-center rounded border border-border bg-surface text-muted-foreground hover:text-foreground active:bg-surface-2 disabled:opacity-20"
+                      aria-label="Move path card up"
+                    >
+                      <ArrowUp className="size-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      disabled={idx === paths.data.length - 1}
+                      onClick={async () => {
+                        const newOrder = paths.data?.map((p) => p.id) ?? [];
+                        const currentId = newOrder[idx];
+                        const nextId = newOrder[idx + 1];
+                        if (currentId && nextId) {
+                          newOrder[idx] = nextId;
+                          newOrder[idx + 1] = currentId;
+                          await reorderPathCards(newOrder);
+                          void refresh();
+                        }
+                      }}
+                      className="flex size-8 items-center justify-center rounded border border-border bg-surface text-muted-foreground hover:text-foreground active:bg-surface-2 disabled:opacity-20"
+                      aria-label="Move path card down"
+                    >
+                      <ArrowDown className="size-3.5" />
+                    </button>
+                  </div>
+
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-8 px-2.5 text-xs"
+                    onClick={() => setEditing(card)}
+                  >
+                    <Pencil className="size-3 mr-1" />
+                    Edit
+                  </Button>
+                </div>
+              </article>
+            ))}
+          </div>
+
+          {/* Desktop Table View (>= md) */}
+          <div className={`${tableClasses.wrapper} hidden md:block`}>
+            <table className={tableClasses.table}>
+              <thead>
+                <tr className={tableClasses.head}>
+                  <th className={tableClasses.th}>Order</th>
+                  <th className={tableClasses.th}>Path</th>
+                  <th className={tableClasses.th}>Tagline</th>
+                  <th className={tableClasses.th}>CTA</th>
+                  <th className={tableClasses.th}>Destination</th>
+                  <th className={tableClasses.th}>Badge</th>
+                  <th className={tableClasses.th}>Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {paths.data.map((card, idx) => (
+                  <tr key={card.id} className={tableClasses.row}>
+                    <td className={tableClasses.td}>
+                      <div className="flex items-center gap-1">
+                        <span className="font-mono text-xs text-muted-foreground mr-1">
+                          {card.sortOrder}
+                        </span>
+                        <button
+                          type="button"
+                          disabled={idx === 0}
+                          onClick={async () => {
+                            const newOrder = paths.data?.map((p) => p.id) ?? [];
+                            const currentId = newOrder[idx];
+                            const prevId = newOrder[idx - 1];
+                            if (currentId && prevId) {
+                              newOrder[idx] = prevId;
+                              newOrder[idx - 1] = currentId;
+                              await reorderPathCards(newOrder);
+                              void refresh();
+                            }
+                          }}
+                          className="rounded p-1 text-muted-foreground hover:bg-surface hover:text-foreground disabled:opacity-20"
+                          title="Move up"
+                        >
+                          <ArrowUp className="size-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          disabled={idx === paths.data.length - 1}
+                          onClick={async () => {
+                            const newOrder = paths.data?.map((p) => p.id) ?? [];
+                            const currentId = newOrder[idx];
+                            const nextId = newOrder[idx + 1];
+                            if (currentId && nextId) {
+                              newOrder[idx] = nextId;
+                              newOrder[idx + 1] = currentId;
+                              await reorderPathCards(newOrder);
+                              void refresh();
+                            }
+                          }}
+                          className="rounded p-1 text-muted-foreground hover:bg-surface hover:text-foreground disabled:opacity-20"
+                          title="Move down"
+                        >
+                          <ArrowDown className="size-3.5" />
+                        </button>
+                      </div>
+                    </td>
+                    <td className={tableClasses.td}>
+                      <span className="font-bold text-foreground">{card.title}</span>
+                      <span className="ml-2 font-mono text-xs text-muted-foreground">
+                        ({card.slug})
+                      </span>
+                    </td>
+                    <td className={tableClasses.td}>
+                      <span className="text-xs text-muted-foreground line-clamp-1">
+                        {card.tagline || "—"}
+                      </span>
+                    </td>
+                    <td className={tableClasses.td}>
+                      <span className="text-xs font-mono text-foreground">{card.ctaLabel}</span>
+                    </td>
+                    <td className={tableClasses.td}>
+                      <span className="text-xs font-mono text-primary">{card.destinationUrl}</span>
+                    </td>
+                    <td className={tableClasses.td}>
+                      {card.badge ? (
+                        <span className="rounded bg-primary/20 px-2 py-0.5 text-[0.65rem] font-semibold uppercase text-primary">
+                          {card.badge}
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground text-xs">—</span>
+                      )}
+                    </td>
+                    <td className={tableClasses.td}>
+                      <Button size="sm" variant="ghost" onClick={() => setEditing(card)}>
+                        <Pencil className="size-3.5" />
+                        Edit
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
       ) : null}
     </div>
   );
@@ -347,11 +441,11 @@ function PathCardForm({
         </div>
       </Field>
 
-      <div className="flex items-center justify-end gap-3 border-t border-border pt-4">
-        <Button type="button" variant="outline" onClick={onCancel}>
+      <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-3 border-t border-border pt-4">
+        <Button type="button" variant="outline" className="w-full sm:w-auto" onClick={onCancel}>
           Cancel
         </Button>
-        <Button type="submit" disabled={saving}>
+        <Button type="submit" className="w-full sm:w-auto" disabled={saving}>
           {saving ? <LoaderCircle className="size-4 animate-spin" /> : null}
           Save path changes
         </Button>

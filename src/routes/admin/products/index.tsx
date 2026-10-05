@@ -207,71 +207,199 @@ function AdminProductsPage() {
           }
         />
       ) : (
-        <div className={tableClasses.wrapper} aria-busy={products.isFetching}>
-          <table className={tableClasses.table}>
-            <thead className={tableClasses.head}>
-              <tr>
-                <th scope="col" className={tableClasses.th}>
-                  <span className="sr-only">Image</span>
-                </th>
-                <th scope="col" className={tableClasses.th}>
-                  Product
-                </th>
-                <th scope="col" className={tableClasses.th}>
-                  Category
-                </th>
-                <th scope="col" className={`${tableClasses.th} text-right`}>
-                  Price
-                </th>
-                <th scope="col" className={`${tableClasses.th} text-right`}>
-                  Stock
-                </th>
-                <th scope="col" className={tableClasses.th}>
-                  Status
-                </th>
-                <th scope="col" className={tableClasses.th}>
-                  Updated
-                </th>
-                <th scope="col" className={`${tableClasses.th} text-right`}>
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((product) => (
-                <ProductRow
-                  key={product.id}
-                  product={product}
-                  busy={busyId === product.id}
-                  disabled={busyId !== null}
-                  onDuplicate={() =>
-                    void runRowAction(product.id, async () => {
-                      const copy = await duplicateProduct(product.id);
-                      await navigate({
-                        to: "/admin/products/$productId",
-                        params: { productId: copy.id },
-                      });
-                    })
-                  }
-                  onArchive={() => {
-                    if (
-                      window.confirm(
-                        `Archive “${product.name}”? It leaves the shop but keeps its history.`,
-                      )
-                    ) {
-                      void runRowAction(product.id, () => archiveProduct(product.id));
+        <>
+          {/* Mobile Stacked Product Cards (< md) */}
+          <div className="space-y-3 md:hidden" aria-busy={products.isFetching}>
+            {rows.map((product) => (
+              <article
+                key={product.id}
+                className="rounded-sm border border-border bg-card p-3.5 transition-colors"
+                aria-busy={busyId === product.id}
+              >
+                <div className="flex items-start gap-3">
+                  <div className="size-16 shrink-0 overflow-hidden rounded-sm border border-border bg-surface">
+                    {product.primaryImage?.url ? (
+                      <img
+                        src={product.primaryImage.url}
+                        alt=""
+                        className="size-full object-cover"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <span
+                        className="flex size-full items-center justify-center text-muted-foreground"
+                        title="No images"
+                      >
+                        <ImageOff className="size-5" aria-hidden />
+                        <span className="sr-only">No images</span>
+                      </span>
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-start justify-between gap-2">
+                      <Link
+                        to="/admin/products/$productId"
+                        params={{ productId: product.id }}
+                        className="font-semibold text-foreground hover:text-primary line-clamp-2 leading-snug"
+                      >
+                        {product.name}
+                      </Link>
+                      <ProductStatusBadge status={product.status} />
+                    </div>
+                    <p className="mt-1 font-mono text-xs text-muted-foreground">
+                      {product.sku} · {product.category.name}
+                    </p>
+                    <div className="mt-2 flex items-center justify-between text-xs">
+                      <span className="font-semibold text-foreground text-sm">
+                        {formatINR(minorToRupees(product.price))}
+                      </span>
+                      <span className="text-muted-foreground">
+                        Stock: <span className="font-medium text-foreground">{formatNumber(product.stockQuantity)}</span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-3 flex items-center justify-between border-t border-border/60 pt-2.5 text-xs">
+                  <span className="text-[0.65rem] text-muted-foreground">
+                    {dateTime.format(new Date(product.updatedAt))}
+                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <Link
+                      to="/admin/products/$productId"
+                      params={{ productId: product.id }}
+                      className="inline-flex h-9 items-center gap-1 rounded-sm border border-border bg-surface px-2.5 text-xs font-medium text-foreground hover:bg-surface-2 active:bg-surface-2"
+                      aria-label={`Edit ${product.name}`}
+                    >
+                      <Pencil className="size-3.5" aria-hidden />
+                      <span>Edit</span>
+                    </Link>
+                    <button
+                      type="button"
+                      disabled={busyId !== null}
+                      onClick={() =>
+                        void runRowAction(product.id, async () => {
+                          const copy = await duplicateProduct(product.id);
+                          await navigate({
+                            to: "/admin/products/$productId",
+                            params: { productId: copy.id },
+                          });
+                        })
+                      }
+                      className="flex size-9 items-center justify-center rounded-sm border border-border bg-surface text-muted-foreground hover:text-foreground active:bg-surface-2 disabled:opacity-40"
+                      aria-label={`Duplicate ${product.name}`}
+                      title="Duplicate"
+                    >
+                      <Copy className="size-3.5" aria-hidden />
+                    </button>
+                    {product.status === "ARCHIVED" ? (
+                      <button
+                        type="button"
+                        disabled={busyId !== null}
+                        onClick={() =>
+                          void runRowAction(product.id, () =>
+                            updateProduct(product.id, { status: "DRAFT" }),
+                          )
+                        }
+                        className="flex size-9 items-center justify-center rounded-sm border border-border bg-surface text-muted-foreground hover:text-foreground active:bg-surface-2 disabled:opacity-40"
+                        aria-label={`Restore ${product.name}`}
+                        title="Restore"
+                      >
+                        <RotateCcw className="size-3.5" aria-hidden />
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        disabled={busyId !== null}
+                        onClick={() => {
+                          if (
+                            window.confirm(
+                              `Archive “${product.name}”? It leaves the shop but keeps its history.`,
+                            )
+                          ) {
+                            void runRowAction(product.id, () => archiveProduct(product.id));
+                          }
+                        }}
+                        className="flex size-9 items-center justify-center rounded-sm border border-border bg-surface text-muted-foreground hover:text-destructive active:bg-surface-2 disabled:opacity-40"
+                        aria-label={`Archive ${product.name}`}
+                        title="Archive"
+                      >
+                        <Archive className="size-3.5" aria-hidden />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+
+          {/* Desktop Table View (>= md) */}
+          <div className={`${tableClasses.wrapper} hidden md:block`} aria-busy={products.isFetching}>
+            <table className={tableClasses.table}>
+              <thead className={tableClasses.head}>
+                <tr>
+                  <th scope="col" className={tableClasses.th}>
+                    <span className="sr-only">Image</span>
+                  </th>
+                  <th scope="col" className={tableClasses.th}>
+                    Product
+                  </th>
+                  <th scope="col" className={tableClasses.th}>
+                    Category
+                  </th>
+                  <th scope="col" className={`${tableClasses.th} text-right`}>
+                    Price
+                  </th>
+                  <th scope="col" className={`${tableClasses.th} text-right`}>
+                    Stock
+                  </th>
+                  <th scope="col" className={tableClasses.th}>
+                    Status
+                  </th>
+                  <th scope="col" className={tableClasses.th}>
+                    Updated
+                  </th>
+                  <th scope="col" className={`${tableClasses.th} text-right`}>
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((product) => (
+                  <ProductRow
+                    key={product.id}
+                    product={product}
+                    busy={busyId === product.id}
+                    disabled={busyId !== null}
+                    onDuplicate={() =>
+                      void runRowAction(product.id, async () => {
+                        const copy = await duplicateProduct(product.id);
+                        await navigate({
+                          to: "/admin/products/$productId",
+                          params: { productId: copy.id },
+                        });
+                      })
                     }
-                  }}
-                  onRestore={() =>
-                    void runRowAction(product.id, () =>
-                      updateProduct(product.id, { status: "DRAFT" }),
-                    )
-                  }
-                />
-              ))}
-            </tbody>
-          </table>
-        </div>
+                    onArchive={() => {
+                      if (
+                        window.confirm(
+                          `Archive “${product.name}”? It leaves the shop but keeps its history.`,
+                        )
+                      ) {
+                        void runRowAction(product.id, () => archiveProduct(product.id));
+                      }
+                    }}
+                    onRestore={() =>
+                      void runRowAction(product.id, () =>
+                        updateProduct(product.id, { status: "DRAFT" }),
+                      )
+                    }
+                  />
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
 
       {cursors.length > 1 || products.data?.meta.nextCursor ? (

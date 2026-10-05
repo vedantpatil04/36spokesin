@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { HeadContent, Outlet, Scripts, createRootRouteWithContext } from "@tanstack/react-router";
+import { HeadContent, Outlet, Scripts, createRootRouteWithContext, useLocation } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
 import appCss from "../styles.css?url";
@@ -55,12 +55,14 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const pathname = useLocation({ select: (location) => location.pathname });
+  const isAdminRoute = pathname.startsWith("/admin");
 
   return (
     <QueryClientProvider client={queryClient}>
       <AppStateProvider>
         <SkipLink />
-        <div className="flex min-h-screen flex-col pb-16 lg:pb-0">
+        <div className={`flex min-h-screen flex-col ${isAdminRoute ? "pb-0" : "pb-16 lg:pb-0"}`}>
           <Navbar />
           <main id={MAIN_CONTENT_ID} tabIndex={-1} className="flex-1 focus-visible:outline-none">
             {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}

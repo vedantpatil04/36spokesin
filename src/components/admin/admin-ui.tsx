@@ -22,7 +22,7 @@ export function AdminPageHeader({
     <header className="flex flex-col gap-4 border-b border-border pb-6 md:flex-row md:items-end md:justify-between">
       <div className="min-w-0">
         <p className="eyebrow">{eyebrow}</p>
-        <h1 className="mt-2 text-3xl leading-tight sm:text-4xl">{title}</h1>
+        <h1 className="mt-2 text-2xl font-bold leading-tight sm:text-3xl md:text-4xl break-words">{title}</h1>
         {description ? (
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">{description}</p>
         ) : null}

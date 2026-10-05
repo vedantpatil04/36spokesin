@@ -91,13 +91,19 @@ export function FormActions({
   onCancel: () => void;
 }) {
   return (
-    <div className="flex flex-wrap items-center gap-3 border-t border-border pt-5">
-      <Button type="submit" disabled={saving}>
+    <div className="flex flex-col-reverse sm:flex-row sm:items-center gap-3 border-t border-border pt-5">
+      <Button
+        type="button"
+        variant="outline"
+        className="w-full sm:w-auto min-h-10"
+        onClick={onCancel}
+        disabled={saving}
+      >
+        Cancel
+      </Button>
+      <Button type="submit" className="w-full sm:w-auto min-h-10" disabled={saving}>
         {saving ? <LoaderCircle className="size-4 animate-spin" aria-hidden /> : null}
         {submitLabel}
-      </Button>
-      <Button type="button" variant="outline" onClick={onCancel} disabled={saving}>
-        Cancel
       </Button>
       {message ? (
         <p role="alert" className="text-sm text-destructive">

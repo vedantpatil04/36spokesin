@@ -56,10 +56,10 @@ function AdminLayout() {
   }
 
   return (
-    <div className="container-page py-8 md:py-10">
+    <div className="container-page px-4 py-5 sm:px-6 sm:py-6 md:py-8 lg:px-8 lg:py-10">
       <div className="grid gap-6 lg:grid-cols-[13rem_minmax(0,1fr)] lg:gap-10">
-        <aside className="lg:sticky lg:top-24 lg:self-start">
-          <p className="mb-3 hidden text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground lg:block">
+        <aside className="hidden lg:sticky lg:top-24 lg:block lg:self-start">
+          <p className="mb-3 text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground">
             Content CMS
           </p>
           <AdminNav />

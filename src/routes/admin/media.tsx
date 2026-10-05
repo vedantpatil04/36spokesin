@@ -52,12 +52,12 @@ function MediaLibraryPage() {
         title="Media library"
         description="Every catalogue and community image in storage and where it's used. Files still in use can't be deleted; unused ones (e.g. abandoned uploads) can be cleaned up here."
       />
-      <div className="flex flex-wrap items-center gap-6">
+      <div className="flex flex-wrap items-center gap-4 sm:gap-6">
         <SelectInput
           aria-label="Category"
           value={category}
           onChange={(event) => setCategory(event.target.value as ApiMediaCategory | "")}
-          className="mt-0 h-11 w-48"
+          className="mt-0 h-11 w-full sm:w-56"
         >
           <option value="">Products, bikes and community</option>
           <option value="PRODUCT">Products</option>
@@ -132,7 +132,7 @@ function MediaLibraryPage() {
                   <Button
                     size="sm"
                     variant="outline"
-                    className="w-full"
+                    className="w-full min-h-10 text-xs"
                     disabled={asset.usage.total > 0 || busyId !== null}
                     onClick={() => void remove(asset)}
                     title={
@@ -153,9 +153,10 @@ function MediaLibraryPage() {
             ))}
           </ul>
           {library.hasNextPage ? (
-            <div className="flex justify-center">
+            <div className="flex justify-center pt-2">
               <Button
                 variant="outline"
+                className="w-full sm:w-auto min-h-11 px-8"
                 onClick={() => void library.fetchNextPage()}
                 disabled={library.isFetchingNextPage}
               >

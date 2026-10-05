@@ -1,6 +1,7 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { ChevronDown, Menu, Search, ShoppingBag, User, X } from "lucide-react";
 import { useEffect } from "react";
+import { AdminDrawer } from "@/components/admin/AdminDrawer";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,6 +25,7 @@ const mobileRowClasses =
 
 export function Navbar() {
   const menu = useDisclosure();
+  const adminDrawer = useDisclosure();
   const cartCount = useCartCount();
   const pathname = useLocation({ select: (location) => location.pathname });
   const status = useAuthStatus();
@@ -32,6 +34,7 @@ export function Navbar() {
   const navigate = useNavigate();
   const isAuthenticated = status === "authenticated" && user !== null;
   const isAdmin = isAuthenticated && user.role === "ADMIN";
+  const isAdminRoute = pathname.startsWith("/admin");
 
   // Close the mobile menu whenever the route changes (including back/forward).
   const closeMenu = menu.close;
@@ -45,7 +48,79 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-md">
-      <div className="container-page flex h-16 items-center justify-between gap-6 lg:h-20">
+      {/* Mobile Admin Header (displayed only on mobile when on /admin routes) */}
+      {isAdminRoute ? (
+        <div className="flex h-14 w-full items-center justify-between gap-2 px-3 sm:h-16 sm:px-4 lg:hidden">
+          <button
+            type="button"
+            onClick={adminDrawer.open}
+            className="flex h-10 items-center gap-1.5 rounded-sm border border-border/80 bg-surface/80 px-2.5 font-display text-xs uppercase tracking-[0.16em] text-foreground transition-colors hover:bg-surface-2 active:bg-surface-2"
+            aria-label="Open admin navigation menu"
+            aria-expanded={adminDrawer.isOpen}
+          >
+            <Menu className="size-4 text-primary" aria-hidden />
+            <span>Menu</span>
+          </button>
+
+          <Link
+            to="/admin/products"
+            className="group flex min-w-0 items-center gap-2 font-display text-sm tracking-[0.2em] text-foreground"
+            aria-label="36 Spokes Admin home"
+          >
+            <BrandCrest className="size-7 shrink-0 ring-1 ring-border/80 transition-transform group-hover:scale-105" />
+            <div className="flex items-center gap-1.5 truncate">
+              <span className="font-semibold tracking-[0.18em]">36 SPOKES</span>
+              <span className="text-[0.68rem] uppercase tracking-[0.18em] text-primary">/ ADMIN</span>
+            </div>
+          </Link>
+
+          <DropdownMenu modal={false}>
+            <DropdownMenuTrigger
+              className="flex h-10 items-center gap-1.5 rounded-sm border border-border/80 bg-surface/80 px-2.5 font-display text-xs uppercase tracking-[0.16em] text-foreground transition-colors hover:bg-surface-2 data-[state=open]:bg-surface-2"
+              aria-label="Admin account menu"
+            >
+              <User className="size-4" aria-hidden />
+              <span className="hidden xs:inline">Account</span>
+              <ChevronDown className="size-3 text-muted-foreground" aria-hidden />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" sideOffset={8} className="w-56 rounded-sm p-1.5 shadow-xl">
+              <div className="border-b border-border px-3 py-2">
+                <p className="font-display text-xs font-semibold uppercase tracking-wider text-foreground">
+                  {user ? `${user.firstName} ${user.lastName}` : "Admin"}
+                </p>
+                <p className="truncate text-[0.7rem] text-muted-foreground">
+                  {user?.email ?? ""}
+                </p>
+                <span className="mt-1 inline-block rounded bg-primary/10 px-1.5 py-0.5 text-[0.62rem] font-semibold uppercase tracking-wider text-primary">
+                  Administrator
+                </span>
+              </div>
+              <DropdownMenuItem asChild className={accountItemClasses}>
+                <Link to="/my-36-spokes">
+                  My Account
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild className={accountItemClasses}>
+                <Link to="/" target="_blank" rel="noopener noreferrer">
+                  View Live Site ↗
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator className="bg-border" />
+              <DropdownMenuItem
+                className={`${accountItemClasses} text-destructive focus:text-destructive`}
+                onSelect={handleLogout}
+              >
+                Log out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <AdminDrawer isOpen={adminDrawer.isOpen} onClose={adminDrawer.close} />
+        </div>
+      ) : null}
+
+      {/* Main / Desktop Header: unchanged on desktop, renders mobile consumer header only when !isAdminRoute */}
+      <div className={`container-page ${isAdminRoute ? "hidden lg:flex" : "flex"} h-16 items-center justify-between gap-6 lg:h-20`}>
         <Link
           to="/"
           className="group flex items-center gap-2.5 font-display text-lg tracking-[0.22em] lg:text-xl"

@@ -186,7 +186,142 @@ function SocialPostsTable({
   return (
     <>
       <InlineError message={error} />
-      <div className={`${tableClasses.wrapper} mt-2`}>
+
+      {/* Mobile stacked cards (< md) */}
+      <div className="mt-3 space-y-3 md:hidden">
+        {posts.map((post, index) => {
+          const isReel =
+            post.mediaType === "VIDEO" ||
+            post.postUrl.toLowerCase().includes("/reel/") ||
+            post.postUrl.toLowerCase().includes("/reels/");
+
+          return (
+            <div
+              key={post.id}
+              className="rounded-lg border border-border/70 bg-surface/50 p-4 space-y-3 shadow-xs"
+            >
+              {/* Top row: Type, Platform, Status */}
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex items-center gap-1.5 rounded border border-border/60 bg-surface px-2 py-0.5 font-display text-[0.68rem] uppercase tracking-wider text-foreground">
+                    {isReel ? (
+                      <>
+                        <VideoIcon className="size-3 text-primary" aria-hidden />
+                        <span>Reel</span>
+                      </>
+                    ) : (
+                      <>
+                        <ImageIcon className="size-3 text-muted-foreground" aria-hidden />
+                        <span>Post</span>
+                      </>
+                    )}
+                  </span>
+                  <span className="inline-flex items-center gap-1 font-display text-xs uppercase tracking-wider text-muted-foreground">
+                    <Instagram className="size-3 text-primary" aria-hidden />
+                    {post.platform}
+                  </span>
+                </div>
+                <ProductStatusBadge status={post.status} />
+              </div>
+
+              {/* Caption (if present) */}
+              {post.caption ? (
+                <p className="text-sm font-medium text-foreground">{post.caption}</p>
+              ) : null}
+
+              {/* Post URL */}
+              <div className="font-mono text-xs break-all">
+                <a
+                  href={post.postUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-primary hover:underline"
+                >
+                  <span className="line-clamp-1">{post.postUrl}</span>
+                  <ExternalLink className="size-3 shrink-0" aria-hidden />
+                </a>
+              </div>
+
+              {/* Order and updated timestamp */}
+              <div className="flex items-center justify-between border-t border-border/40 pt-2.5 text-xs text-muted-foreground">
+                <div className="flex items-center gap-1">
+                  <span className="text-[0.7rem] uppercase tracking-wider">Order:</span>
+                  <button
+                    type="button"
+                    onClick={() => void move(index, "up")}
+                    disabled={disabled || index === 0 || busyId !== null}
+                    aria-label="Move up"
+                    className="flex size-7 items-center justify-center rounded border border-border/60 bg-surface text-muted-foreground hover:bg-muted active:scale-95 disabled:opacity-30"
+                  >
+                    <ArrowUp className="size-3.5" />
+                  </button>
+                  <span className="min-w-6 text-center tabular-nums font-mono font-semibold text-foreground">
+                    {post.sortOrder}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => void move(index, "down")}
+                    disabled={disabled || index === posts.length - 1 || busyId !== null}
+                    aria-label="Move down"
+                    className="flex size-7 items-center justify-center rounded border border-border/60 bg-surface text-muted-foreground hover:bg-muted active:scale-95 disabled:opacity-30"
+                  >
+                    <ArrowDown className="size-3.5" />
+                  </button>
+                </div>
+                <span className="text-[0.72rem]">{dateTime.format(new Date(post.updatedAt))}</span>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="grid grid-cols-3 gap-2 pt-1 border-t border-border/40">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full text-xs h-9 justify-center"
+                  onClick={() => void toggleStatus(post)}
+                  disabled={disabled || busyId !== null}
+                >
+                  {busyId === post.id ? (
+                    <LoaderCircle className="size-3.5 animate-spin" aria-hidden />
+                  ) : post.status === "PUBLISHED" ? (
+                    <>
+                      <EyeOff className="size-3.5 shrink-0" aria-hidden />
+                      <span className="truncate">Hide</span>
+                    </>
+                  ) : (
+                    <>
+                      <Eye className="size-3.5 shrink-0" aria-hidden />
+                      <span className="truncate">Publish</span>
+                    </>
+                  )}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full text-xs h-9 justify-center"
+                  onClick={() => onEdit(post)}
+                  disabled={disabled}
+                >
+                  <Pencil className="size-3.5 shrink-0" aria-hidden />
+                  <span>Edit</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full text-xs h-9 justify-center text-destructive hover:bg-destructive/10 hover:text-destructive"
+                  onClick={() => void remove(post)}
+                  disabled={disabled || busyId !== null || post.status === "ARCHIVED"}
+                >
+                  <Trash2 className="size-3.5 shrink-0" aria-hidden />
+                  <span>Archive</span>
+                </Button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Desktop Table (>= md) */}
+      <div className={`${tableClasses.wrapper} mt-2 hidden md:block`}>
         <table className={tableClasses.table}>
           <thead className={tableClasses.head}>
             <tr>
@@ -502,11 +637,17 @@ function SocialPostForm({
         </div>
       </div>
 
-      <div className="flex justify-end gap-2 pt-2">
-        <Button type="button" variant="outline" onClick={onCancel} disabled={pending}>
+      <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-2">
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full sm:w-auto min-h-10"
+          onClick={onCancel}
+          disabled={pending}
+        >
           Cancel
         </Button>
-        <Button type="submit" disabled={pending}>
+        <Button type="submit" className="w-full sm:w-auto min-h-10" disabled={pending}>
           {pending ? (
             <>
               <LoaderCircle className="size-3.5 animate-spin" aria-hidden />

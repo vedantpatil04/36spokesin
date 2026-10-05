@@ -114,7 +114,81 @@ function CategoryTable({
   return (
     <>
       <InlineError message={error} />
-      <div className={`${tableClasses.wrapper} mt-2`}>
+
+      {/* Mobile Stacked Category Cards (< md) */}
+      <div className="space-y-3 mt-2 md:hidden">
+        {categories.map((category) => (
+          <article
+            key={category.id}
+            className="rounded-sm border border-border bg-card p-3.5 transition-colors"
+          >
+            <div className="flex items-start gap-3">
+              <div className="size-14 shrink-0 overflow-hidden rounded-sm border border-border bg-surface">
+                {category.image?.url ? (
+                  <img src={category.image.url} alt="" className="size-full object-cover" />
+                ) : (
+                  <span className="flex size-full items-center justify-center text-xs text-muted-foreground">
+                    None
+                  </span>
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-start justify-between gap-2">
+                  <h4 className="font-semibold text-foreground leading-snug">{category.name}</h4>
+                  <span className="font-mono text-xs text-muted-foreground">#{category.sortOrder}</span>
+                </div>
+                <p className="font-mono text-xs text-muted-foreground">{category.slug}</p>
+                {category.description ? (
+                  <p className="mt-1 text-xs text-muted-foreground line-clamp-2">
+                    {category.description}
+                  </p>
+                ) : null}
+              </div>
+            </div>
+
+            <div className="mt-3 flex items-center justify-between border-t border-border/60 pt-2.5 text-xs">
+              <span className="text-muted-foreground">
+                Products: <span className="font-medium text-foreground">{category.productCount}</span>
+              </span>
+              <div className="flex items-center gap-1.5">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 px-2.5 text-xs"
+                  onClick={() => onEdit(category)}
+                  disabled={disabled}
+                  aria-label={`Edit ${category.name}`}
+                >
+                  <Pencil className="size-3 mr-1" />
+                  Edit
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 px-2 text-xs"
+                  onClick={() => void remove(category)}
+                  disabled={disabled || busyId !== null || category.productCount > 0}
+                  aria-label={`Delete ${category.name}`}
+                  title={
+                    category.productCount > 0
+                      ? "Move its products to another category first"
+                      : "Delete"
+                  }
+                >
+                  {busyId === category.id ? (
+                    <LoaderCircle className="size-3.5 animate-spin" aria-hidden />
+                  ) : (
+                    <Trash2 className="size-3.5" aria-hidden />
+                  )}
+                </Button>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      {/* Desktop Table View (>= md) */}
+      <div className={`${tableClasses.wrapper} mt-2 hidden md:block`}>
         <table className={tableClasses.table}>
           <thead className={tableClasses.head}>
             <tr>
@@ -300,13 +374,13 @@ function CategoryForm({
           disabled={pending}
         />
       </div>
-      <div className="flex flex-wrap items-center gap-3 md:col-span-2">
-        <Button type="submit" disabled={pending}>
+      <div className="flex flex-col-reverse sm:flex-row sm:items-center gap-3 md:col-span-2">
+        <Button type="button" variant="outline" className="w-full sm:w-auto" onClick={onDone} disabled={pending}>
+          Cancel
+        </Button>
+        <Button type="submit" className="w-full sm:w-auto" disabled={pending}>
           {pending ? <LoaderCircle className="size-4 animate-spin" aria-hidden /> : null}
           {category ? "Save category" : "Create category"}
-        </Button>
-        <Button type="button" variant="ghost" onClick={onDone} disabled={pending}>
-          Cancel
         </Button>
         <InlineError message={error} />
       </div>
@@ -340,14 +414,14 @@ function BrandManager({ brands }: { brands: ApiBrand[] }) {
   return (
     <div className="space-y-4">
       <form
-        className="flex flex-wrap items-end gap-2"
+        className="flex flex-col sm:flex-row sm:items-end gap-2"
         onSubmit={(event) => {
           event.preventDefault();
           if (!name.trim()) return;
           void run(() => createBrand({ name: name.trim() })).then((ok) => ok && setName(""));
         }}
       >
-        <div className="min-w-56 flex-1">
+        <div className="w-full sm:min-w-56 sm:flex-1">
           <label htmlFor={`${id}-brand`} className="sr-only">
             New brand name
           </label>
@@ -360,7 +434,7 @@ function BrandManager({ brands }: { brands: ApiBrand[] }) {
             className="mt-0 h-11"
           />
         </div>
-        <Button type="submit" variant="outline" disabled={pending || !name.trim()}>
+        <Button type="submit" variant="outline" className="w-full sm:w-auto" disabled={pending || !name.trim()}>
           Add brand
         </Button>
       </form>

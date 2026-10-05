@@ -97,7 +97,140 @@ function AdminHeroPage() {
           onRetry={() => void refresh()}
         />
       ) : slides.data && slides.data.length > 0 ? (
-        <div className={tableClasses.wrapper}>
+        <>
+          {/* Mobile Stacked Hero Slide Cards (< md) */}
+          <div className="space-y-3 md:hidden">
+            {slides.data.map((slide, idx) => (
+              <article
+                key={slide.id}
+                className="rounded-sm border border-border bg-card p-3.5 transition-colors"
+              >
+                <div className="flex items-start gap-3">
+                  <div className="relative size-16 shrink-0 overflow-hidden rounded-sm border border-border bg-surface">
+                    {slide.mediaType === "VIDEO" && slide.videoUrl ? (
+                      <video
+                        src={slide.videoUrl}
+                        poster={slide.posterUrl ?? undefined}
+                        className="size-full object-cover"
+                        muted
+                      />
+                    ) : slide.imageUrl ? (
+                      <img src={slide.imageUrl} alt="" className="size-full object-cover" />
+                    ) : (
+                      <div className="flex size-full items-center justify-center text-muted-foreground">
+                        <Sliders className="size-5" />
+                      </div>
+                    )}
+                    <span className="absolute bottom-1 right-1 rounded bg-background/85 px-1 font-mono text-[0.55rem] font-bold uppercase tracking-wider">
+                      {slide.mediaType === "VIDEO" ? "VID" : "IMG"}
+                    </span>
+                  </div>
+
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-start justify-between gap-2">
+                      <h4 className="font-semibold text-foreground line-clamp-1 leading-snug">
+                        {slide.title}
+                      </h4>
+                      <ProductStatusBadge status={slide.status} />
+                    </div>
+                    {slide.eyebrow ? (
+                      <p className="mt-0.5 text-xs text-muted-foreground truncate">{slide.eyebrow}</p>
+                    ) : null}
+                    <div className="mt-1.5 flex flex-wrap gap-x-2 gap-y-1 text-xs text-muted-foreground">
+                      <span className="font-medium text-foreground">
+                        {slide.durationSeconds}s
+                      </span>
+                      <span>·</span>
+                      <span>{slide.autoAdvanceMode === "VIDEO_END" ? "Video end" : "Fixed"}</span>
+                      {slide.location ? (
+                        <>
+                          <span>·</span>
+                          <span className="truncate max-w-[12rem]">📍 {slide.location}</span>
+                        </>
+                      ) : null}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-3 flex items-center justify-between border-t border-border/60 pt-2.5">
+                  <div className="flex items-center gap-1">
+                    <span className="font-mono text-xs text-muted-foreground mr-1">
+                      #{slide.sortOrder}
+                    </span>
+                    <button
+                      type="button"
+                      disabled={idx === 0}
+                      onClick={async () => {
+                        const newOrder = slides.data?.map((s) => s.id) ?? [];
+                        const currentId = newOrder[idx];
+                        const prevId = newOrder[idx - 1];
+                        if (currentId && prevId) {
+                          newOrder[idx] = prevId;
+                          newOrder[idx - 1] = currentId;
+                          await reorderHeroSlides(newOrder);
+                          void refresh();
+                        }
+                      }}
+                      className="flex size-8 items-center justify-center rounded border border-border bg-surface text-muted-foreground hover:text-foreground active:bg-surface-2 disabled:opacity-20"
+                      aria-label="Move slide up"
+                    >
+                      <ArrowUp className="size-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      disabled={idx === slides.data.length - 1}
+                      onClick={async () => {
+                        const newOrder = slides.data?.map((s) => s.id) ?? [];
+                        const currentId = newOrder[idx];
+                        const nextId = newOrder[idx + 1];
+                        if (currentId && nextId) {
+                          newOrder[idx] = nextId;
+                          newOrder[idx + 1] = currentId;
+                          await reorderHeroSlides(newOrder);
+                          void refresh();
+                        }
+                      }}
+                      className="flex size-8 items-center justify-center rounded border border-border bg-surface text-muted-foreground hover:text-foreground active:bg-surface-2 disabled:opacity-20"
+                      aria-label="Move slide down"
+                    >
+                      <ArrowDown className="size-3.5" />
+                    </button>
+                  </div>
+
+                  <div className="flex items-center gap-1.5">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-8 px-2.5 text-xs"
+                      onClick={() => setEditing(slide)}
+                    >
+                      <Pencil className="size-3 mr-1" />
+                      Edit
+                    </Button>
+                    {slide.status !== "ARCHIVED" ? (
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          if (confirm(`Archive hero slide "${slide.title}"?`)) {
+                            await archiveHeroSlide(slide.id);
+                            void refresh();
+                          }
+                        }}
+                        className="flex size-8 items-center justify-center rounded border border-border bg-surface text-muted-foreground hover:text-destructive active:bg-surface-2"
+                        aria-label="Archive slide"
+                        title="Archive slide"
+                      >
+                        <Trash2 className="size-3.5" />
+                      </button>
+                    ) : null}
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+
+          {/* Desktop Table View (>= md) */}
+          <div className={`${tableClasses.wrapper} hidden md:block`}>
           <table className={tableClasses.table}>
             <thead>
               <tr className={tableClasses.head}>
@@ -245,7 +378,8 @@ function AdminHeroPage() {
             </tbody>
           </table>
         </div>
-      ) : (
+      </>
+    ) : (
         <div className="rounded-sm border border-border bg-card p-12 text-center">
           <Sliders className="mx-auto size-10 text-muted-foreground" />
           <h3 className="mt-3 font-display text-lg uppercase">No hero slides</h3>
@@ -755,11 +889,11 @@ function HeroSlideForm({
         </Field>
       </div>
 
-      <div className="flex items-center justify-end gap-3 border-t border-border pt-4">
-        <Button type="button" variant="outline" onClick={onCancel}>
+      <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-3 border-t border-border pt-4">
+        <Button type="button" variant="outline" className="w-full sm:w-auto" onClick={onCancel}>
           Cancel
         </Button>
-        <Button type="submit" disabled={saving}>
+        <Button type="submit" className="w-full sm:w-auto" disabled={saving}>
           {saving ? <LoaderCircle className="size-4 animate-spin" /> : null}
           {slide ? "Save changes" : "Create hero slide"}
         </Button>

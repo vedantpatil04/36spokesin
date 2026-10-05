@@ -107,87 +107,146 @@ function BikesAdminPage() {
                   : "No motorcycles yet."}
               </p>
             ) : (
-              <div className={tableClasses.wrapper}>
-                <table className={tableClasses.table}>
-                  <thead className={tableClasses.head}>
-                    <tr>
-                      <th scope="col" className={tableClasses.th}>
-                        <span className="sr-only">Image</span>
-                      </th>
-                      <th scope="col" className={tableClasses.th}>
-                        Motorcycle
-                      </th>
-                      <th scope="col" className={tableClasses.th}>
-                        Segment
-                      </th>
-                      <th scope="col" className={tableClasses.th}>
-                        Variants
-                      </th>
-                      <th scope="col" className={`${tableClasses.th} text-right`}>
-                        In garages
-                      </th>
-                      <th scope="col" className={`${tableClasses.th} text-right`}>
-                        Fitment
-                      </th>
-                      <th scope="col" className={tableClasses.th}>
-                        Status
-                      </th>
-                      <th scope="col" className={`${tableClasses.th} text-right`}>
-                        <span className="sr-only">Actions</span>
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {bikes.data.map((bike) => (
-                      <tr key={bike.id} className={tableClasses.row}>
-                        <td className={`${tableClasses.td} w-16`}>
-                          <div className="h-10 w-14 overflow-hidden rounded-sm border border-border bg-surface">
-                            {bike.image?.url ? (
-                              <img src={bike.image.url} alt="" className="size-full object-cover" />
-                            ) : null}
-                          </div>
-                        </td>
-                        <td className={tableClasses.td}>
-                          <span className="text-xs text-muted-foreground">{bike.brand.name}</span>
-                          <span className="block font-semibold">{bike.name}</span>
-                        </td>
-                        <td className={`${tableClasses.td} text-muted-foreground`}>
-                          {segmentLabel(bike.segment)}
-                        </td>
-                        <td className={`${tableClasses.td} text-muted-foreground`}>
-                          {bike.variants.filter((variant) => !variant.archivedAt).length}
-                        </td>
-                        <td className={`${tableClasses.td} text-right tabular-nums`}>
-                          {bike.riderCount}
-                        </td>
-                        <td className={`${tableClasses.td} text-right tabular-nums`}>
-                          {bike.productCount}
-                        </td>
-                        <td className={tableClasses.td}>
-                          {bike.archivedAt ? (
-                            <Badge tone="warning">archived</Badge>
+              <>
+                {/* Mobile Stacked Bike Cards (< md) */}
+                <div className="space-y-3 md:hidden">
+                  {bikes.data.map((bike) => (
+                    <article
+                      key={bike.id}
+                      className="rounded-sm border border-border bg-card p-3.5 transition-colors"
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="size-16 shrink-0 overflow-hidden rounded-sm border border-border bg-surface">
+                          {bike.image?.url ? (
+                            <img src={bike.image.url} alt="" className="size-full object-cover" />
                           ) : (
-                            <Badge tone="success">active</Badge>
+                            <span className="flex size-full items-center justify-center text-xs text-muted-foreground">
+                              None
+                            </span>
                           )}
-                        </td>
-                        <td className={tableClasses.td}>
-                          <div className="flex justify-end">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => setEditing(bike.id)}
-                              disabled={editing !== null}
-                              aria-label={`Edit ${bike.brand.name} ${bike.name}`}
-                            >
-                              <Pencil className="size-3.5" aria-hidden />
-                            </Button>
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-start justify-between gap-2">
+                            <div>
+                              <span className="text-xs text-muted-foreground">{bike.brand.name}</span>
+                              <h4 className="font-semibold text-foreground leading-snug">{bike.name}</h4>
+                            </div>
+                            {bike.archivedAt ? (
+                              <Badge tone="warning">archived</Badge>
+                            ) : (
+                              <Badge tone="success">active</Badge>
+                            )}
                           </div>
-                        </td>
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            {segmentLabel(bike.segment)} · {bike.variants.filter((variant) => !variant.archivedAt).length} variant{bike.variants.filter((variant) => !variant.archivedAt).length === 1 ? "" : "s"}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="mt-3 flex items-center justify-between border-t border-border/60 pt-2.5 text-xs">
+                        <div className="flex gap-3 text-muted-foreground">
+                          <span>Garages: <strong className="text-foreground">{bike.riderCount}</strong></span>
+                          <span>Fitment: <strong className="text-foreground">{bike.productCount}</strong></span>
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-8 px-2.5 text-xs"
+                          onClick={() => setEditing(bike.id)}
+                          disabled={editing !== null}
+                          aria-label={`Edit ${bike.brand.name} ${bike.name}`}
+                        >
+                          <Pencil className="size-3 mr-1" aria-hidden />
+                          Edit
+                        </Button>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+
+                {/* Desktop Table View (>= md) */}
+                <div className={`${tableClasses.wrapper} hidden md:block`}>
+                  <table className={tableClasses.table}>
+                    <thead className={tableClasses.head}>
+                      <tr>
+                        <th scope="col" className={tableClasses.th}>
+                          <span className="sr-only">Image</span>
+                        </th>
+                        <th scope="col" className={tableClasses.th}>
+                          Motorcycle
+                        </th>
+                        <th scope="col" className={tableClasses.th}>
+                          Segment
+                        </th>
+                        <th scope="col" className={tableClasses.th}>
+                          Variants
+                        </th>
+                        <th scope="col" className={`${tableClasses.th} text-right`}>
+                          In garages
+                        </th>
+                        <th scope="col" className={`${tableClasses.th} text-right`}>
+                          Fitment
+                        </th>
+                        <th scope="col" className={tableClasses.th}>
+                          Status
+                        </th>
+                        <th scope="col" className={`${tableClasses.th} text-right`}>
+                          <span className="sr-only">Actions</span>
+                        </th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {bikes.data.map((bike) => (
+                        <tr key={bike.id} className={tableClasses.row}>
+                          <td className={`${tableClasses.td} w-16`}>
+                            <div className="h-10 w-14 overflow-hidden rounded-sm border border-border bg-surface">
+                              {bike.image?.url ? (
+                                <img src={bike.image.url} alt="" className="size-full object-cover" />
+                              ) : null}
+                            </div>
+                          </td>
+                          <td className={tableClasses.td}>
+                            <span className="text-xs text-muted-foreground">{bike.brand.name}</span>
+                            <span className="block font-semibold">{bike.name}</span>
+                          </td>
+                          <td className={`${tableClasses.td} text-muted-foreground`}>
+                            {segmentLabel(bike.segment)}
+                          </td>
+                          <td className={`${tableClasses.td} text-muted-foreground`}>
+                            {bike.variants.filter((variant) => !variant.archivedAt).length}
+                          </td>
+                          <td className={`${tableClasses.td} text-right tabular-nums`}>
+                            {bike.riderCount}
+                          </td>
+                          <td className={`${tableClasses.td} text-right tabular-nums`}>
+                            {bike.productCount}
+                          </td>
+                          <td className={tableClasses.td}>
+                            {bike.archivedAt ? (
+                              <Badge tone="warning">archived</Badge>
+                            ) : (
+                              <Badge tone="success">active</Badge>
+                            )}
+                          </td>
+                          <td className={tableClasses.td}>
+                            <div className="flex justify-end">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => setEditing(bike.id)}
+                                disabled={editing !== null}
+                                aria-label={`Edit ${bike.brand.name} ${bike.name}`}
+                              >
+                                <Pencil className="size-3.5" aria-hidden />
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
             )}
           </AdminPanel>
 
@@ -430,23 +489,24 @@ function BikeModelForm({
           />
         </Field>
       ) : null}
-      <div className="flex flex-wrap items-center gap-3 md:col-span-2 xl:col-span-3">
-        <Button type="submit" disabled={pending}>
-          {pending ? <LoaderCircle className="size-4 animate-spin" aria-hidden /> : null}
-          {bike ? "Save motorcycle" : "Create motorcycle"}
+      <div className="flex flex-col-reverse sm:flex-row sm:items-center gap-3 md:col-span-2 xl:col-span-3">
+        <Button type="button" variant="outline" className="w-full sm:w-auto" onClick={onDone} disabled={pending}>
+          {bike ? "Close" : "Cancel"}
         </Button>
         {bike ? (
           <Button
             type="button"
             variant="outline"
+            className="w-full sm:w-auto"
             onClick={() => void toggleArchive()}
             disabled={pending}
           >
             {bike.archivedAt ? "Restore" : "Archive"}
           </Button>
         ) : null}
-        <Button type="button" variant="ghost" onClick={onDone} disabled={pending}>
-          {bike ? "Close" : "Cancel"}
+        <Button type="submit" className="w-full sm:w-auto" disabled={pending}>
+          {pending ? <LoaderCircle className="size-4 animate-spin" aria-hidden /> : null}
+          {bike ? "Save motorcycle" : "Create motorcycle"}
         </Button>
         <InlineError message={error} />
       </div>

@@ -37,7 +37,7 @@ type Upload = {
 let uploadKey = 0;
 
 const iconButton =
-  "flex size-9 shrink-0 items-center justify-center rounded-sm border border-border bg-card text-muted-foreground transition-colors hover:border-border-strong hover:text-foreground disabled:pointer-events-none disabled:opacity-40";
+  "flex size-10 shrink-0 items-center justify-center rounded-sm border border-border bg-card text-muted-foreground transition-all hover:border-border-strong hover:text-foreground active:scale-95 disabled:pointer-events-none disabled:opacity-40";
 
 const isAbort = (error: unknown) => error instanceof DOMException && error.name === "AbortError";
 
@@ -312,7 +312,7 @@ export function ProductMediaManager({
         <ImagePlus className="size-6 text-muted-foreground" aria-hidden />
         <p className="text-sm text-muted-foreground">Drop images here, or</p>
         <label htmlFor={inputId} className="cursor-pointer">
-          <span className="inline-flex h-9 items-center rounded-sm border border-border-strong px-3.5 font-display text-[0.7rem] uppercase tracking-[0.14em] hover:border-primary">
+          <span className="inline-flex min-h-10 items-center justify-center rounded-sm border border-border-strong px-4 font-display text-xs uppercase tracking-[0.14em] hover:border-primary active:scale-95 transition-all">
             Choose images
           </span>
           <input

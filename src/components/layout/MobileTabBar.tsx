@@ -1,7 +1,14 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useLocation } from "@tanstack/react-router";
 import { mobileTabs } from "./nav-config";
 
 export function MobileTabBar() {
+  const pathname = useLocation({ select: (location) => location.pathname });
+
+  // Hide mobile customer tab bar on admin routes
+  if (pathname.startsWith("/admin")) {
+    return null;
+  }
+
   return (
     <nav
       aria-label="Mobile primary"

@@ -662,8 +662,8 @@ export function TripEditor({
           </div>
         </div>
 
-        <div className="sticky bottom-0 z-20 mt-6 flex flex-wrap items-center gap-3 border-t border-border bg-background/95 py-4 backdrop-blur">
-          <Button type="submit" disabled={saving}>
+        <div className="sticky bottom-0 z-20 mt-6 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 border-t border-border bg-background/95 py-4 backdrop-blur">
+          <Button type="submit" className="w-full sm:w-auto min-h-11" disabled={saving}>
             {saving ? <LoaderCircle className="size-4 animate-spin" aria-hidden /> : null}
             {trip ? "Save changes" : "Create trip"}
           </Button>

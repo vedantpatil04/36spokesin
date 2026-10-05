@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { LoaderCircle } from "lucide-react";
+import { ExternalLink, LoaderCircle } from "lucide-react";
 import { type FormEvent, useId, useState } from "react";
 import { type ImageChoice, SingleImageField } from "@/components/admin/SingleImageField";
 import { dateTime, describedBy, fieldErrors } from "@/components/admin/admin-format";
@@ -75,7 +75,7 @@ function PaymentsPage() {
       <AdminPanel
         title="Payment proofs"
         actions={
-          <div role="group" aria-label="Filter payment proofs" className="flex gap-1">
+          <div role="group" aria-label="Filter payment proofs" className="flex flex-wrap gap-1">
             {FILTERS.map((option) => (
               <Button
                 key={option.value}
@@ -174,20 +174,23 @@ function PaymentReview({
   ];
 
   return (
-    <article className="grid gap-4 rounded-sm border border-border p-4 md:grid-cols-[10rem_1fr]">
+    <article className="grid gap-4 rounded-sm border border-border p-4 md:grid-cols-[11rem_1fr]">
       {payment.proofUrl ? (
         <a
           href={payment.proofUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="block overflow-hidden rounded-sm border border-border bg-surface"
+          className="group block overflow-hidden rounded-md border border-border bg-surface transition hover:border-primary"
         >
           <img
             src={payment.proofUrl}
             alt={`Payment proof for booking ${payment.reference}`}
-            className="h-48 w-full object-contain md:h-full md:max-h-64"
+            className="h-52 w-full object-contain md:h-full md:max-h-64"
           />
-          <span className="sr-only">Open the payment proof at full size</span>
+          <div className="flex items-center justify-center gap-1.5 border-t border-border/50 bg-muted/40 py-2 text-[0.72rem] text-muted-foreground group-hover:text-foreground">
+            <ExternalLink className="size-3 shrink-0" aria-hidden />
+            <span>Tap to open full proof</span>
+          </div>
         </a>
       ) : (
         <div className="flex h-32 items-center justify-center rounded-sm border border-border text-xs text-muted-foreground">
@@ -251,10 +254,19 @@ function PaymentReview({
                     {...describedBy(reasonId, undefined, "hint")}
                   />
                 </Field>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-col-reverse sm:flex-row gap-2">
                   <Button
-                    size="sm"
-                    className="bg-destructive text-destructive-foreground"
+                    size="md"
+                    variant="ghost"
+                    className="w-full sm:w-auto min-h-10"
+                    disabled={pending !== null}
+                    onClick={() => setRejecting(false)}
+                  >
+                    Back
+                  </Button>
+                  <Button
+                    size="md"
+                    className="w-full sm:w-auto min-h-10 bg-destructive text-destructive-foreground hover:bg-destructive/90"
                     disabled={pending !== null}
                     onClick={() => void decide("reject")}
                   >
@@ -263,35 +275,29 @@ function PaymentReview({
                     ) : null}
                     Reject proof
                   </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    disabled={pending !== null}
-                    onClick={() => setRejecting(false)}
-                  >
-                    Back
-                  </Button>
                 </div>
               </div>
             ) : (
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <Button
-                  size="sm"
+                  size="md"
+                  className="w-full sm:w-auto min-h-10"
                   disabled={pending !== null}
                   onClick={() => void decide("approve")}
                 >
                   {pending === "approve" ? (
                     <LoaderCircle className="size-3.5 animate-spin" aria-hidden />
                   ) : null}
-                  Approve
+                  Approve payment
                 </Button>
                 <Button
-                  size="sm"
+                  size="md"
                   variant="outline"
+                  className="w-full sm:w-auto min-h-10 text-destructive hover:bg-destructive/10 hover:text-destructive"
                   disabled={pending !== null}
                   onClick={() => setRejecting(true)}
                 >
-                  Reject
+                  Reject payment
                 </Button>
               </div>
             )}
@@ -397,8 +403,8 @@ function PaymentSettingsForm({
           </Field>
         </div>
         <SingleImageField label="UPI QR code" category="SITE" value={qr} onChange={setQr} />
-        <div className="flex flex-wrap items-center gap-3">
-          <Button type="submit" disabled={saving}>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
+          <Button type="submit" className="w-full sm:w-auto min-h-10" disabled={saving}>
             {saving ? <LoaderCircle className="size-4 animate-spin" aria-hidden /> : null}
             Save payment details
           </Button>

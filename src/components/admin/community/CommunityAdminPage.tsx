@@ -129,7 +129,154 @@ export function CommunityAdminPage<T extends Record>({
         ) : (
           <>
             <InlineError message={error} />
-            <div className={`${tableClasses.wrapper} mt-2`}>
+
+            {/* Mobile stacked cards (< md) */}
+            <div className="mt-3 space-y-3 md:hidden">
+              {items.data.map((item, index) => {
+                const row = toRow(item);
+                const archived = item.status === "ARCHIVED";
+                const published = item.status === "PUBLISHED";
+                return (
+                  <div
+                    key={item.id}
+                    className="rounded-lg border border-border/70 bg-surface/50 p-4 space-y-3 shadow-xs"
+                  >
+                    {/* Top row: Thumbnail + Title/Subtitle + Status */}
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-start gap-3 min-w-0">
+                        <div className="size-12 shrink-0 overflow-hidden rounded-md border border-border bg-surface">
+                          {row.thumbUrl ? (
+                            <img
+                              src={row.thumbUrl}
+                              alt=""
+                              className="size-full object-cover"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <div className="size-full bg-muted/40" />
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-semibold text-sm text-foreground truncate">{row.title}</p>
+                          {row.subtitle ? (
+                            <p className="mt-0.5 text-xs text-muted-foreground line-clamp-2">
+                              {row.subtitle}
+                            </p>
+                          ) : null}
+                        </div>
+                      </div>
+                      <ProductStatusBadge status={item.status} />
+                    </div>
+
+                    {/* Order and updated timestamp */}
+                    <div className="flex items-center justify-between border-t border-border/40 pt-2.5 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[0.7rem] uppercase tracking-wider">Order:</span>
+                        <button
+                          type="button"
+                          onClick={() => move(items.data, index, -1)}
+                          disabled={locked || index === 0}
+                          aria-label={`Move ${row.title} up`}
+                          className="flex size-7 items-center justify-center rounded border border-border/60 bg-surface text-muted-foreground hover:bg-muted active:scale-95 disabled:opacity-30"
+                        >
+                          <ArrowUp className="size-3.5" aria-hidden />
+                        </button>
+                        <span className="min-w-6 text-center tabular-nums font-mono font-semibold text-foreground">
+                          {index + 1}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => move(items.data, index, 1)}
+                          disabled={locked || index === items.data.length - 1}
+                          aria-label={`Move ${row.title} down`}
+                          className="flex size-7 items-center justify-center rounded border border-border/60 bg-surface text-muted-foreground hover:bg-muted active:scale-95 disabled:opacity-30"
+                        >
+                          <ArrowDown className="size-3.5" aria-hidden />
+                        </button>
+                      </div>
+                      <span className="text-[0.72rem]">{dateTime.format(new Date(item.updatedAt))}</span>
+                    </div>
+
+                    {/* Action buttons */}
+                    <div className="grid grid-cols-3 gap-2 pt-1 border-t border-border/40">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full text-xs h-9 justify-center"
+                        onClick={() =>
+                          void run(item.id, () =>
+                            api.update(item.id, {
+                              status: published ? "DRAFT" : archived ? "DRAFT" : "PUBLISHED",
+                            } as never),
+                          )
+                        }
+                        disabled={locked}
+                        aria-label={
+                          published
+                            ? `Unpublish ${row.title}`
+                            : archived
+                              ? `Restore ${row.title} as a draft`
+                              : `Publish ${row.title}`
+                        }
+                      >
+                        {busyId === item.id ? (
+                          <LoaderCircle className="size-3.5 animate-spin" aria-hidden />
+                        ) : published ? (
+                          <>
+                            <EyeOff className="size-3.5 shrink-0" aria-hidden />
+                            <span className="truncate">Hide</span>
+                          </>
+                        ) : archived ? (
+                          <>
+                            <RotateCcw className="size-3.5 shrink-0" aria-hidden />
+                            <span className="truncate">Restore</span>
+                          </>
+                        ) : (
+                          <>
+                            <Eye className="size-3.5 shrink-0" aria-hidden />
+                            <span className="truncate">Publish</span>
+                          </>
+                        )}
+                      </Button>
+
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full text-xs h-9 justify-center"
+                        onClick={() => setEditing(item)}
+                        disabled={locked}
+                        aria-label={`Edit ${row.title}`}
+                      >
+                        <Pencil className="size-3.5 shrink-0" aria-hidden />
+                        <span>Edit</span>
+                      </Button>
+
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full text-xs h-9 justify-center text-destructive hover:bg-destructive/10 hover:text-destructive"
+                        onClick={() => {
+                          if (
+                            window.confirm(
+                              `Archive “${row.title}”? It will be removed from the site.`,
+                            )
+                          )
+                            void run(item.id, () => api.archive(item.id));
+                        }}
+                        disabled={locked || archived}
+                        aria-label={`Archive ${row.title}`}
+                      >
+                        <Trash2 className="size-3.5 shrink-0" aria-hidden />
+                        <span>Archive</span>
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Desktop Table (>= md) */}
+            <div className={`${tableClasses.wrapper} mt-2 hidden md:block`}>
               <table className={tableClasses.table}>
                 <thead className={tableClasses.head}>
                   <tr>
